@@ -1,0 +1,10 @@
+{
+	"NAME": {
+		"name": "",
+		"address": "",
+		"deploy": false,
+		"upgrade": false,
+		"params": [
+		]
+	}
+}

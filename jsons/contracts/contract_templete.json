@@ -1,0 +1,11 @@
+{
+	
+	"ViolasNft721": {
+		"name": "ViolasNft721",
+		"address": "",
+		"deploy": false,
+		"upgrade": false,
+		"fixed": false,
+		"params": []
+	}
+}

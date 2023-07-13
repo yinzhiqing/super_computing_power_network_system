@@ -1,0 +1,18 @@
+{
+	"TempleteEx": {
+		"name": "TempleteEx",
+		"address": "",
+		"deploy": true,
+		"upgrade": false,
+		"fixed": false,
+		"params": []
+	},
+	"Templete": {
+		"name": "Templete",
+		"address": "",
+		"deploy": true,
+		"upgrade": false,
+		"fixed": false,
+		"params": []
+	}
+}
