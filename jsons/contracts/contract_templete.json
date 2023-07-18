@@ -1,7 +1,25 @@
 {
 	
-	"ViolasNft721": {
-		"name": "ViolasNft721",
+	"SCPNSNotes": {
+		"name": "SCPNSNotes",
+		"address": "",
+		"deploy": false,
+		"upgrade": false,
+		"fixed": false,
+		"params": []
+	}
+	,
+	"SCPNSGpuTypes": {
+		"name": "SCPNSGpuTypes",
+		"address": "",
+		"deploy": false,
+		"upgrade": false,
+		"fixed": false,
+		"params": []
+	}
+	,
+	"SCPNSDns": {
+		"name": "SCPNSDns",
 		"address": "",
 		"deploy": false,
 		"upgrade": false,

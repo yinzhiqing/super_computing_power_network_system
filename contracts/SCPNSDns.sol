@@ -7,7 +7,7 @@ import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 
-contract AssemblyDNS is 
+contract SCPNSDns is 
     Initializable, 
     AccessControlEnumerableUpgradeable, 
     PausableUpgradeable
@@ -33,19 +33,19 @@ contract AssemblyDNS is
     initializer 
     public 
     {
-        __AssemblyDNS_init(name_, symbol_);
+        __SCPNSDns_init(name_, symbol_);
 
     }
-    function __AssemblyDNS_init(string memory name_, string memory symbol_)
+    function __SCPNSDns_init(string memory name_, string memory symbol_)
     internal 
     initializer 
     {
         __Pausable_init_unchained();
         __AccessControlEnumerable_init_unchained();
-        __AssemblyDNS_init_unchained(name_, symbol_);
+        __SCPNSDns_init_unchained(name_, symbol_);
     }
 
-    function __AssemblyDNS_init_unchained(string memory name_, string memory symbol_) 
+    function __SCPNSDns_init_unchained(string memory name_, string memory symbol_) 
     internal initializer 
     {
         _name   = name_;
@@ -76,7 +76,7 @@ contract AssemblyDNS is
      * - the caller must have the `PAUSER_ROLE`.
      */
     function pause() public virtual {
-        require(hasRole(PAUSER_ROLE, _msgSender()), "AssemblyDNS: must have pauser role to pause");
+        require(hasRole(PAUSER_ROLE, _msgSender()), "SCPNSDns: must have pauser role to pause");
         _pause();
     }
 
@@ -90,12 +90,12 @@ contract AssemblyDNS is
      * - the caller must have the `PAUSER_ROLE`.
      */
     function unpause() public virtual {
-        require(hasRole(PAUSER_ROLE, _msgSender()), "AssemblyDNS: must have pauser role to unpause");
+        require(hasRole(PAUSER_ROLE, _msgSender()), "SCPNSDns: must have pauser role to unpause");
         _unpause();
     }
 
     function set(string memory name_, address addr_) public whenNotPaused virtual {
-        require(hasRole(MANAGER_ROLE, _msgSender()), "AssemblyDNS: must have pauser role to set");
+        require(hasRole(MANAGER_ROLE, _msgSender()), "SCPNSDns: must have pauser role to set");
         if (_exists[name_]) {
             _addresses[_hosts[name_]] = addr_;
         } else {

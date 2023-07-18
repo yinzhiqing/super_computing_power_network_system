@@ -1,18 +1,36 @@
 {
-	"TempleteEx": {
-		"name": "TempleteEx",
+	"SCPNSNotes": {
+		"name": "SCPNSNotes",
 		"address": "",
-		"deploy": true,
+		"deploy": false,
 		"upgrade": false,
 		"fixed": false,
-		"params": []
+		"params": [
+			"SCPNSNotes",
+			"SCPNSNotes"
+		]
 	},
-	"Templete": {
-		"name": "Templete",
+	"SCPNSGpuTypes": {
+		"name": "SCPNSGpuTypes",
 		"address": "",
 		"deploy": true,
 		"upgrade": false,
 		"fixed": false,
-		"params": []
+		"params": [
+			"SCPNSGpuTypes",
+			"SCPNSGpuTypes",
+			""
+		]
+	},
+	"SCPNSDns": {
+		"name": "SCPNSDns",
+		"address": "",
+		"deploy": false,
+		"upgrade": false,
+		"fixed": false,
+		"params": [
+			"SCPNSDns",
+			"SCPNSDns"
+		]
 	}
 }

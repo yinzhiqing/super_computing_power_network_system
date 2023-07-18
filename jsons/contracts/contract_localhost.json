@@ -1,10 +1,36 @@
 {
-	"NAME": {
-		"name": "",
+	"SCPNSNotes": {
+		"name": "SCPNSNotes",
 		"address": "",
 		"deploy": false,
 		"upgrade": false,
+		"fixed": false,
 		"params": [
+			"SCPNSNotes",
+			"SCPNSNotes"
+		]
+	},
+	"SCPNSGpuTypes": {
+		"name": "SCPNSGpuTypes",
+		"address": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+		"deploy": false,
+		"upgrade": false,
+		"fixed": false,
+		"params": [
+			"SCPNSGpuTypes",
+			"SCPNSGpuTypes",
+			""
+		]
+	},
+	"SCPNSDns": {
+		"name": "SCPNSDns",
+		"address": "",
+		"deploy": false,
+		"upgrade": false,
+		"fixed": false,
+		"params": [
+			"SCPNSDns",
+			"SCPNSDns"
 		]
 	}
 }
