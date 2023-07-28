@@ -134,6 +134,9 @@ function str_to_web3bytes(data) {
     return web3.eth.abi.encodeParameter("bytes", web3.utils.toHex(data));
 }
 
+function w3bytes32_to_str(data) {
+    return web3.eth.abi.decodeParameter("bytes32", data);
+}
 
 function w3uint256_to_str(data) {
     return web3.eth.abi.decodeParameter("uint256", web3.utils.toHex(data));
@@ -177,5 +180,6 @@ module.exports = {
     str_to_web3bytes,
     lstr_to_lweb3bytes32,
     str_to_web3uint256,
-    w3uint256_to_str
+    w3uint256_to_str,
+    w3bytes32_to_str
 }

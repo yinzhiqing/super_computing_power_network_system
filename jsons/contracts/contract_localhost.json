@@ -1,36 +1,50 @@
 {
-	"SCPNSNotes": {
-		"name": "SCPNSNotes",
-		"address": "",
-		"deploy": false,
-		"upgrade": false,
-		"fixed": false,
-		"params": [
-			"SCPNSNotes",
-			"SCPNSNotes"
-		]
-	},
-	"SCPNSGpuTypes": {
-		"name": "SCPNSGpuTypes",
-		"address": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
-		"deploy": false,
-		"upgrade": false,
-		"fixed": false,
-		"params": [
-			"SCPNSGpuTypes",
-			"SCPNSGpuTypes",
-			""
-		]
-	},
 	"SCPNSDns": {
 		"name": "SCPNSDns",
 		"address": "",
 		"deploy": false,
 		"upgrade": false,
 		"fixed": false,
-		"params": [
-			"SCPNSDns",
-			"SCPNSDns"
-		]
+		"params": []
+	},
+	"SCPNSUnitBase": {
+		"name": "SCPNSUnitBase",
+		"address": "",
+		"deploy": false,
+		"upgrade": false,
+		"fixed": false,
+		"params": []
+	},
+	"SCPNSNotes": {
+		"name": "SCPNSNotes",
+		"address": "",
+		"deploy": false,
+		"upgrade": false,
+		"fixed": false,
+		"params": []
+	},
+	"SCPNSUnitGpu": {
+		"name": "SCPNSUnitGpu",
+		"address": "0x59b670e9fA9D0A427751Af201D676719a970857b",
+		"deploy": false,
+		"upgrade": false,
+		"fixed": false,
+		"params": []
+	},
+	"ISCPNSUint": {
+		"name": "ISCPNSUint",
+		"address": "",
+		"deploy": false,
+		"upgrade": false,
+		"fixed": false,
+		"params": []
+	},
+	"SCPNSTypeUnit": {
+		"name": "SCPNSTypeUnit",
+		"address": "0xa85233C63b9Ee964Add6F2cffe00Fd84eb32338f",
+		"deploy": false,
+		"upgrade": false,
+		"fixed": false,
+		"params": []
 	}
 }

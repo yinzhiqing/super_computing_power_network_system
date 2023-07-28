@@ -1,5 +1,23 @@
 {
 	
+	"SCPNSDns": {
+		"name": "SCPNSDns",
+		"address": "",
+		"deploy": false,
+		"upgrade": false,
+		"fixed": false,
+		"params": []
+	}
+	,
+	"SCPNSUnitBase": {
+		"name": "SCPNSUnitBase",
+		"address": "",
+		"deploy": false,
+		"upgrade": false,
+		"fixed": false,
+		"params": []
+	}
+	,
 	"SCPNSNotes": {
 		"name": "SCPNSNotes",
 		"address": "",
@@ -9,8 +27,8 @@
 		"params": []
 	}
 	,
-	"SCPNSGpuTypes": {
-		"name": "SCPNSGpuTypes",
+	"SCPNSUnitGpu": {
+		"name": "SCPNSUnitGpu",
 		"address": "",
 		"deploy": false,
 		"upgrade": false,
@@ -18,8 +36,17 @@
 		"params": []
 	}
 	,
-	"SCPNSDns": {
-		"name": "SCPNSDns",
+	"ISCPNSUint": {
+		"name": "ISCPNSUint",
+		"address": "",
+		"deploy": false,
+		"upgrade": false,
+		"fixed": false,
+		"params": []
+	}
+	,
+	"SCPNSTypeUnit": {
+		"name": "SCPNSTypeUnit",
 		"address": "",
 		"deploy": false,
 		"upgrade": false,
