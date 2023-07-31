@@ -27,6 +27,7 @@ contract SCPNSProofParameter is
     SCPNSUnitBase
     {
     using CountersUpgradeable for CountersUpgradeable.Counter;
+    ISCPNSUint private _typeUnitIf;
     // typeUnit contract address 
     address public typeUnitAddr;
     // Mapping from id to parameter list
@@ -57,6 +58,7 @@ contract SCPNSProofParameter is
     function __SCPNSProofParameter_init_unchained(address typeUnitAddr_) internal initializer {
         _unitType("types");
         typeUnitAddr = typeUnitAddr_;
+        _typeUnitIf = ISCPNSUint(typeUnitAddr_);
     }
 
     /**
@@ -69,7 +71,8 @@ contract SCPNSProofParameter is
      */
     function mint(uint256 tokenId, bytes32 name_, uint256 typeUnitId, string memory datas) public virtual {
         require(_id2TypeUnitId[tokenId] == uint256(0), "SCPNSProofParameter: tokenId is exists.");
-        require(_typeUnitId2Id[typeUnitId] == uint256(0), "SCPNSProofParameter: typeUnitId is exists.");
+        require(_typeUnitIf.exists(typeUnitId), "SCPNSProofParameter: typeUnitId is invalid.");
+        require(_typeUnitId2Id[typeUnitId] == uint256(0), "SCPNSProofParameter: typeUnitId was setting.");
 
         _mint(tokenId, name_, datas);
         _id2TypeUnitId[tokenId] = typeUnitId;
@@ -78,34 +81,16 @@ contract SCPNSProofParameter is
         UpdateDatas(tokenId, name_, _msgSender(), datas);
     }
 
-    function updateTypeUnitAddr(address typeUnitAddr_) public virtual {
+    function updateTypeUnitAddr(address contract_) public virtual {
         require(hasRole(MANAGE_ROLE, _msgSender()), "SCPNSProofParameter: must have manager role to add");
-        require(typeUnitAddr_ != address(0), "SCPNSProofParameter: typeUnitAddr is invalid address.");
+        require(contract_ != address(0), "SCPNSProofParameter: contract address is invalid address.");
 
-        typeUnitAddr = typeUnitAddr;
+        typeUnitAddr = contract_;
     }
 
     function setValueOfParameter(uint256 tokenId, bytes32 pname, uint256 pvalue) public virtual {
         require(hasRole(MANAGE_ROLE, _msgSender()), "SCPNSProofParameter: must have manager role to remove");
-        require(_exist(tokenId), "SCPNSProofParameter: tokenId is not exists.");
-        require(pname != bytes32(""), "SCPNSProofParameter: pname is invalid.");
-
-        // mabe is new parameter, check it and add to name list
-        if (uint256(0) == _id2Parameters[tokenId][pname]) {
-            uint256 index = _id2ParameterCount[tokenId].current();
-            while(index > 0) {
-                if (_id2ParameterNames[tokenId][index - 1] == pname) {
-                    break;
-                }
-                index = index - 1;
-            }
-            if (index == 0) {
-                _id2ParameterCount[tokenId].increment();
-                _id2ParameterNames[tokenId][_id2ParameterCount[tokenId].current()] = pname;
-            }
-        }
-
-        _id2Parameters[tokenId][pname] = pvalue;
+        _setValueOfParameter(tokenId, pname, pvalue);
     }
 
     function valueOfParameter(uint256 tokenId, bytes32 pname) public view returns(uint256) {
@@ -128,12 +113,20 @@ contract SCPNSProofParameter is
         require(index < _id2ParameterCount[tokenId].current(), "SCPNSProofParameter: index out of bounds.");
         return _id2ParameterNames[tokenId][index];
     }
+
+    function parametersOf(uint256 tokenId) public view virtual returns(bytes32[] memory names, uint256[] memory values) {
+        uint256 index = _id2ParameterCount[tokenId].current();
+        uint i = 0;
+        while(index > 0) {
+            bytes32 pname = _id2ParameterNames[tokenId][index - 1];
+            names[i] = pname;
+            values[i] = _id2Parameters[tokenId][pname];
+            index = index - 1;
+            i = i + 1;
+        }
+    }
     
-    function burn(uint256 tokenId)
-    public
-    virtual
-    override
-    {
+    function burn(uint256 tokenId) public virtual override {
         while(_id2ParameterCount[tokenId].current() > 0) {
             _id2ParameterCount[tokenId].decrement();
             delete _id2Parameters[tokenId][_id2ParameterNames[tokenId][_id2ParameterCount[tokenId].current()]];
@@ -147,6 +140,28 @@ contract SCPNSProofParameter is
         delete _id2TypeUnitId[tokenId];
 
         _burn(tokenId);
+    }
+
+    function _setValueOfParameter(uint256 tokenId, bytes32 pname, uint256 pvalue) internal virtual {
+        require(_exist(tokenId), "SCPNSProofParameter: tokenId is not exists.");
+        require(pname != bytes32(""), "SCPNSProofParameter: pname is invalid.");
+
+        // mabe is new parameter, check it and add to name list
+        if (uint256(0) == _id2Parameters[tokenId][pname]) {
+            uint256 index = _id2ParameterCount[tokenId].current();
+            while(index > 0) {
+                if (_id2ParameterNames[tokenId][index - 1] == pname) {
+                    break;
+                }
+                index = index - 1;
+            }
+            if (index == 0) {
+                _id2ParameterCount[tokenId].increment();
+                _id2ParameterNames[tokenId][_id2ParameterCount[tokenId].current()] = pname;
+            }
+        }
+
+        _id2Parameters[tokenId][pname] = pvalue;
     }
 
     uint256[48] private __gap;

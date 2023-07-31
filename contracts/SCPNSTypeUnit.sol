@@ -90,14 +90,6 @@ contract SCPNSTypeUnit is
     function isValidUnitType(address unitAddr) public view returns(bool) {
         return _validUnitTypes[unitAddr];
     }
-    /**
-      * @dev Update datas of token
-      *
-    */
-    function update(uint256 tokenId, string memory datas) public virtual override{
-        _update(tokenId, datas);
-        UpdateDatas(tokenId, _id2Names[tokenId], _msgSender(), datas);
-    }
 
     function burn(uint256 tokenId)
     public

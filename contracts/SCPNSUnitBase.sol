@@ -176,6 +176,13 @@ contract SCPNSUnitBase is
         unitType = unitType_;
     }
 
+    function exists(uint256 tokenId)
+    public
+    virtual
+    returns(bool) {
+        return _exist(tokenId);
+    }
+
     function _mint(uint256 tokenId, bytes32 name_, string memory datas) 
     internal
     virtual 
@@ -217,7 +224,7 @@ contract SCPNSUnitBase is
     }
     
     function _exist(uint256 tokenId) internal view returns(bool) {
-        return _id2Names[tokenId] != bytes32(0);
+        return _id2Names[tokenId] != bytes32("");
     }
     uint256[48] private __gap;
 }

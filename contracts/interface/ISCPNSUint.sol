@@ -9,4 +9,5 @@ interface ISCPNSUint {
     function datasOf(uint256 tokenId) external view returns(string memory);
     function nameOf(uint256 tokenId) external view returns(string memory);
     function tokenIdOf(bytes32 name_) external view returns(uint256);
+    function exists(uint256 tokenId) external view returns(bool);
 }
