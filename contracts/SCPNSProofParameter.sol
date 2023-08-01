@@ -27,9 +27,12 @@ contract SCPNSProofParameter is
     SCPNSUnitBase
     {
     using CountersUpgradeable for CountersUpgradeable.Counter;
-    ISCPNSUint private _typeUnitIf;
+
     // typeUnit contract address 
     address public typeUnitAddr;
+
+    ISCPNSUint internal _typeUnitIf;
+
     // Mapping from id to parameter list
     mapping (uint256 => mapping(bytes32 => uint256)) internal _id2Parameters;
     // Mapping from id to parameter name list
@@ -40,6 +43,7 @@ contract SCPNSProofParameter is
     mapping (uint256 => uint256) internal _id2TypeUnitId;
     // Mapping from typeUnitId to id
     mapping (uint256 => uint256) internal _typeUnitId2Id;
+
 
     function initialize(address typeUnitAddr_) public virtual initializer {
         __SCPNSUnitBase_init("SCPNSProofParameter", "SCPNSProofParameter", "");
@@ -81,16 +85,17 @@ contract SCPNSProofParameter is
         UpdateDatas(tokenId, name_, _msgSender(), datas);
     }
 
-    function updateTypeUnitAddr(address contract_) public virtual {
+    function updateTypeUnit(address contract_) public virtual {
         require(hasRole(MANAGE_ROLE, _msgSender()), "SCPNSProofParameter: must have manager role to add");
         require(contract_ != address(0), "SCPNSProofParameter: contract address is invalid address.");
 
         typeUnitAddr = contract_;
+        _typeUnitIf = ISCPNSUint(contract_);
     }
 
     function setValueOfParameter(uint256 tokenId, bytes32 pname, uint256 pvalue) public virtual {
         require(hasRole(MANAGE_ROLE, _msgSender()), "SCPNSProofParameter: must have manager role to remove");
-        _setValueOfParameter(tokenId, pname, pvalue);
+        __setValueOfParameter(tokenId, pname, pvalue);
     }
 
     function valueOfParameter(uint256 tokenId, bytes32 pname) public view returns(uint256) {
@@ -142,7 +147,7 @@ contract SCPNSProofParameter is
         _burn(tokenId);
     }
 
-    function _setValueOfParameter(uint256 tokenId, bytes32 pname, uint256 pvalue) internal virtual {
+    function __setValueOfParameter(uint256 tokenId, bytes32 pname, uint256 pvalue) internal virtual {
         require(_exist(tokenId), "SCPNSProofParameter: tokenId is not exists.");
         require(pname != bytes32(""), "SCPNSProofParameter: pname is invalid.");
 

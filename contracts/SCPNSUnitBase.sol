@@ -85,7 +85,7 @@ contract SCPNSUnitBase is
     function mint(uint256 tokenId, bytes32 name_, string memory datas) public virtual {
         _mint(tokenId, name_, datas);
 
-        UpdateDatas(tokenId, name_, _msgSender(), datas);
+        emit UpdateDatas(tokenId, name_, _msgSender(), datas);
     }
 
     /**
@@ -216,7 +216,7 @@ contract SCPNSUnitBase is
     }
 
     function _update(uint256 tokenId, string memory datas) internal virtual {
-        require(hasRole(MANAGE_ROLE, _msgSender()), "SCPNSUnitBase: must have manager role to mint");
+        require(hasRole(MINTER_ROLE, _msgSender()), "SCPNSUnitBase: must have minter role to mint");
         require(_id2Names[tokenId] != bytes32(0), "tokenId is invalid.");
 
         _tokenDatas[tokenId] = datas;
