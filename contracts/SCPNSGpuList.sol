@@ -4,26 +4,26 @@
 pragma solidity ^0.8.2;
 
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
-import "./SCPNSUnitBase.sol";
+import "./SCPNSBase.sol";
 
-contract SCPNSUnitGpu is SCPNSUnitBase {
+contract SCPNSGpuList is SCPNSBase {
 
     function initialize() 
     initializer 
     public 
     {
-        __SCPNSUnitGpu_init();
+        __SCPNSGpuList_init();
 
     }
-    function __SCPNSUnitGpu_init()
+    function __SCPNSGpuList_init()
     internal 
     initializer 
     {
-        __SCPNSUnitBase_init("SCPNSUnitGpu", "SCPNSUnitGpu", "");
-        __SCPNSUnitGpu_init_unchained();
+        __SCPNSBase_init("SCPNSGpuList", "SCPNSGpuList", "");
+        __SCPNSGpuList_init_unchained();
     }
 
-    function __SCPNSUnitGpu_init_unchained() 
+    function __SCPNSGpuList_init_unchained() 
     internal initializer 
     {
         _unitType("gpu");

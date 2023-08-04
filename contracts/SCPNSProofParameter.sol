@@ -5,8 +5,8 @@ pragma solidity ^0.8.2;
 import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
-import "./SCPNSUnitBase.sol";
-import "./interface/ISCPNSUint.sol";
+import "./SCPNSBase.sol";
+import "./interface/ISCPNSTypeUnit.sol";
 
 /**
  * @dev {SCPNSProofParameter} token, including:
@@ -24,14 +24,14 @@ import "./interface/ISCPNSUint.sol";
  * and pauser roles to other accounts.
  */
 contract SCPNSProofParameter is 
-    SCPNSUnitBase
+    SCPNSBase
     {
     using CountersUpgradeable for CountersUpgradeable.Counter;
 
     // typeUnit contract address 
     address public typeUnitAddr;
 
-    ISCPNSUint internal _typeUnitIf;
+    ISCPNSTypeUnit internal _typeUnitIf;
 
     // Mapping from id to parameter list
     mapping (uint256 => mapping(bytes32 => uint256)) internal _id2Parameters;
@@ -46,7 +46,7 @@ contract SCPNSProofParameter is
 
 
     function initialize(address typeUnitAddr_) public virtual initializer {
-        __SCPNSUnitBase_init("SCPNSProofParameter", "SCPNSProofParameter", "");
+        __SCPNSBase_init("SCPNSProofParameter", "SCPNSProofParameter", "");
         __SCPNSProofParameter_init(typeUnitAddr_);
     }
     /**
@@ -62,7 +62,7 @@ contract SCPNSProofParameter is
     function __SCPNSProofParameter_init_unchained(address typeUnitAddr_) internal initializer {
         _unitType("types");
         typeUnitAddr = typeUnitAddr_;
-        _typeUnitIf = ISCPNSUint(typeUnitAddr_);
+        _typeUnitIf = ISCPNSTypeUnit(typeUnitAddr_);
     }
 
     /**
@@ -90,7 +90,7 @@ contract SCPNSProofParameter is
         require(contract_ != address(0), "SCPNSProofParameter: contract address is invalid address.");
 
         typeUnitAddr = contract_;
-        _typeUnitIf = ISCPNSUint(contract_);
+        _typeUnitIf = ISCPNSTypeUnit(contract_);
     }
 
     function setValueOfParameter(uint256 tokenId, bytes32 pname, uint256 pvalue) public virtual {

@@ -6,8 +6,8 @@ import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
-import "./SCPNSUnitBase.sol";
-import "./interface/ISCPNSUint.sol";
+import "./SCPNSBase.sol";
+import "./interface/ISCPNSTypeUnit.sol";
 
 /**
  * @dev {SCPNSTypeUnit} token, including:
@@ -25,7 +25,7 @@ import "./interface/ISCPNSUint.sol";
  * and pauser roles to other accounts.
  */
 contract SCPNSTypeUnit is 
-    SCPNSUnitBase
+    SCPNSBase
     {
     // Maping from comptility id to unit(gpu/memory) id 
     mapping (uint256 => uint256) internal _id2UnitIds;
@@ -37,7 +37,7 @@ contract SCPNSTypeUnit is
     address[] internal _allUnitTypes;
 
     function initialize() public virtual initializer {
-        __SCPNSUnitBase_init("SCPNSTypeUnit", "SCPNSTypeUnit", "");
+        __SCPNSBase_init("SCPNSTypeUnit", "SCPNSTypeUnit", "");
         __SCPNSTypeUnit_init();
     }
     /**
@@ -103,7 +103,7 @@ contract SCPNSTypeUnit is
     function unitTypeOf(uint256 tokenId) public view returns(string memory) {
         address unitAddr = _unitId2UnitAddr[tokenId];
         if (unitAddr != address(0) && _validUnitTypes[unitAddr]) {
-           ISCPNSUint iuf = ISCPNSUint(unitAddr);
+           ISCPNSTypeUnit iuf = ISCPNSTypeUnit(unitAddr);
            return iuf.unitType();
         }
         return "";

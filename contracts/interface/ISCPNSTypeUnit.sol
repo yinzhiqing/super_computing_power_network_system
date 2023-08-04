@@ -1,8 +1,9 @@
+
 // SPDX-License-Identifier: MIT
 
 pragma solidity ^0.8.2;
 
-interface ISCPNSUint {
+interface ISCPNSTypeUnit {
     function name() external view returns(string memory);
     function symbol() external view returns(string memory);
     function unitType() external view returns(string memory);

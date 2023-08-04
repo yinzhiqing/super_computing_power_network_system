@@ -4,29 +4,17 @@
 pragma solidity ^0.8.2;
 
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
-import "./SCPNSUnitBase.sol";
+import "./SCPNSBase.sol";
 import "./interface/ISCPNSProofTask.sol";
 import "./interface/ISCPNSUseRightToken.sol";
 import "./interface/ISCPNSProofParameter.sol";
 
-contract SCPNSProofTask is SCPNSUnitBase {
+contract SCPNSProofTask is 
+SCPNSBase, 
+ISCPNSProofTask
+{
 
     using CountersUpgradeable for CountersUpgradeable.Counter;
-
-    enum TaskType {Manual, Auto, Type3, Type4}
-    struct TaskParameter {
-        uint256  parameterId;
-        bytes32  dynamicData;
-        TaskType taskType;
-    }
-
-    enum TaskState {Start, Working, End, Cancel, ERROR}
-    struct TaskDetail {
-        uint256 start;
-        uint256 end;
-        TaskState state;
-        string result;
-    }
 
     address public proofParameterAddr;
     // 
@@ -43,7 +31,7 @@ contract SCPNSProofTask is SCPNSUnitBase {
     // Task Id Generator
     CountersUpgradeable.Counter _idGenerator;
     // Mapping from task id to parameter
-    mapping (uint256 => TaskParameter) internal _id2Parameter;
+    mapping (uint256 => TaskParameter) internal _id2TaskParameter;
     // Mapping from task id to task Detail
     mapping (uint256 => TaskDetail) internal _id2TaskDetail;
     // Mapping from task id to use right id
@@ -51,14 +39,6 @@ contract SCPNSProofTask is SCPNSUnitBase {
     // Mapping from use right id to task id list;
     mapping (uint256 => uint256[]) internal _useRightId2TaskIds;
 
-    event TaskData(uint256 indexed index, 
-                   uint256 indexed useRightId, 
-                   uint256 indexed taskId, 
-                   uint256 preBlockNumber,  
-                   address sender, 
-                   TaskParameter taskParameter, 
-                   TaskDetail taskDetail, 
-                   string datas);
 
     function initialize(address useRightToken, address proofParameter) 
     initializer 
@@ -71,7 +51,7 @@ contract SCPNSProofTask is SCPNSUnitBase {
     internal 
     initializer 
     {
-        __SCPNSUnitBase_init("SCPNSProofTask", "SCPNSProofTask", "");
+        __SCPNSBase_init("SCPNSProofTask", "SCPNSProofTask", "");
         __SCPNSProofTask_init_unchained(useRightToken, proofParameter);
     }
 
@@ -88,7 +68,7 @@ contract SCPNSProofTask is SCPNSUnitBase {
         keepTaskCountOfUseRightId = type(uint256).max;
     }
 
-    function mint(uint256 useRightId, string memory datas) public virtual {
+    function mint(uint256 useRightId, string memory datas) public virtual override {
         require(_msgSender() == useRightTokenIf.ownerOf(useRightId) 
             || hasRole(MANAGE_ROLE, _msgSender()), 
             "SCPNSProofTask: The sender is onwer of useRightId or sender has MANAGE_ROLE role.");
@@ -97,19 +77,20 @@ contract SCPNSProofTask is SCPNSUnitBase {
         bytes32 tokenName = bytes32(tokenId);
         _mint(tokenId, tokenName, datas);
 
-        TaskParameter storage tp = _id2Parameter[tokenId];
+        TaskParameter storage tp = _id2TaskParameter[tokenId];
         tp.taskType = TaskType.Manual;
         tp.dynamicData = __prefixed(keccak256(abi.encodePacked(block.timestamp, _msgSender(), tokenId, tp.taskType)));
         tp.parameterId = __selectParameterId(useRightId);
 
         TaskDetail storage td = _id2TaskDetail[tokenId];
+        td.tokenId = tokenId;
         td.start = block.timestamp;
         td.state = TaskState.Start;
 
         _useRightId2TaskIds[useRightId].push(tokenId);
 
-        //keep some data in memory
-        _cleanMemory(useRightId, keepTaskCountOfUseRightId);
+        //purge some data in memory
+        _purgeMemory(useRightId, keepTaskCountOfUseRightId);
         emit TaskData(_eventIndex.current(), useRightId, tokenId, _preBlockNumber, _msgSender(), tp, td, datas);
 
         // next mint use 
@@ -118,16 +99,15 @@ contract SCPNSProofTask is SCPNSUnitBase {
         _eventIndex.increment();
     }
 
-    function taskEnd(uint256 tokenId, string memory result) public virtual {
+    function taskEnd(uint256 tokenId, string memory result) public virtual override {
         uint256 useRightId = _id2useRightId[tokenId];
         require(hasRole(MINTER_ROLE, _msgSender()), "SCPNSProofTask: must have minter role to add");
-        /*
-           task owner to end
-        */
         require(_msgSender() == useRightTokenIf.ownerOf(_id2useRightId[tokenId]), 
                 "SCPNSProofTask: tokenId owner is not sender");
+        require(_id2TaskDetail[tokenId].state == TaskState.Start, 
+                "SCPNSProofParameter: task state is not Start, can't change.");
 
-        TaskParameter storage tp = _id2Parameter[tokenId];
+        TaskParameter storage tp = _id2TaskParameter[tokenId];
         TaskDetail storage td = _id2TaskDetail[tokenId];
         td.state = TaskState.End;
         td.result = result;
@@ -139,13 +119,15 @@ contract SCPNSProofTask is SCPNSUnitBase {
         _eventIndex.increment();
     }
 
-    function taskCancel(uint256 tokenId) public virtual {
+    function taskCancel(uint256 tokenId) public virtual override {
         uint256 useRightId = _id2useRightId[tokenId];
         require(hasRole(MINTER_ROLE, _msgSender()), "SCPNSProofTask: must have minter role to add");
         require(_msgSender() == useRightTokenIf.ownerOf(_id2useRightId[tokenId]), 
                 "SCPNSProofTask: tokenId owner is not sender");
+        require(_id2TaskDetail[tokenId].state == TaskState.Start, 
+                "SCPNSProofParameter: task state is not Start, can't cancel");
 
-        TaskParameter storage tp = _id2Parameter[tokenId];
+        TaskParameter storage tp = _id2TaskParameter[tokenId];
         TaskDetail storage td = _id2TaskDetail[tokenId];
         td.state = TaskState.Cancel;
 
@@ -156,7 +138,7 @@ contract SCPNSProofTask is SCPNSUnitBase {
         _eventIndex.increment();
     }
 
-    function updateUseRightToken(address contract_) public virtual {
+    function updateUseRightToken(address contract_) public virtual override {
         require(hasRole(MANAGE_ROLE, _msgSender()), "SCPNSProofTask: must have manager role to add");
         require(contract_ != address(0), "SCPNSProofTask: contract address is invalid address.");
 
@@ -164,7 +146,7 @@ contract SCPNSProofTask is SCPNSUnitBase {
         useRightTokenIf = ISCPNSUseRightToken(contract_);
     }
 
-    function updateProofParameter(address contract_) public virtual {
+    function updateProofParameter(address contract_) public virtual override {
         require(hasRole(MANAGE_ROLE, _msgSender()), "SCPNSProofTask: must have manager role to add");
         require(contract_ != address(0), "SCPNSProofTask: contract address is invalid address.");
 
@@ -172,11 +154,60 @@ contract SCPNSProofTask is SCPNSUnitBase {
         proofParameterIf = ISCPNSProofParameter(contract_);
     }
 
-     function updateKeepTaskCount(uint256 keepCount) public virtual {
+     function updateKeepTaskCount(uint256 keepCount) public virtual override {
         require(hasRole(MANAGE_ROLE, _msgSender()), "SCPNSProofTask: must have manager role to add");
         require(keepCount > 0, "SCPNSProofTask: The minimum value of a is 1.");
         keepTaskCountOfUseRightId = keepCount;
      }
+
+    function eventCountOf() public view virtual override returns(uint256) {
+        return _eventIndex.current();
+    }
+
+    function latestParametersByUseRightId(uint256 tokenId) public view virtual override returns(
+        bytes32 dynamicData, bytes32[] memory names, uint256[] memory values, uint256 taskId) {
+        uint256[] storage taskIds = _useRightId2TaskIds[tokenId];
+
+        if (taskIds.length > 0) {
+            taskId = taskIds[taskIds.length - 1];
+            (dynamicData, names, values) = SCPNSProofTask.parametersOf(taskId);
+        } 
+    }
+
+    function parametersOf(uint256 tokenId) public view virtual override returns(bytes32 dynamicData, 
+                                                                       bytes32[] memory names, 
+                                                                       uint256[] memory values) {
+        TaskParameter storage tp = _id2TaskParameter[tokenId];
+        dynamicData = tp.dynamicData;
+        (names, values) = proofParameterIf.parametersOf(tp.parameterId);
+    }
+
+    function latestTaskDataByUseRightId(uint256 tokenId) public view virtual override returns(TaskParameter memory parameter, 
+                                                                                     TaskDetail memory result) {
+        if (_useRightId2TaskIds[tokenId].length > 0) {
+            (parameter, result) = SCPNSProofTask.taskDataOfUseRightId(tokenId, _useRightId2TaskIds[tokenId].length - 1);
+        }
+    }
+
+    function taskDataOfUseRightId(uint256 tokenId, uint256 index) public view virtual override returns(TaskParameter memory parameter, 
+                                                                                              TaskDetail memory result) {
+        require(SCPNSProofTask.taskDataCountOfUseRightId(tokenId) > index, "SCPNSProofTask: index is out bound of result.");
+
+        uint256[] storage taskIds = _useRightId2TaskIds[tokenId];
+        if (taskIds.length > index) {
+            (parameter, result) = SCPNSProofTask.taskDataOf(taskIds[taskIds.length -1]);
+        }
+    }
+
+    function taskDataCountOfUseRightId(uint256 tokenId) public view virtual override returns(uint256) {
+        return _useRightId2TaskIds[tokenId].length;
+    }
+
+    function taskDataOf(uint256 tokenId) public view virtual override returns(TaskParameter memory parameter, 
+                                                                     TaskDetail memory result) {
+        parameter = _id2TaskParameter[tokenId];
+        result = _id2TaskDetail[tokenId];
+    }
 
     function __prefixed(bytes32 hash) internal pure returns (bytes32) {
         return keccak256(abi.encodePacked("\x19Dynamic Data Head:\n32", hash));
@@ -188,7 +219,7 @@ contract SCPNSProofTask is SCPNSUnitBase {
         return parameterId;
     }
 
-    function _cleanMemory(uint256 useRightId, uint256 keepCount) internal {
+    function _purgeMemory(uint256 useRightId, uint256 keepCount) internal {
         if (keepCount != type(uint256).max) {
            uint256 length = _useRightId2TaskIds[useRightId].length;
            if (length > keepCount) {
@@ -196,9 +227,11 @@ contract SCPNSProofTask is SCPNSUnitBase {
                while(reCount > 0) {
                    uint256 taskId = _useRightId2TaskIds[useRightId][reCount -1];
 
-                   delete _id2Parameter[taskId];
+                   delete _id2TaskParameter[taskId];
                    delete _id2TaskDetail[taskId];
                    delete _id2useRightId[taskId];
+
+                   _burn(taskId);
                }
            }
         }
