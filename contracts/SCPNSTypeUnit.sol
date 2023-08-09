@@ -25,7 +25,8 @@ import "./interface/ISCPNSTypeUnit.sol";
  * and pauser roles to other accounts.
  */
 contract SCPNSTypeUnit is 
-    SCPNSBase
+    SCPNSBase,
+    ISCPNSTypeUnit
     {
     // Maping from comptility id to unit(gpu/memory) id 
     mapping (uint256 => uint256) internal _id2UnitIds;
@@ -62,7 +63,7 @@ contract SCPNSTypeUnit is
      *
      * - the caller must have the `MINTER_ROLE`.
      */
-    function mint(uint256 tokenId, bytes32 name_, address unitAddr, uint256 unitId, string memory datas) public virtual {
+    function mint(uint256 tokenId, bytes32 name_, address unitAddr, uint256 unitId, string memory datas) public virtual override {
         require(_validUnitTypes[unitAddr], "SCPNSTypeUnit: unitAddr is not existed.");
 
         _mint(tokenId, name_, datas);
@@ -91,16 +92,12 @@ contract SCPNSTypeUnit is
         return _validUnitTypes[unitAddr];
     }
 
-    function burn(uint256 tokenId)
-    public
-    virtual
-    override
-    {
+    function burn(uint256 tokenId) public virtual override(SCPNSBase, ISCPNSBase) {
         delete _id2UnitIds[tokenId];
         _burn(tokenId);
     }
 
-    function unitTypeOf(uint256 tokenId) public view returns(string memory) {
+    function unitTypeOf(uint256 tokenId) public view override returns(string memory) {
         address unitAddr = _unitId2UnitAddr[tokenId];
         if (unitAddr != address(0) && _validUnitTypes[unitAddr]) {
            ISCPNSTypeUnit iuf = ISCPNSTypeUnit(unitAddr);

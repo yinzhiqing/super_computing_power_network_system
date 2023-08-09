@@ -2,7 +2,11 @@
 
 pragma solidity ^0.8.2;
 
-interface ISCPNSProofTask{
+import  "./ISCPNSBase.sol";
+
+interface ISCPNSProofTask is 
+    ISCPNSBase 
+{
     enum TaskType {Manual, Auto, Type3, Type4}
     struct TaskParameter {
         uint256  parameterId;
@@ -32,16 +36,12 @@ interface ISCPNSProofTask{
     function eventCountOf() external view returns(uint256);
     function latestParametersByUseRightId(uint256 tokenId) external view returns(
         bytes32 dynamicData, bytes32[] memory names, uint256[] memory values, uint256 taskId);
-
     function parametersOf(uint256 tokenId) external view returns(
         bytes32 dynamicData, bytes32[] memory names, uint256[] memory values);
-
     function latestTaskDataByUseRightId(uint256 tokenId) external view returns(
         TaskParameter memory parameter, TaskDetail memory result);
-
     function taskDataOfUseRightId(uint256 tokenId, uint256 index) external view returns(
         TaskParameter memory parameter, TaskDetail memory result);
-        
     function taskDataCountOfUseRightId(uint256 tokenId) external view returns(uint256);
     function taskDataOf(uint256 tokenId) external view returns(
         TaskParameter memory parameter, TaskDetail memory result);

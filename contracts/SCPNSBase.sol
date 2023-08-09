@@ -6,6 +6,7 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgrad
 import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "./interface/ISCPNSBase.sol";
 
 /**
  * @dev {SCPNSBase} token, including:
@@ -23,6 +24,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
  * and pauser roles to other accounts.
  */
 contract SCPNSBase is 
+    ISCPNSBase,
     Initializable, 
     AccessControlEnumerableUpgradeable, 
     PausableUpgradeable
@@ -33,11 +35,11 @@ contract SCPNSBase is
     bytes32 public constant MANAGE_ROLE = keccak256("MANAGE_ROLE");
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
 
-    string public name;
-    string public symbol;
-    string public baseURI;
+    string internal _name;
+    string internal _symbol;
+    string internal _baseURI;
 
-    string public unitType;
+    string internal __unitType;
 
     // Mapping  from token to datas
     mapping (uint256 => string) internal _tokenDatas;
@@ -52,7 +54,6 @@ contract SCPNSBase is
     mapping(uint256 => uint256) private _allTokensIndex;
 
 
-    event UpdateDatas(uint256 indexed tokenId, bytes32 tokenName, address sender, string data);
 
     /**
      * @dev Grants `DEFAULT_ADMIN_ROLE`, `MINTER_ROLE` and `PAUSER_ROLE` to the
@@ -67,9 +68,9 @@ contract SCPNSBase is
     }
 
     function __SCPNSBase_init_unchained(string memory name_, string memory symbol_, string memory baseURI_) internal initializer {
-        baseURI= baseURI_;
-        name = name_;
-        symbol = symbol_;
+        _baseURI= baseURI_;
+        _name = name_;
+        _symbol = symbol_;
 
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _setupRole(MINTER_ROLE, _msgSender());
@@ -85,7 +86,7 @@ contract SCPNSBase is
      *
      * - the caller must have the `MINTER_ROLE`.
      */
-    function mint(uint256 tokenId, bytes32 name_, string memory datas) public virtual {
+    function mint(uint256 tokenId, bytes32 name_, string memory datas) public virtual override {
         _mint(tokenId, name_, datas);
 
         emit UpdateDatas(tokenId, name_, _msgSender(), datas);
@@ -95,7 +96,7 @@ contract SCPNSBase is
       * @dev Update datas of token
       *
     */
-    function update(uint256 tokenId, string memory datas) public virtual {
+    function update(uint256 tokenId, string memory datas) public virtual override {
 
         _update(tokenId, datas);
         UpdateDatas(tokenId, _id2Names[tokenId], _msgSender(), datas);
@@ -109,7 +110,7 @@ contract SCPNSBase is
      *
      * - the caller must have the `PAUSER_ROLE`.
      */
-    function pause() public virtual {
+    function pause() public virtual override {
         require(hasRole(PAUSER_ROLE, _msgSender()), "SCPNSBase: must have pauser role to pause");
         _pause();
     }
@@ -123,7 +124,7 @@ contract SCPNSBase is
      *
      * - the caller must have the `PAUSER_ROLE`.
      */
-    function unpause() public virtual {
+    function unpause() public virtual override {
         require(hasRole(PAUSER_ROLE, _msgSender()), "SCPNSBase: must have pauser role to unpause");
         _unpause();
     }
@@ -135,60 +136,67 @@ contract SCPNSBase is
         return super.supportsInterface(interfaceId);
     }
 
+    function name() public view virtual override returns(string memory) {
+        return _name;
+    }
+
+    function symbol() public view virtual override returns(string memory) {
+        return _symbol;
+    }
+
+    function baseURI() public view virtual override returns(string memory) {
+        return _baseURI;
+    }
     /**
       * @dev token datas
     */
-    function datasOf(uint256 tokenId) public view virtual returns(string memory) {
+    function datasOf(uint256 tokenId) public view virtual override returns(string memory) {
         return _tokenDatas[tokenId];
     }
 
     /**
       * @dev token name
     */
-    function nameOf(uint256 tokenId) public view virtual returns(bytes32) {
+    function nameOf(uint256 tokenId) public view virtual override returns(bytes32) {
         return _id2Names[tokenId];
     }
 
     /**
       * @dev token id
     */
-    function tokenIdOf(bytes32 name_) public view virtual returns(uint256) {
+    function tokenIdOf(bytes32 name_) public view virtual override returns(uint256) {
         return _name2IDs[name_];
     }
 
     /**
       * @dev count
     */
-    function countOf() public view virtual returns(uint256 count) {
+    function countOf() public view virtual override returns(uint256 count) {
         return _allTokens.length;
     }
 
-    function tokenOfByIndex(uint256 index) public view virtual returns(uint256) {
+    function tokenOfByIndex(uint256 index) public view virtual override returns(uint256) {
         require(index < _allTokens.length, "SCPNSBase: index out of bounds.");
         return _allTokens[index];
     }
     
-    function burn(uint256 tokenId) 
-    public
-    virtual 
-    {
+    function burn(uint256 tokenId) public virtual override {
         _burn(tokenId);
     }
 
-    function _unitType(string memory unitType_) internal virtual {
-        unitType = unitType_;
+    function unitType() public view virtual override returns(string memory) {
+        return __unitType;
     }
 
-    function exists(uint256 tokenId)
-    public
-    virtual
-    returns(bool) {
+    function _unitType(string memory unitType_) internal virtual {
+        __unitType = unitType_;
+    }
+
+    function exists(uint256 tokenId) public view virtual override returns(bool) {
         return _exist(tokenId);
     }
 
-    function _mint(uint256 tokenId, bytes32 name_, string memory datas) 
-    internal
-    virtual 
+    function _mint(uint256 tokenId, bytes32 name_, string memory datas) internal virtual
     {
         require(hasRole(MINTER_ROLE, _msgSender()), "SCPNSBase: must have minter role to mint");
         require(_name2IDs[name_] == uint256(0), "SCPNSBase: token name is exists.");

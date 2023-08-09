@@ -7,6 +7,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "./SCPNSBase.sol";
 import "./interface/ISCPNSTypeUnit.sol";
+import "./interface/ISCPNSProofParameter.sol";
 
 /**
  * @dev {SCPNSProofParameter} token, including:
@@ -24,7 +25,8 @@ import "./interface/ISCPNSTypeUnit.sol";
  * and pauser roles to other accounts.
  */
 contract SCPNSProofParameter is 
-    SCPNSBase
+    SCPNSBase,
+    ISCPNSProofParameter
     {
     using CountersUpgradeable for CountersUpgradeable.Counter;
 
@@ -43,7 +45,6 @@ contract SCPNSProofParameter is
     mapping (uint256 => uint256) internal _id2TypeUnitId;
     // Mapping from typeUnitId to id
     mapping (uint256 => uint256) internal _typeUnitId2Id;
-
 
     function initialize(address typeUnitAddr_) public virtual initializer {
         __SCPNSBase_init("SCPNSProofParameter", "SCPNSProofParameter", "");
@@ -73,7 +74,7 @@ contract SCPNSProofParameter is
      *
      * - the caller must have the `MINTER_ROLE`.
      */
-    function mint(uint256 tokenId, bytes32 name_, uint256 typeUnitId, string memory datas) public virtual {
+    function mint(uint256 tokenId, bytes32 name_, uint256 typeUnitId, string memory datas) public virtual override{
         require(_id2TypeUnitId[tokenId] == uint256(0), "SCPNSProofParameter: tokenId is exists.");
         require(_typeUnitIf.exists(typeUnitId), "SCPNSProofParameter: typeUnitId is invalid.");
         require(_typeUnitId2Id[typeUnitId] == uint256(0), "SCPNSProofParameter: typeUnitId was setting.");
@@ -85,7 +86,7 @@ contract SCPNSProofParameter is
         UpdateDatas(tokenId, name_, _msgSender(), datas);
     }
 
-    function updateTypeUnit(address contract_) public virtual {
+    function updateTypeUnit(address contract_) public virtual override {
         require(hasRole(MANAGE_ROLE, _msgSender()), "SCPNSProofParameter: must have manager role to add");
         require(contract_ != address(0), "SCPNSProofParameter: contract address is invalid address.");
 
@@ -93,33 +94,33 @@ contract SCPNSProofParameter is
         _typeUnitIf = ISCPNSTypeUnit(contract_);
     }
 
-    function setValueOfParameter(uint256 tokenId, bytes32 pname, uint256 pvalue) public virtual {
+    function setValueOfParameter(uint256 tokenId, bytes32 pname, uint256 pvalue) public virtual override {
         require(hasRole(MANAGE_ROLE, _msgSender()), "SCPNSProofParameter: must have manager role to remove");
         __setValueOfParameter(tokenId, pname, pvalue);
     }
 
-    function valueOfParameter(uint256 tokenId, bytes32 pname) public view returns(uint256) {
+    function valueOfParameter(uint256 tokenId, bytes32 pname) public view override returns(uint256) {
         return _id2Parameters[tokenId][pname];
     }
 
-    function typeUnitIdOf(uint256 tokenId) public view returns(uint256) {
+    function typeUnitIdOf(uint256 tokenId) public view override returns(uint256) {
         return _id2TypeUnitId[tokenId];
     }
 
-    function tokenIdOfTypeUnitId(uint256 typeUnitId) public view returns(uint256) {
+    function tokenIdOfTypeUnitId(uint256 typeUnitId) public view override returns(uint256) {
         return _typeUnitId2Id[typeUnitId];
     }
 
-    function parameterCountOf(uint256 tokenId) public view returns(uint256) {
+    function parameterCountOf(uint256 tokenId) public view override returns(uint256) {
         return _id2ParameterCount[tokenId].current();
     }
 
-    function parameterNameOf(uint256 tokenId, uint256 index) public view virtual returns(bytes32) {
+    function parameterNameOf(uint256 tokenId, uint256 index) public view virtual override returns(bytes32) {
         require(index < _id2ParameterCount[tokenId].current(), "SCPNSProofParameter: index out of bounds.");
         return _id2ParameterNames[tokenId][index];
     }
 
-    function parametersOf(uint256 tokenId) public view virtual returns(bytes32[] memory names, uint256[] memory values) {
+    function parametersOf(uint256 tokenId) public view virtual override returns(bytes32[] memory names, uint256[] memory values) {
         uint256 index = _id2ParameterCount[tokenId].current();
         uint i = 0;
         while(index > 0) {
@@ -131,7 +132,7 @@ contract SCPNSProofParameter is
         }
     }
     
-    function burn(uint256 tokenId) public virtual override {
+    function burn(uint256 tokenId) public virtual override(SCPNSBase, ISCPNSBase) {
         while(_id2ParameterCount[tokenId].current() > 0) {
             _id2ParameterCount[tokenId].decrement();
             delete _id2Parameters[tokenId][_id2ParameterNames[tokenId][_id2ParameterCount[tokenId].current()]];
