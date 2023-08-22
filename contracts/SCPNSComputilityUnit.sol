@@ -3,12 +3,8 @@
 
 pragma solidity ^0.8.2;
 
-import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "./SCPNSBase.sol";
-import "./interface/ISCPNSComputitlityUnit.sol";
+import "./interface/ISCPNSComputilityUnit.sol";
 import "./interface/ISCPNSTypeUnit.sol";
 
 /**
@@ -30,10 +26,10 @@ contract SCPNSComputilityUnit is
     SCPNSBase,
     ISCPNSComputilityUnit
     {
-    using CountersUpgradeable for CountersUpgradeable.Counter;
 
     // typeUnit contract address 
     address public typeUnitAddr;
+    address public computilityVMAddr;
 
     ISCPNSTypeUnit internal _typeUnitIf;
 
@@ -41,7 +37,7 @@ contract SCPNSComputilityUnit is
     *  @dev storage struct
     *  
     * owner => [index => id]
-    *                     |-=> count
+    *                     |-=> typeUnitCount
     *                     |-=> unitTypeId   
     *                            |-=> countOfOwner
     *                            |-=> allCount
@@ -52,20 +48,16 @@ contract SCPNSComputilityUnit is
 
     // Mapping from id to typeUnit id
     mapping (uint256 => uint256) internal _id2TypeUnitId;
-    // Mapping from id to id count
-    mapping (uint256 => uint256) internal _id2Count;
-    // Mapping from typeUnit id to id count(all)
-    mapping (uint256 => uint256) internal _typeUnit2Count;
-    // Mapping from owner to typeUnit list(index => typeUnitId) 
-    mapping (address => mapping (uint256 => uint256)) internal _ownedTokens;
     // Mapping from id to typeUnit Count(typeUnitId to count) id => (typeUnitId => 10)
-    mapping (uint256 => mapping (uint256 => uint256)) internal _ownedTokenTypeUnitCount;
-    // Mapping from token ID to index of the owner tokens list
-    mapping(uint256 => uint256) private _ownedTokensIndex;
-    // Mapping from token ID to owner address
-    mapping (uint256 => address) private _owners;
-    // Mapping owner address to token count
-    mapping (address => uint256) private _balances;
+    mapping (uint256 => uint256) internal _id2TypeUnitCount;
+    // Mapping from id to locked count
+    mapping (uint256 => uint256) internal _id2LockedCount;
+    // Mapping from typeUnit id to count(all)
+    mapping (uint256 => uint256) internal _typeUnit2Count;
+    // Mapping from owner to typeUnitId count
+    mapping (address => mapping (uint256 => uint256)) internal _ownedTypeUnitCount;
+    // Mapping from owner to locked typeUnitId count 
+    mapping (address => mapping (uint256 => uint256)) internal _ownedTypeUnitCountLocked;
 
     function initialize(address typeUnitAddr_) public virtual initializer {
         __SCPNSBase_init("SCPNSComputilityUnit", "SCPNSComputilityUnit", "");
@@ -95,43 +87,24 @@ contract SCPNSComputilityUnit is
      *
      * - the caller must have the `MINTER_ROLE`.
      */
-    function mint(address to, uint256 tokenId, uint256 count_, uint256 typeUnitId, uint256 typeUnitCount_, string memory datas) public virtual override {
+    function mint(address to, uint256 tokenId, uint256 typeUnitId, uint256 typeUnitCount_, string memory datas) public virtual override {
 
         require(_typeUnitIf.exists(typeUnitId), "SCPNSComputilityUnit: typeUnitId is not exists.");
-        require(count_ > 0, "SCPNSComputilityUnit: The token quantity value must be greater than 0");
         require(typeUnitCount_ > 0, "SCPNSComputilityUnit: The typeUnit quantity value must be greater than 0");
 
         bytes32 _name = bytes32(tokenId);
-        _mint(tokenId, _name, datas);
+        _mint(to, tokenId, _name, datas);
 
-        uint256 length = SCPNSComputilityUnit.balanceOf(to);
-        _ownedTokenTypeUnitCount[tokenId][typeUnitId] = count_;
-        _ownedTokens[to][length] = tokenId;
-        _ownedTokensIndex[tokenId] = length;
-        _owners[tokenId] = to;
+        _id2TypeUnitCount[tokenId] = typeUnitCount_;
+        _ownedTypeUnitCount[to][typeUnitId] += typeUnitCount_;
+        _ownedTypeUnitCountLocked[to][typeUnitId] = 0;
         
-        _balances[to] += 1;
 
-        _id2Count[tokenId] = count_;
+        _id2LockedCount[tokenId] = 0;
         _id2TypeUnitId[tokenId] = typeUnitId;
-        _typeUnit2Count[typeUnitId] = typeUnitCount_ * count_;
+        // all count of typeUnitId
+        _typeUnit2Count[typeUnitId] += typeUnitCount_;
 
-        UpdateDatas(tokenId, _name, _msgSender(), datas);
-    }
-
-    function burn(uint256 tokenId) public virtual override(SCPNSBase, ISCPNSComputilityUnit) {
-        _removeTokenFromOwner(_owners[tokenId], tokenId);
-
-        // Update all count of typeUnit
-        uint256 typeUnitCount = _ownedTokenTypeUnitCount[tokenId][_id2TypeUnitId[tokenId]];
-        _typeUnit2Count[_id2TypeUnitId[tokenId]] -= typeUnitCount * _id2Count[tokenId];
-
-        _balances[_owners[tokenId]] -= 1;
-        delete _owners[tokenId];
-        delete _id2TypeUnitId[tokenId];
-        delete _id2Count[tokenId];
-
-        _burn(tokenId);
     }
 
     function updateTypeUnit(address contract_) public virtual override {
@@ -141,18 +114,12 @@ contract SCPNSComputilityUnit is
         typeUnitAddr = contract_;
         _typeUnitIf = ISCPNSTypeUnit(contract_);
     }
-    function balanceOf(address owner) public view virtual override returns (uint256) {
-        require(owner != address(0), "SCPNSComputilityUnit: balance query for the zero address");
-        return _balances[owner];
-    }
 
-    /**
-     * @dev See {IZXX-ownerOf}.
-     */
-    function ownerOf(uint256 tokenId) public view virtual override returns (address) {
-        address owner = _owners[tokenId];
-        require(owner != address(0), "SCPNSComputilityUnit: owner query for nonexistent token");
-        return owner;
+    function updateComputilityVM(address contract_) public virtual override {
+        require(hasRole(MANAGE_ROLE, _msgSender()), "SCPNSProofParameter: must have manager role to add");
+        require(contract_ != address(0), "SCPNSProofParameter: contract address is invalid address.");
+
+        computilityVMAddr = contract_;
     }
 
     function typeUnitIdOf(uint256 tokenId) public view virtual override returns(uint256) {
@@ -163,26 +130,42 @@ contract SCPNSComputilityUnit is
         return _typeUnit2Count[tokenId];
     }
 
-    function countOf(uint256 tokenId) public view virtual override returns(uint256) {
-        return _id2Count[tokenId];
+    function typeUnitCountOf(uint256 tokenId) public view virtual override returns(uint256) {
+        uint256 typeUnitCount = _id2TypeUnitCount[tokenId];
+        return typeUnitCount;
     }
     
-    function _removeTokenFromOwner(address from, uint256 tokenId) private {
-        uint256 lastTokenIndex = SCPNSComputilityUnit.balanceOf(from) - 1;
-        uint256 tokenIndex = _ownedTokensIndex[tokenId];
+    function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal virtual override {
+        super._beforeTokenTransfer(from, to, tokenId);
 
-        // When the token to delete is the last token, the swap operation is unnecessary
-        if (tokenIndex != lastTokenIndex) {
-            uint256 lastTokenId = _ownedTokens[from][lastTokenIndex];
-
-            _ownedTokens[from][tokenIndex] = lastTokenId; // Move the last token to the slot of the to-delete token
-            _ownedTokensIndex[lastTokenId] = tokenIndex; // Update the moved token's index
+        if (from == address(0)) {
+        } else if (from != to) {
+            _removeTokenFromOwner(from, tokenId);
         }
-
-        // This also deletes the contents at the last position of the array
-        delete _ownedTokensIndex[tokenId];
-        delete _ownedTokens[from][lastTokenIndex];
-        delete _ownedTokenTypeUnitCount[tokenId][_id2TypeUnitId[tokenId]];
+        if (to == address(0)) {
+        } else if (to != from) {
+        }
     }
+    function _removeTokenFromOwner(address from, uint256 tokenId) private {
+
+        uint256 typeUnitCount = _id2LockedCount[tokenId];
+        uint256 typeUnitId = _id2TypeUnitId[tokenId];
+        _ownedTypeUnitCount[from][typeUnitId] -= typeUnitCount;
+
+        delete _id2TypeUnitCount[tokenId];
+        delete _id2LockedCount[tokenId];
+    }
+
+    function _burn(uint256 tokenId) internal virtual override(SCPNSBase) {
+        super._burn(tokenId);
+
+        // Update all count of typeUnit
+        uint256 typeUnitCount = _id2TypeUnitCount[tokenId];
+        _typeUnit2Count[_id2TypeUnitId[tokenId]] -= typeUnitCount;
+    
+        delete _id2TypeUnitId[tokenId];
+        delete _id2LockedCount[tokenId];
+    }
+
     uint256[48] private __gap;
 }

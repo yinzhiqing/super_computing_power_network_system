@@ -63,14 +63,12 @@ contract SCPNSTypeUnit is
      *
      * - the caller must have the `MINTER_ROLE`.
      */
-    function mint(uint256 tokenId, bytes32 name_, address unitAddr, uint256 unitId, string memory datas) public virtual override {
+    function mint(address to, uint256 tokenId, bytes32 name_, address unitAddr, uint256 unitId, string memory datas) public virtual override {
         require(_validUnitTypes[unitAddr], "SCPNSTypeUnit: unitAddr is not existed.");
 
-        _mint(tokenId, name_, datas);
+        _mint(to, tokenId, name_, datas);
         _id2UnitIds[tokenId] = unitId;
         _unitId2UnitAddr[unitId] = unitAddr;
-
-        UpdateDatas(tokenId, name_, _msgSender(), datas);
     }
 
     function addUnitType(address unitAddr) public virtual {
@@ -92,9 +90,9 @@ contract SCPNSTypeUnit is
         return _validUnitTypes[unitAddr];
     }
 
-    function burn(uint256 tokenId) public virtual override(SCPNSBase, ISCPNSBase) {
+    function _burn(uint256 tokenId) internal virtual override(SCPNSBase) {
+        super.burn(tokenId);
         delete _id2UnitIds[tokenId];
-        _burn(tokenId);
     }
 
     function unitTypeOf(uint256 tokenId) public view override returns(string memory) {

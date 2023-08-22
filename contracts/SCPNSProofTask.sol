@@ -68,14 +68,14 @@ ISCPNSProofTask
         keepTaskCountOfUseRightId = type(uint256).max;
     }
 
-    function mint(uint256 useRightId, string memory datas) public virtual override {
+    function mint(address to, uint256 useRightId, string memory datas) public virtual override {
         require(_msgSender() == useRightTokenIf.ownerOf(useRightId) 
             || hasRole(MANAGE_ROLE, _msgSender()), 
             "SCPNSProofTask: The sender is onwer of useRightId or sender has MANAGE_ROLE role.");
 
         uint256 tokenId = _idGenerator.current();
         bytes32 tokenName = bytes32(tokenId);
-        _mint(tokenId, tokenName, datas);
+        _mint(to, tokenId, tokenName, datas);
 
         TaskParameter storage tp = _id2TaskParameter[tokenId];
         tp.taskType = TaskType.Manual;
@@ -227,14 +227,17 @@ ISCPNSProofTask
                while(reCount > 0) {
                    uint256 taskId = _useRightId2TaskIds[useRightId][reCount -1];
 
-                   delete _id2TaskParameter[taskId];
-                   delete _id2TaskDetail[taskId];
-                   delete _id2useRightId[taskId];
-
                    _burn(taskId);
                }
            }
         }
+    }
+
+    function _burn(uint256 tokenId) internal virtual override(SCPNSBase) {
+        super._burn(tokenId);
+        delete _id2TaskParameter[tokenId];
+        delete _id2TaskDetail[tokenId];
+        delete _id2useRightId[tokenId];
     }
 
     //must be at end

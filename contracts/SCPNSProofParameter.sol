@@ -2,9 +2,6 @@
 
 pragma solidity ^0.8.2;
 
-import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "./SCPNSBase.sol";
 import "./interface/ISCPNSTypeUnit.sol";
 import "./interface/ISCPNSProofParameter.sol";
@@ -74,16 +71,16 @@ contract SCPNSProofParameter is
      *
      * - the caller must have the `MINTER_ROLE`.
      */
-    function mint(uint256 tokenId, bytes32 name_, uint256 typeUnitId, string memory datas) public virtual override{
+    function mint(address to, uint256 tokenId, bytes32 name_, uint256 typeUnitId, string memory datas) public virtual override{
         require(_id2TypeUnitId[tokenId] == uint256(0), "SCPNSProofParameter: tokenId is exists.");
         require(_typeUnitIf.exists(typeUnitId), "SCPNSProofParameter: typeUnitId is invalid.");
         require(_typeUnitId2Id[typeUnitId] == uint256(0), "SCPNSProofParameter: typeUnitId was setting.");
 
-        _mint(tokenId, name_, datas);
         _id2TypeUnitId[tokenId] = typeUnitId;
         _typeUnitId2Id[typeUnitId] = tokenId;
 
-        UpdateDatas(tokenId, name_, _msgSender(), datas);
+        _mint(to, tokenId, name_, datas);
+
     }
 
     function updateTypeUnit(address contract_) public virtual override {
@@ -132,7 +129,9 @@ contract SCPNSProofParameter is
         }
     }
     
-    function burn(uint256 tokenId) public virtual override(SCPNSBase, ISCPNSBase) {
+    function _burn(uint256 tokenId) internal virtual override(SCPNSBase) {
+        super._burn(tokenId);
+
         while(_id2ParameterCount[tokenId].current() > 0) {
             _id2ParameterCount[tokenId].decrement();
             delete _id2Parameters[tokenId][_id2ParameterNames[tokenId][_id2ParameterCount[tokenId].current()]];
@@ -145,11 +144,10 @@ contract SCPNSProofParameter is
 
         delete _id2TypeUnitId[tokenId];
 
-        _burn(tokenId);
     }
 
     function __setValueOfParameter(uint256 tokenId, bytes32 pname, uint256 pvalue) internal virtual {
-        require(_exist(tokenId), "SCPNSProofParameter: tokenId is not exists.");
+        require(_exists(tokenId), "SCPNSProofParameter: tokenId is not exists.");
         require(pname != bytes32(""), "SCPNSProofParameter: pname is invalid.");
 
         // mabe is new parameter, check it and add to name list

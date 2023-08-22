@@ -26,7 +26,7 @@ interface ISCPNSProofTask is
     event TaskData(uint256 indexed index, uint256 indexed useRightId, uint256 indexed taskId, 
                    uint256 preBlockNumber,  address sender, TaskParameter taskParameter, TaskDetail taskDetail, string datas);
 
-    function mint(uint256 useRightId, string memory datas) external ;
+    function mint(address to, uint256 useRightId, string memory datas) external ;
     function taskEnd(uint256 tokenId, string memory result) external;
     function taskCancel(uint256 tokenId) external;
     function updateUseRightToken(address contract_) external;
