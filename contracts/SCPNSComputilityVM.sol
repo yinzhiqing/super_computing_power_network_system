@@ -2,13 +2,10 @@
 
 pragma solidity ^0.8.2;
 
-import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "./SCPNSBase.sol";
 import "./interface/ISCPNSComputilityUnit.sol";
 import "./interface/ISCPNSComputilityVM.sol";
+import "./PairValues.sol";
 
 
 contract SCPNSComputilityVM is
@@ -16,9 +13,18 @@ contract SCPNSComputilityVM is
    ISCPNSComputilityVM 
    {
      using CountersUpgradeable for CountersUpgradeable.Counter;
+     using PairValues for PairValues.PairUint256;
+     
 
      address public computilityUnitAddr;
      ISCPNSComputilityUnit internal _computilityUnitIf;
+
+     // Mapping from id to user 
+     mapping (uint256 => address) private _users;
+     // Mapping from id to deadline
+     mapping (uint256 => uint256) private _deadlines;
+     // Mapping from id to computility units list
+     mapping (uint256 => PairValues.PairUint256) private _tokenComputilityUnits;
 
     function initialize(address computilityUnitAddr_) public virtual initializer {
         __SCPNSBase_init("SCPNSComputilityVM", "SCPNSComputilityVM", "");
@@ -40,10 +46,30 @@ contract SCPNSComputilityVM is
         _computilityUnitIf = ISCPNSComputilityUnit(contract_);
     }
 
+    function mint(address to, uint256 tokenId, uint256 deadline,
+                  uint256[] memory computilityUnits, uint256[] memory typeUnitCounts, string memory datas) public virtual override {
+        require(computilityUnits.length == typeUnitCounts.length, "SCPNSComputilityVM: computilityUnits and typeUnitCounts length is differ");
+        require(deadline > block.timestamp, "SCPNSComputilityVM: deadline is too small.");
 
+        _mint(to, tokenId, bytes32(tokenId), datas);
 
+        uint256 len = computilityUnits.length;
+        for (uint256 i = 0; i < len; i++) {
+            _tokenComputilityUnits[tokenId].sets(computilityUnits, typeUnitCounts);
 
+            _computilityUnitIf.lockResources(computilityUnits[i], typeUnitCounts[i]);
+        }
 
+        _deadlines[tokenId] = deadline;
+    }
+
+    function changeUser(address to, uint256 tokenId) public virtual override {
+        require(_msgSender() == super.ownerOf(tokenId), "SCPNSComputilityVM: only owner of token can change user");
+        require(to != address(0), "SCPNSComputilityVM: new user address is address(0)");
+        require(!_exists(tokenId), "SCPNS: token is nonexists.");
+
+        _users[tokenId] = to;
+    }
 
      uint256[48] private __gap;
    }

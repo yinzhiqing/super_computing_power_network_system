@@ -51,7 +51,7 @@ contract SCPNSComputilityUnit is
     // Mapping from id to typeUnit Count(typeUnitId to count) id => (typeUnitId => 10)
     mapping (uint256 => uint256) internal _id2TypeUnitCount;
     // Mapping from id to locked count
-    mapping (uint256 => uint256) internal _id2LockedCount;
+    mapping (uint256 => uint256) internal _id2TypeUnitCountLocked;
     // Mapping from typeUnit id to count(all)
     mapping (uint256 => uint256) internal _typeUnit2Count;
     // Mapping from owner to typeUnitId count
@@ -94,17 +94,39 @@ contract SCPNSComputilityUnit is
 
         bytes32 _name = bytes32(tokenId);
         _mint(to, tokenId, _name, datas);
+        _addTokenToAll(to, tokenId, typeUnitId, typeUnitCount_);
 
-        _id2TypeUnitCount[tokenId] = typeUnitCount_;
-        _ownedTypeUnitCount[to][typeUnitId] += typeUnitCount_;
-        _ownedTypeUnitCountLocked[to][typeUnitId] = 0;
-        
+    }
 
-        _id2LockedCount[tokenId] = 0;
-        _id2TypeUnitId[tokenId] = typeUnitId;
-        // all count of typeUnitId
-        _typeUnit2Count[typeUnitId] += typeUnitCount_;
+    function lockResources(uint256 tokenId, uint256 typeUnitCount) public virtual override {
+        require(_exists(tokenId), "SCPNSComputilityUnit: token is nonexists");
 
+        uint256 typeUnitId = _id2TypeUnitId[tokenId];
+        address owner = super.ownerOf(tokenId);
+        uint256 lockedCount = _id2TypeUnitCountLocked[tokenId];
+        uint256 allCount = _id2TypeUnitCount[tokenId];
+
+        require(_msgSender() == owner || hasRole(MANAGE_ROLE, _msgSender()), 
+                "SCPNSComputilityUnit: must have manager role to locking or owner of token");
+        require(typeUnitCount + lockedCount <= allCount, "SCPNSComputilityUnit: resources cannot meet demand");
+
+       _ownedTypeUnitCountLocked[owner][typeUnitId] += typeUnitCount;
+       _id2TypeUnitCountLocked[tokenId] += typeUnitCount;
+    }
+
+    function unlockResources(uint256 tokenId, uint256 typeUnitCount) public virtual override {
+        require(_exists(tokenId), "SCPNSComputilityUnit: token is nonexists");
+
+        uint256 typeUnitId = _id2TypeUnitId[tokenId];
+        address owner = super.ownerOf(tokenId);
+        uint256 lockedCount = _id2TypeUnitCountLocked[tokenId];
+
+        require(_msgSender() == owner || hasRole(MANAGE_ROLE, _msgSender()), 
+                "SCPNSComputilityUnit: must have manager role to locking or owner of token");
+        require(typeUnitCount <= lockedCount, "SCPNSComputilityUnit: resources cannot meet demand");
+
+       _ownedTypeUnitCountLocked[owner][typeUnitId] -= typeUnitCount;
+       _id2TypeUnitCountLocked[tokenId] -= typeUnitCount;
     }
 
     function updateTypeUnit(address contract_) public virtual override {
@@ -122,13 +144,14 @@ contract SCPNSComputilityUnit is
         computilityVMAddr = contract_;
     }
 
+    function countOfTypeUnit(uint256 typeUnitId) public view override returns(uint256) {
+        return _typeUnit2Count[typeUnitId];
+    }
+
     function typeUnitIdOf(uint256 tokenId) public view virtual override returns(uint256) {
         return _id2TypeUnitId[tokenId];
     }
 
-    function countOfTypeUnit(uint256 tokenId) public view virtual override returns(uint256) {
-        return _typeUnit2Count[tokenId];
-    }
 
     function typeUnitCountOf(uint256 tokenId) public view virtual override returns(uint256) {
         uint256 typeUnitCount = _id2TypeUnitCount[tokenId];
@@ -139,32 +162,69 @@ contract SCPNSComputilityUnit is
         super._beforeTokenTransfer(from, to, tokenId);
 
         if (from == address(0)) {
+            // parameters can't input sou move mint interface or use it space
         } else if (from != to) {
             _removeTokenFromOwner(from, tokenId);
         }
         if (to == address(0)) {
+            _removeTokenFromAll(tokenId);
         } else if (to != from) {
+            _addTokenToOwner(to, tokenId);
         }
     }
-    function _removeTokenFromOwner(address from, uint256 tokenId) private {
 
-        uint256 typeUnitCount = _id2LockedCount[tokenId];
+    function _addTokenToAll(address to, uint256 tokenId, uint256 typeUnitId, uint256 typeUnitCount_) private {
+        _id2TypeUnitCount[tokenId] = typeUnitCount_;
+        _ownedTypeUnitCount[to][typeUnitId] += typeUnitCount_;
+        _ownedTypeUnitCountLocked[to][typeUnitId] = 0;
+        
+
+        _id2TypeUnitCountLocked[tokenId] = 0;
+        _id2TypeUnitId[tokenId] = typeUnitId;
+        // all count of typeUnitId
+        _typeUnit2Count[typeUnitId] += typeUnitCount_;
+
+    }
+
+    function _addTokenToOwner(address to, uint256 tokenId) private {
+        // @dev change owner computility count 
         uint256 typeUnitId = _id2TypeUnitId[tokenId];
+
+        uint256 typeUnitCount = _id2TypeUnitCount[tokenId];
+        _ownedTypeUnitCount[to][typeUnitId] += typeUnitCount;
+
+        uint256 typeUnitCountLocked = _id2TypeUnitCountLocked[tokenId];
+        _ownedTypeUnitCountLocked[to][typeUnitId] += typeUnitCountLocked;
+    }
+
+    function _removeTokenFromOwner(address from, uint256 tokenId) private {
+        // @dev change owner computility count 
+        uint256 typeUnitId = _id2TypeUnitId[tokenId];
+
+        uint256 typeUnitCount = _id2TypeUnitCount[tokenId];
         _ownedTypeUnitCount[from][typeUnitId] -= typeUnitCount;
 
+        uint256 typeUnitCountLocked = _id2TypeUnitCountLocked[tokenId];
+        _ownedTypeUnitCountLocked[from][typeUnitId] -= typeUnitCountLocked;
+    }
+
+    function _removeTokenFromAll(uint256 tokenId) private {
+        // Update all count of typeUnit
+        address owner = super.ownerOf(tokenId);
+        uint256 typeUnitId = _id2TypeUnitId[tokenId];
+        uint256 typeUnitCount = _id2TypeUnitCount[tokenId];
+        _typeUnit2Count[typeUnitId] -= typeUnitCount;
+        _ownedTypeUnitCount[owner][typeUnitId] -= typeUnitCount;
+    
+        delete _id2TypeUnitId[tokenId];
         delete _id2TypeUnitCount[tokenId];
-        delete _id2LockedCount[tokenId];
+        delete _id2TypeUnitCountLocked[tokenId];
     }
 
     function _burn(uint256 tokenId) internal virtual override(SCPNSBase) {
+        // must at before of super_burn(burn will remove onwer of token)
+        _removeTokenFromAll(tokenId);
         super._burn(tokenId);
-
-        // Update all count of typeUnit
-        uint256 typeUnitCount = _id2TypeUnitCount[tokenId];
-        _typeUnit2Count[_id2TypeUnitId[tokenId]] -= typeUnitCount;
-    
-        delete _id2TypeUnitId[tokenId];
-        delete _id2LockedCount[tokenId];
     }
 
     uint256[48] private __gap;
