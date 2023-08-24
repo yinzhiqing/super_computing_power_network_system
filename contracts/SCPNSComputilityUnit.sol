@@ -152,7 +152,6 @@ contract SCPNSComputilityUnit is
         return _id2TypeUnitId[tokenId];
     }
 
-
     function typeUnitCountOf(uint256 tokenId) public view virtual override returns(uint256) {
         uint256 typeUnitCount = _id2TypeUnitCount[tokenId];
         return typeUnitCount;

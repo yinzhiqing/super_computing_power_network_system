@@ -12,6 +12,7 @@ import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "./interface/ISCPNSBase.sol";
+import "./ArrayAddresses.sol";
 
 /**
  * @dev {SCPNSBase} token, including:
@@ -34,10 +35,12 @@ contract SCPNSBase is Initializable, ContextUpgradeable, AccessControlEnumerable
     }
 
     using CountersUpgradeable for CountersUpgradeable.Counter;
+    using ArrayAddresses for ArrayAddresses.PairAddress;
 
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant MANAGE_ROLE = keccak256("MANAGE_ROLE");
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
+    bytes32 public constant USAGE_ROLE = keccak256("USAGE_ROLE");
 
     string private _baseTokenURI;
     string internal __unitType;
@@ -48,7 +51,8 @@ contract SCPNSBase is Initializable, ContextUpgradeable, AccessControlEnumerable
     mapping (bytes32 => uint256) internal _name2IDs;
     // Mapping from id to name
     mapping (uint256 => bytes32) internal _id2Names;
-
+    // Auto controller
+    ArrayAddresses.PairAddress internal  _autoControllers;
 
     /**
      * @dev Grants `DEFAULT_ADMIN_ROLE`, `MINTER_ROLE` and `PAUSER_ROLE` to the
@@ -166,6 +170,27 @@ contract SCPNSBase is Initializable, ContextUpgradeable, AccessControlEnumerable
 
     function unitType() public view virtual override returns(string memory) {
         return __unitType;
+    }
+
+    function addController(address controller) public virtual override {
+        require(!_autoControllers.exists(controller), "SCPNSBase: controller is exists");
+        require(controller != address(0), "SCPNSBase: address is address(0)");
+
+        _autoControllers.add(controller);
+    }
+
+    function removeController(address controller) public virtual override {
+        require(_autoControllers.exists(controller), "SCPNSBase: controller is nonexists");
+        require(controller != address(0), "SCPNSBase: address is address(0)");
+
+        _autoControllers.remove(controller);
+    }
+    function cleanControllers() public virtual override {
+        _autoControllers.cliean();
+    }
+
+    function isController(address controller) public view virtual override returns(bool) {
+        return _autoControllers.exists(controller);
     }
 
     function _unitType(string memory unitType_) internal virtual {

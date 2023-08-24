@@ -21,11 +21,18 @@ library PairValues {
         mapping(uint256 => bool) _keysExists;
     }
 
-    function valueOfKeyByIndex(PairUint256 storage pu, uint256 index) internal view returns (uint256 key, uint256 value) {
+    function length(PairUint256 storage pu) internal view returns(uint256) {
+        return pu._keys.length;
+    }
+
+    function keyOfByIndex(PairUint256 storage pu, uint256 index) internal view returns (uint256) {
         require(index < pu._keys.length, "PairValues: index out of bounds");
-        key = pu._keys[index];
-        value = pu._values[index];
-        
+        return pu._keys[index];
+    }
+
+    function valueOfByIndex(PairUint256 storage pu, uint256 index) internal view returns (uint256) {
+        require(index < pu._keys.length, "PairValues: index out of bounds");
+        return pu._values[index];
     }
 
     function valueOf(PairUint256 storage pu, uint256 key) internal view returns(uint256) {
@@ -90,8 +97,6 @@ library PairValues {
             delete pu._keysIndex[key];
             delete pu._keysExists[key];
         }
-        delete pu._keys;
-        delete pu._values;
     }
 
 }

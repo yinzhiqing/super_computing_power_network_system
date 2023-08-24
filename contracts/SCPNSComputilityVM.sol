@@ -25,6 +25,8 @@ contract SCPNSComputilityVM is
      mapping (uint256 => uint256) private _deadlines;
      // Mapping from id to computility units list
      mapping (uint256 => PairValues.PairUint256) private _tokenComputilityUnits;
+     //
+     mapping (uint256 => uint256) private _lockLines;
 
     function initialize(address computilityUnitAddr_) public virtual initializer {
         __SCPNSBase_init("SCPNSComputilityVM", "SCPNSComputilityVM", "");
@@ -47,15 +49,18 @@ contract SCPNSComputilityVM is
     }
 
     function mint(address to, uint256 tokenId, uint256 deadline,
-                  uint256[] memory computilityUnits, uint256[] memory typeUnitCounts, string memory datas) public virtual override {
-        require(computilityUnits.length == typeUnitCounts.length, "SCPNSComputilityVM: computilityUnits and typeUnitCounts length is differ");
+                  uint256[] memory computilityUnits, uint256[] memory typeUnitCounts, 
+                  string memory datas) public virtual override {
+
+        require(computilityUnits.length == typeUnitCounts.length, 
+                "SCPNSComputilityVM: computilityUnits and typeUnitCounts length is differ");
         require(deadline > block.timestamp, "SCPNSComputilityVM: deadline is too small.");
 
         _mint(to, tokenId, bytes32(tokenId), datas);
 
         uint256 len = computilityUnits.length;
         for (uint256 i = 0; i < len; i++) {
-            _tokenComputilityUnits[tokenId].sets(computilityUnits, typeUnitCounts);
+            _tokenComputilityUnits[tokenId].set(computilityUnits[i], typeUnitCounts[i]);
 
             _computilityUnitIf.lockResources(computilityUnits[i], typeUnitCounts[i]);
         }
@@ -64,12 +69,44 @@ contract SCPNSComputilityVM is
     }
 
     function changeUser(address to, uint256 tokenId) public virtual override {
-        require(_msgSender() == super.ownerOf(tokenId), "SCPNSComputilityVM: only owner of token can change user");
+        require(_msgSender() == super.ownerOf(tokenId) || super.isController(_msgSender()), 
+                "SCPNSComputilityVM: only owner of token can change user");
         require(to != address(0), "SCPNSComputilityVM: new user address is address(0)");
         require(!_exists(tokenId), "SCPNS: token is nonexists.");
 
         _users[tokenId] = to;
     }
+
+    function lockResources(uint256 tokenId, uint256 lockline) public virtual override {
+        require(_msgSender() == super.ownerOf(tokenId) || super.isController(_msgSender()), 
+                "SCPNSComputilityVM: only owner of token can change user");
+        require(!_exists(tokenId), "SCPNS: token is nonexists.");
+        require(lockline <= _deadlines[tokenId], "SCPNSComputilityVM: locked time > deadline");
+
+        _lockLines[tokenId] = lockline;
+    }
+
+    function typeUnitIdOf(uint256 tokenId) public view virtual override returns(uint256) {
+        uint256 len = _tokenComputilityUnits[tokenId].length();
+        require(len > 0, "SCPNSComputilityVM: no computility unit ");
+
+        uint256 computilityUnitId = _tokenComputilityUnits[tokenId].keyOfByIndex(len - 1);
+        return _computilityUnitIf.typeUnitIdOf(computilityUnitId);
+    }
+
+    function typeUnitCountOf(uint256 tokenId) public view virtual override returns(uint256) {
+        uint256 len = _tokenComputilityUnits[tokenId].length();
+        require(len > 0, "SCPNSComputilityVM: no computility unit ");
+
+        uint256 total = 0;
+        for(uint256 i = 0; i < len; i++) {
+            uint256 computilityUnitCount = _tokenComputilityUnits[tokenId].valueOfByIndex(i);
+            total += computilityUnitCount;
+        }
+        return total;
+
+    }
+
 
      uint256[48] private __gap;
    }
