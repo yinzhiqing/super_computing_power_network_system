@@ -11,5 +11,8 @@ interface ISCPNSUseRightToken is
     function mint(address to, uint256 tokenId, uint256 deadline,
                   uint256[] memory computilityVMs, string memory datas) external;
     function typeUnitIdOf(uint256 tokenId) external view returns(uint256);
+    function typeUnitCountOf(uint256 tokenId) external view returns(uint256);
     function ownerOf(uint256 tokenId) external view returns(address);
+    function deadLine(uint256 tokenId) external view returns(uint256);
+    function isValid(uint256 tokenId) external view returns(bool);
 }

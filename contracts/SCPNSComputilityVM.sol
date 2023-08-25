@@ -100,13 +100,15 @@ contract SCPNSComputilityVM is
 
         uint256 total = 0;
         for(uint256 i = 0; i < len; i++) {
-            uint256 computilityUnitCount = _tokenComputilityUnits[tokenId].valueOfByIndex(i);
-            total += computilityUnitCount;
+            total += _tokenComputilityUnits[tokenId].valueOfByIndex(i);
         }
         return total;
 
     }
 
+    function deadLine(uint256 tokenId) public view virtual override returns(uint256) {
+        return _deadlines[tokenId];
+    }
 
      uint256[48] private __gap;
    }

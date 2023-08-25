@@ -87,7 +87,7 @@ contract SCPNSComputilityUnit is
      *
      * - the caller must have the `MINTER_ROLE`.
      */
-    function mint(address to, uint256 tokenId, uint256 typeUnitId, uint256 typeUnitCount_, string memory datas) public virtual override {
+    function mint(address to, uint256 tokenId, uint256 typeUnitId, uint256 typeUnitCount_, string memory datas) public whenNotPaused virtual override {
 
         require(_typeUnitIf.exists(typeUnitId), "SCPNSComputilityUnit: typeUnitId is not exists.");
         require(typeUnitCount_ > 0, "SCPNSComputilityUnit: The typeUnit quantity value must be greater than 0");

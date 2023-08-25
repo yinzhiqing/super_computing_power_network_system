@@ -65,7 +65,6 @@ contract SCPNSUseRightToken is
         _deadlines[tokenId] = deadline;
     }
 
-
     function typeUnitIdOf(uint256 tokenId) public view virtual override returns(uint256) {
         uint256 len = _tokenComputilityVMs[tokenId].length();
         require(len > 0, "SCPNSComputilityVM: no computility unit ");
@@ -74,8 +73,28 @@ contract SCPNSUseRightToken is
         return _computilityVMIf.typeUnitIdOf(computilityVMId);
     }
 
+    function typeUnitCountOf(uint256 tokenId) public view virtual override returns(uint256) {
+        uint256 len = _tokenComputilityVMs[tokenId].length();
+        require(len > 0, "SCPNSUseRightToken: no computility ");
+
+        uint256 total = 0;
+        for(uint256 i = 0; i < len; i++) {
+            total += _tokenComputilityVMs[tokenId].valueOfByIndex(i);
+        }
+
+        return total;
+    }
+
     function ownerOf(uint256 tokenId) public view override(ERC721Upgradeable, ISCPNSUseRightToken) returns(address) {
         return ERC721Upgradeable.ownerOf(tokenId);
+    }
+
+    function deadLine(uint256 tokenId) public view virtual override returns(uint256) {
+        return _deadlines[tokenId];
+    }
+
+    function isValid(uint256 tokenId) public view virtual override returns(bool) {
+        return _deadlines[tokenId] > block.timestamp;
     }
      uint256[48] private __gap;
    }
