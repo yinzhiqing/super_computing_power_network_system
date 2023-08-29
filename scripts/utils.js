@@ -85,7 +85,6 @@ function arg_is_parse(arg) {
 
 function args_is_parse(args) {
     if (args.length > 0 && Array.isArray(args)) {
-
         for (i in args) {
             arg = args[i];
             if(arg.startsWith(ARG_FLG_TXT)) {

@@ -1,10 +1,11 @@
 # !/bin/bash
     contracts_path='./contracts'
+    skip_path='interface'
     output_path="./jsons/contracts"
     output_file="$output_path/contract_templete.json"
     split_section=""
 
-	contract_list=$(sudo find $contracts_path -name "*.sol" -exec basename {} \;)
+	contract_list=$(sudo find $contracts_path -maxdepth 1 -type f -name "*.sol" -exec basename {} \;)
     arry=(${contract_list//.sol/})
     echo "{" > $output_file
     for name in ${arry[@]}

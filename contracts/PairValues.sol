@@ -21,6 +21,13 @@ library PairValues {
         mapping(uint256 => bool) _keysExists;
     }
 
+    function keysOf(PairUint256 storage pu) internal view returns(uint256[] memory) {
+        return pu._keys;
+    }
+
+    function valuesOf(PairUint256 storage pu) internal view returns(uint256[] memory) {
+        return pu._values;
+    }
     function length(PairUint256 storage pu) internal view returns(uint256) {
         return pu._keys.length;
     }
@@ -53,7 +60,7 @@ library PairValues {
         }
     }
     function set(PairUint256 storage pu, uint256 key, uint256 value) internal {
-        if (pu._keysExists[key]) {
+        if (PairValues.exists(pu, key)) {
             uint256 curtIndex = pu._keysIndex[key];
             unchecked {
                 pu._values[curtIndex] = value;
@@ -68,8 +75,33 @@ library PairValues {
         }
     }
 
+    function increment(PairUint256 storage pu, uint256 key, uint256 value) internal {
+        if (PairValues.exists(pu, key)) {
+            uint256 curtIndex = pu._keysIndex[key];
+            unchecked {
+                pu._values[curtIndex] += value;
+            }
+        } else {
+            set(pu, key, value);
+        }
+    }
+
+    function decrement(PairUint256 storage pu, uint256 key, uint256 value) internal {
+        require(PairValues.exists(pu, key), "PairValues: key is nonexists");
+        require(PairValues.valueOf(pu, key) >= value, "PairValues: value out of range");
+        uint256 curtIndex = pu._keysIndex[key];
+        unchecked {
+            pu._values[curtIndex] -= value;
+        }
+    }
+
+    function removeMatched(PairUint256 storage pu, uint256 key, uint256 value) internal {
+        if (PairValues.exists(pu, key) && PairValues.valueOf(pu, key) == value) {
+            PairValues.remove(pu, key);
+        }
+    }
     function remove(PairUint256 storage pu, uint256 key) internal {
-        if (pu._keysExists[key]) {
+        if (PairValues.exists(pu, key)) {
             uint256 curtindex = pu._keysIndex[key];
             uint256 lastIndex = pu._keys.length - 1;
             uint256 lastIndexKey = pu._keys[lastIndex];

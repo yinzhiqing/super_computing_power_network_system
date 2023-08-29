@@ -1,48 +1,97 @@
 {
+	"SCPNSComputilityUnit": {
+		"name": "SCPNSComputilityUnit",
+		"address": "",
+		"deploy": true,
+		"upgrade": false,
+		"fixed": false,
+		"params": [
+			"!REFSCPNSTypeUnit.address"
+		]
+	},
+	"SCPNSComputilityVM": {
+		"name": "SCPNSComputilityVM",
+		"address": "",
+		"deploy": true,
+		"upgrade": false,
+		"fixed": false,
+		"params": [
+			"!REFSCPNSComputilityUnit.address"
+		]
+	},
 	"SCPNSDns": {
 		"name": "SCPNSDns",
 		"address": "",
-		"deploy": false,
+		"deploy": true,
 		"upgrade": false,
 		"fixed": false,
-		"params": []
+		"params": [
+			"SCPNSDns",
+			"SCPNSDns"
+		]
 	},
-	"SCPNSUnitBase": {
-		"name": "SCPNSUnitBase",
+	"SCPNSProofTask": {
+		"name": "SCPNSProofTask",
 		"address": "",
-		"deploy": false,
+		"deploy": true,
 		"upgrade": false,
 		"fixed": false,
-		"params": []
+		"params": [
+			"!REFSCPNSUseRightToken.address",
+			"!REFSCPNSProofParameter.address"
+		]
+	},
+	"SCPNSUseRightToken": {
+		"name": "SCPNSUseRightToken",
+		"address": "",
+		"deploy": true,
+		"upgrade": false,
+		"fixed": false,
+		"params": [
+			"!REFSCPNSComputilityVM.address"
+		]
 	},
 	"SCPNSNotes": {
 		"name": "SCPNSNotes",
 		"address": "",
-		"deploy": false,
+		"deploy": true,
 		"upgrade": false,
 		"fixed": false,
-		"params": []
+		"params": [
+			"SCPNSNotes",
+			"SCPNSNotes"
+		]
 	},
-	"SCPNSUnitGpu": {
-		"name": "SCPNSUnitGpu",
-		"address": "0x59b670e9fA9D0A427751Af201D676719a970857b",
-		"deploy": false,
-		"upgrade": false,
-		"fixed": false,
-		"params": []
-	},
-	"ISCPNSUint": {
-		"name": "ISCPNSUint",
+	"SCPNSGpuList": {
+		"name": "SCPNSGpuList",
 		"address": "",
-		"deploy": false,
+		"deploy": true,
 		"upgrade": false,
 		"fixed": false,
 		"params": []
+	},
+	"SCPNSComputilityRanking": {
+		"name": "SCPNSComputilityRanking",
+		"address": "",
+		"deploy": true,
+		"upgrade": false,
+		"fixed": false,
+		"params": []
+	},
+	"SCPNSProofParameter": {
+		"name": "SCPNSProofParameter",
+		"address": "",
+		"deploy": true,
+		"upgrade": false,
+		"fixed": false,
+		"params": [
+			"!REFSCPNSTypeUnit"
+		]
 	},
 	"SCPNSTypeUnit": {
 		"name": "SCPNSTypeUnit",
-		"address": "0xa85233C63b9Ee964Add6F2cffe00Fd84eb32338f",
-		"deploy": false,
+		"address": "",
+		"deploy": true,
 		"upgrade": false,
 		"fixed": false,
 		"params": []

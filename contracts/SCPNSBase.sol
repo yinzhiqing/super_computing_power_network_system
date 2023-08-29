@@ -41,6 +41,7 @@ contract SCPNSBase is Initializable, ContextUpgradeable, AccessControlEnumerable
     bytes32 public constant MANAGE_ROLE = keccak256("MANAGE_ROLE");
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
     bytes32 public constant USAGE_ROLE = keccak256("USAGE_ROLE");
+    bytes32 public constant CONTROLLER_ROLE = keccak256("CONTROLLER_ROLE");
 
     string private _baseTokenURI;
     string internal __unitType;
@@ -172,25 +173,8 @@ contract SCPNSBase is Initializable, ContextUpgradeable, AccessControlEnumerable
         return __unitType;
     }
 
-    function addController(address controller) public virtual override {
-        require(!_autoControllers.exists(controller), "SCPNSBase: controller is exists");
-        require(controller != address(0), "SCPNSBase: address is address(0)");
-
-        _autoControllers.add(controller);
-    }
-
-    function removeController(address controller) public virtual override {
-        require(_autoControllers.exists(controller), "SCPNSBase: controller is nonexists");
-        require(controller != address(0), "SCPNSBase: address is address(0)");
-
-        _autoControllers.remove(controller);
-    }
-    function cleanControllers() public virtual override {
-        _autoControllers.cliean();
-    }
-
     function isController(address controller) public view virtual override returns(bool) {
-        return _autoControllers.exists(controller);
+        return hasRole(CONTROLLER_ROLE, controller);
     }
 
     function _unitType(string memory unitType_) internal virtual {

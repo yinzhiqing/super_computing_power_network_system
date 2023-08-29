@@ -165,6 +165,10 @@ async function run() {
     }
 }
 
+async function sort_tokens(items) {
+    let sorted = [];
+}
+
 run()
   .then(() => process.exit(0))
   .catch(error => {
