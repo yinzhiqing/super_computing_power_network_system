@@ -20,14 +20,8 @@ library ArrayAddresses {
         mapping(address => bool) _valuesExists;
     }
 
-    function valueOfValueByIndex(PairAddress storage pu, uint256 index) internal view returns (address) {
-        require(index < pu._values.length, "ArrayAddresses: index out of bounds");
-        return  pu._values[index];
-    }
-
-    function valueOf(PairAddress storage pu, address value) internal view returns(address) {
-        require(pu._valuesExists[value], "ArrayAddresses: value is out of bounds");
-        uint256 index = pu._valuesIndex[value];
+    function valueOf(PairAddress storage pu, uint256 index) internal view returns(address) {
+        require(pu._values.length > index, "ArrayAddresses: index is out of bounds");
         return pu._values[index];
     }
 
@@ -78,6 +72,7 @@ library ArrayAddresses {
             address value = pu._values[count];
             delete pu._valuesIndex[value];
             delete pu._valuesExists[value];
+            pu._values.pop();
         }
     }
 

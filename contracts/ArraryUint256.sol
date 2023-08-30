@@ -20,14 +20,12 @@ library ArrayUnit256 {
         mapping(uint256 => bool) _valuesExists;
     }
 
-    function valueOfByIndex(Uint256s storage pu, uint256 index) internal view returns (uint256) {
-        require(index < pu._values.length, "ArrayUint256: index out of bounds");
-        return  pu._values[index];
+    function length(Uint256s storage pu) internal view returns(uint256) {
+        return pu._values.length;
     }
 
-    function valueOf(Uint256s storage pu, uint256 value) internal view returns(uint256) {
-        require(pu._valuesExists[value], "ArrayUint256: value is out of bounds");
-        uint256 index = pu._valuesIndex[value];
+    function valueOf(Uint256s storage pu, uint256 index) internal view returns(uint256) {
+        require(pu._values.length > index, "ArrayUint256: index is out of bounds");
         return pu._values[index];
     }
 
@@ -75,9 +73,12 @@ library ArrayUnit256 {
         uint256 count = pu._values.length;
         while (count > 0) {
             count--;
+
             uint256 value = pu._values[count];
             delete pu._valuesIndex[value];
             delete pu._valuesExists[value];
+
+            pu._values.pop();
         }
     }
 

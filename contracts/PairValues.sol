@@ -128,6 +128,9 @@ library PairValues {
             uint256 key = pu._keys[count];
             delete pu._keysIndex[key];
             delete pu._keysExists[key];
+
+            pu._keys.pop();
+            pu._values.pop();
         }
     }
 
