@@ -6,11 +6,13 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
+import "./interface/ISCPNSDns.sol";
 
 contract SCPNSDns is 
     Initializable, 
     AccessControlEnumerableUpgradeable, 
-    PausableUpgradeable
+    PausableUpgradeable,
+    ISCPNSDns
 {
     //variable members
     string private _name;
@@ -26,8 +28,6 @@ contract SCPNSDns is
     mapping (uint256 => string)     private _names;
     uint256 private _count;
 
-    event Set(string indexed name, address addr, address manager);
-    event Del(string indexed name, address addr, address manager);
 
     function initialize(string memory name_, string memory symbol_) 
     initializer 
@@ -57,12 +57,12 @@ contract SCPNSDns is
         //other init
     }
 
-    function name() public view virtual returns(string memory) 
+    function name() public view virtual override returns(string memory) 
     {
         return _name;
     }
 
-    function symbol() public view virtual returns(string memory) 
+    function symbol() public view virtual override returns(string memory) 
     {
         return _symbol;
     }
@@ -75,7 +75,7 @@ contract SCPNSDns is
      *
      * - the caller must have the `PAUSER_ROLE`.
      */
-    function pause() public virtual {
+    function pause() public virtual override {
         require(hasRole(PAUSER_ROLE, _msgSender()), "SCPNSDns: must have pauser role to pause");
         _pause();
     }
@@ -89,12 +89,12 @@ contract SCPNSDns is
      *
      * - the caller must have the `PAUSER_ROLE`.
      */
-    function unpause() public virtual {
+    function unpause() public virtual override {
         require(hasRole(PAUSER_ROLE, _msgSender()), "SCPNSDns: must have pauser role to unpause");
         _unpause();
     }
 
-    function set(string memory name_, address addr_) public whenNotPaused virtual {
+    function set(string memory name_, address addr_) public whenNotPaused virtual override {
         require(hasRole(MANAGER_ROLE, _msgSender()), "SCPNSDns: must have pauser role to set");
         if (_exists[name_]) {
             _addresses[_hosts[name_]] = addr_;
@@ -108,22 +108,22 @@ contract SCPNSDns is
         emit Set(name_, addr_, _msgSender());
     }
 
-    function addressOf(string memory name_) public view virtual returns(address) {
+    function addressOf(string memory name_) public view virtual override  returns(address) {
         if (_exists[name_]) {
             return _addresses[_hosts[name_]];
         }
         return address(0);
     }
 
-    function exists(string memory name_) public view virtual returns(bool) {
+    function exists(string memory name_) public view virtual override  returns(bool) {
         return _exists[name_];
     }
 
-    function count() public view virtual returns(uint256) {
+    function count() public view virtual override  returns(uint256) {
         return _count;
     }
 
-    function hostOf(uint256 index) public view virtual returns(string memory, address) {
+    function hostOf(uint256 index) public view virtual override  returns(string memory, address) {
         if (index < _count) {
             return (_names[index], _addresses[index]);
         }

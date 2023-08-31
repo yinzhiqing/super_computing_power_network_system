@@ -29,8 +29,6 @@ interface ISCPNSProofTask is
     function mint(address to, uint256 useRightId, bytes32 q, string memory datas) external ;
     function taskEnd(uint256 tokenId, string memory result, bytes32 a) external;
     function taskCancel(uint256 tokenId) external;
-    function updateUseRightToken(address contract_) external;
-    function updateProofParameter(address contract_) external;
     function updateKeepTaskCount(uint256 keepCount) external;
 
     function eventCountOf() external view returns(uint256);

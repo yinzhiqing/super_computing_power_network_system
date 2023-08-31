@@ -7,17 +7,16 @@ import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
-import "./interface/ISCPNSProofTask.sol";
-import "./interface/ISCPNSUseRightToken.sol";
-import "./interface/ISCPNSProofParameter.sol";
 import "./interface/ISCPNSComputilityRanking.sol";
 import "./PairValues.sol";
 import "./ArraryUint256.sol";
+import "./ContractProject.sol";
 
 contract SCPNSComputilityRanking is 
    Initializable,
    AccessControlEnumerableUpgradeable,
    PausableUpgradeable,
+   ContractProject,
    ISCPNSComputilityRanking
 {
 
@@ -34,7 +33,6 @@ contract SCPNSComputilityRanking is
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
     bytes32 public constant CONTROLLER_ROLE = keccak256("CONTROLLER_ROLE");
 
-    address public proofTaskAddr;
     CountersUpgradeable.Counter _eventIndex;
 
     // tokenId is useRightId
@@ -55,10 +53,11 @@ contract SCPNSComputilityRanking is
 
     uint256 private _preBlockNumber;
 
-    function initialize(string memory name_, string memory symbol_) 
+    function initialize(string memory name_, string memory symbol_, address dns) 
     initializer 
     public 
     {
+        __ContractProject_init(dns);
         __SCPNSComputilityRanking_init(name_, symbol_);
 
     }
@@ -176,13 +175,19 @@ contract SCPNSComputilityRanking is
         }
     }
 
-    function exctimeOf(uint256 parameterId, uint256 tokenId) public view virtual override returns(uint256) {
-        return _id2ExcTime[parameterId].valueOf(tokenId);
+    function postionOf(uint256 parameterId, uint256 tokenId, uint256 scale) public view virtual override returns(uint256) {
+        require(_scales[parameterId].exists(scale), "SCPNSComputilityRanking: the scale is invalied");
+        return _id2ExcTime[parameterId].valueOf(tokenId) / scale;
     }
 
     function parameterIdsOf(uint256 tokenId) public view virtual override returns(uint256[] memory) {
         return _id2PidTid[tokenId].keysOf();
     }
+
+    function scalesOf(uint256 parameterId) public view virtual override returns(uint256[] memory) {
+        return _scales[parameterId].valuesOf();
+    }
+
     function lastTaskIdOf(uint256 tokenId) public view virtual override returns(uint256) {
         return _id2PidTid[tokenId].valueOf(_id2ParameterIds[tokenId]);
     }
@@ -193,6 +198,10 @@ contract SCPNSComputilityRanking is
     
     function lastBlockNumber() public view virtual override returns(uint256) {
         return _preBlockNumber;
+    }
+
+    function lastEventIndex() public view virtual override returns(uint256) {
+        return _eventIndex.current();
     }
 
     function _updateExcTimeDistTables(uint256 parameterId, uint256 tokenId, uint256 _execTime) private {

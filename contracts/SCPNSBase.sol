@@ -13,6 +13,7 @@ import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "./interface/ISCPNSBase.sol";
 import "./ArrayAddresses.sol";
+import "./ContractProject.sol";
 
 /**
  * @dev {SCPNSBase} token, including:
@@ -206,6 +207,7 @@ contract SCPNSBase is Initializable, ContextUpgradeable, AccessControlEnumerable
     function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal virtual override(ERC721Upgradeable, ERC721EnumerableUpgradeable, ERC721PausableUpgradeable) {
         super._beforeTokenTransfer(from, to, tokenId);
     }
+
 
     function exists(uint256 tokenId) public view virtual override(ISCPNSBase) returns(bool) {
         return _exists(tokenId);

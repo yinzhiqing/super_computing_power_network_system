@@ -8,6 +8,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "./SCPNSBase.sol";
 import "./interface/ISCPNSTypeUnit.sol";
+import "./ContractProject.sol";
 
 /**
  * @dev {SCPNSTypeUnit} token, including:
@@ -26,6 +27,7 @@ import "./interface/ISCPNSTypeUnit.sol";
  */
 contract SCPNSTypeUnit is 
     SCPNSBase,
+    ContractProject,
     ISCPNSTypeUnit
     {
     // Maping from comptility id to unit(gpu/memory) id 
@@ -37,8 +39,9 @@ contract SCPNSTypeUnit is
 
     address[] internal _allUnitTypes;
 
-    function initialize() public virtual initializer {
+    function initialize(address dns) public virtual initializer {
         __SCPNSBase_init("SCPNSTypeUnit", "SCPNSTypeUnit", "");
+        __ContractProject_init(dns);
         __SCPNSTypeUnit_init();
     }
     /**

@@ -24,6 +24,10 @@ library ArrayUnit256 {
         return pu._values.length;
     }
 
+    function valuesOf(Uint256s storage pu) internal view returns(uint256[] memory) {
+        return pu._values;
+    }
+
     function valueOf(Uint256s storage pu, uint256 index) internal view returns(uint256) {
         require(pu._values.length > index, "ArrayUint256: index is out of bounds");
         return pu._values[index];
