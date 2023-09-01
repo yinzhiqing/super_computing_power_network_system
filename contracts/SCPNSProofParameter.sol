@@ -67,7 +67,7 @@ contract SCPNSProofParameter is
      *
      * - the caller must have the `MINTER_ROLE`.
      */
-    function mint(address to, uint256 tokenId, bytes32 name_, uint256 typeUnitId, string memory datas) public virtual override{
+    function mint(address to, uint256 tokenId, bytes32 name_, uint256 typeUnitId, string memory datas) public virtual override whenNotPaused {
         require(_id2TypeUnitId[tokenId] == uint256(0), "SCPNSProofParameter: tokenId is exists.");
         require(_typeUnitIf().exists(typeUnitId), "SCPNSProofParameter: typeUnitId is invalid.");
         require(_typeUnitId2Id[typeUnitId] == uint256(0), "SCPNSProofParameter: typeUnitId was setting.");
@@ -79,7 +79,7 @@ contract SCPNSProofParameter is
 
     }
 
-    function setValueOfParameter(uint256 tokenId, bytes32 pname, uint256 pvalue) public virtual override {
+    function setValueOfParameter(uint256 tokenId, bytes32 pname, uint256 pvalue) public virtual override whenNotPaused {
         require(hasRole(MANAGE_ROLE, _msgSender()), "SCPNSProofParameter: must have manager role to remove");
         __setValueOfParameter(tokenId, pname, pvalue);
     }

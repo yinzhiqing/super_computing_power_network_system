@@ -47,7 +47,7 @@ contract SCPNSComputilityVM is
 
     function mint(address to, uint256 tokenId, uint256 deadline,
                   uint256[] memory computilityUnits, uint256[] memory typeUnitCounts, 
-                  string memory datas) public virtual override {
+                  string memory datas) public virtual override whenNotPaused {
 
         require(computilityUnits.length == typeUnitCounts.length, 
                 "SCPNSComputilityVM: computilityUnits and typeUnitCounts length is differ");
@@ -65,7 +65,7 @@ contract SCPNSComputilityVM is
         _deadlines[tokenId] = deadline;
     }
 
-    function changeUser(address to, uint256 tokenId) public virtual override {
+    function changeUser(address to, uint256 tokenId) public virtual override whenNotPaused {
         require(_msgSender() == super.ownerOf(tokenId) || super.isController(_msgSender()), 
                 "SCPNSComputilityVM: only owner of token can change user");
         require(to != address(0), "SCPNSComputilityVM: new user address is address(0)");
@@ -74,7 +74,7 @@ contract SCPNSComputilityVM is
         _users[tokenId] = to;
     }
 
-    function lockResources(uint256 tokenId, uint256 lockline) public virtual override {
+    function lockResources(uint256 tokenId, uint256 lockline) public virtual override whenNotPaused {
         require(_msgSender() == super.ownerOf(tokenId) || super.isController(_msgSender()), 
                 "SCPNSComputilityVM: only owner of token can change user");
         require(!_exists(tokenId), "SCPNS: token is nonexists.");

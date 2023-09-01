@@ -66,7 +66,7 @@ contract SCPNSTypeUnit is
      *
      * - the caller must have the `MINTER_ROLE`.
      */
-    function mint(address to, uint256 tokenId, bytes32 name_, address unitAddr, uint256 unitId, string memory datas) public virtual override {
+    function mint(address to, uint256 tokenId, bytes32 name_, address unitAddr, uint256 unitId, string memory datas) public virtual override whenNotPaused {
         require(_validUnitTypes[unitAddr], "SCPNSTypeUnit: unitAddr is not existed.");
 
         _mint(to, tokenId, name_, datas);
@@ -74,7 +74,7 @@ contract SCPNSTypeUnit is
         _unitId2UnitAddr[unitId] = unitAddr;
     }
 
-    function addUnitType(address unitAddr) public virtual {
+    function addUnitType(address unitAddr) public virtual whenNotPaused {
         require(hasRole(MANAGE_ROLE, _msgSender()), "SCPNSTypeUnit: must have manager role to add");
         require(unitAddr != address(0), "SCPNSTypeUnit: unitAddr is invalid address.");
         _validUnitTypes[unitAddr] = true;
@@ -82,7 +82,7 @@ contract SCPNSTypeUnit is
         _allUnitTypes.push(unitAddr);
     }
 
-    function removeUnitType(address unitAddr) public virtual {
+    function removeUnitType(address unitAddr) public virtual whenNotPaused {
         require(hasRole(MANAGE_ROLE, _msgSender()), "SCPNSTypeUnit: must have manager role to remove");
         if (_validUnitTypes[unitAddr]) {
             delete _validUnitTypes[unitAddr];

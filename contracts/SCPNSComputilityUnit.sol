@@ -93,7 +93,7 @@ contract SCPNSComputilityUnit is
 
     }
 
-    function lockResources(uint256 tokenId, uint256 typeUnitCount) public virtual override {
+    function lockResources(uint256 tokenId, uint256 typeUnitCount) public virtual override whenNotPaused {
         require(_exists(tokenId), "SCPNSComputilityUnit: token is nonexists");
 
         uint256 typeUnitId = _id2TypeUnitId[tokenId];
@@ -109,7 +109,7 @@ contract SCPNSComputilityUnit is
        _id2TypeUnitCountLocked[tokenId] += typeUnitCount;
     }
 
-    function unlockResources(uint256 tokenId, uint256 typeUnitCount) public virtual override {
+    function unlockResources(uint256 tokenId, uint256 typeUnitCount) public virtual override whenNotPaused {
         require(_exists(tokenId), "SCPNSComputilityUnit: token is nonexists");
 
         uint256 typeUnitId = _id2TypeUnitId[tokenId];

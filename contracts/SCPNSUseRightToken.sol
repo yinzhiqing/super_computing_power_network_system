@@ -44,7 +44,7 @@ contract SCPNSUseRightToken is
     }
 
     function mint(address to, uint256 tokenId, uint256 deadline,
-                  uint256[] memory computilityVMs, string memory datas) public virtual override {
+                  uint256[] memory computilityVMs, string memory datas) public virtual override whenNotPaused {
 
         require(computilityVMs.length > 0, 
                 "SCPNSUseRightToken: computilityVMs length is 0");

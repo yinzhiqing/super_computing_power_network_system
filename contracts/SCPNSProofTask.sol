@@ -62,7 +62,7 @@ ISCPNSProofTask
         keepTaskCountOfUseRightId = type(uint256).max;
     }
 
-    function mint(address to, uint256 useRightId, bytes32 q, string memory datas) public virtual override {
+    function mint(address to, uint256 useRightId, bytes32 q, string memory datas) public virtual override whenNotPaused {
         require(_msgSender() == _useRightTokenIf().ownerOf(useRightId) 
             || hasRole(MANAGE_ROLE, _msgSender()), 
             "SCPNSProofTask: The sender is onwer of useRightId or sender has MANAGE_ROLE role.");
@@ -95,7 +95,7 @@ ISCPNSProofTask
         _eventIndex.increment();
     }
 
-    function taskEnd(uint256 tokenId, string memory result, bytes32 a) public virtual override {
+    function taskEnd(uint256 tokenId, string memory result, bytes32 a) public virtual override whenNotPaused {
         uint256 useRightId = _id2useRightId[tokenId];
         require(_msgSender() == _useRightTokenIf().ownerOf(_id2useRightId[tokenId]) || _msgSender() == super.ownerOf(tokenId), 
                 "SCPNSProofTask: sender has not use-right, and is not owner of tokenId ");
@@ -116,7 +116,7 @@ ISCPNSProofTask
         _eventIndex.increment();
     }
 
-    function taskCancel(uint256 tokenId) public virtual override {
+    function taskCancel(uint256 tokenId) public virtual override whenNotPaused {
         uint256 useRightId = _id2useRightId[tokenId];
         require(hasRole(MINTER_ROLE, _msgSender()), "SCPNSProofTask: must have minter role to add");
         require(_msgSender() == _useRightTokenIf().ownerOf(_id2useRightId[tokenId]), 
@@ -135,7 +135,7 @@ ISCPNSProofTask
         _eventIndex.increment();
     }
 
-     function updateKeepTaskCount(uint256 keepCount) public virtual override {
+     function updateKeepTaskCount(uint256 keepCount) public virtual override whenNotPaused {
         require(hasRole(MANAGE_ROLE, _msgSender()), "SCPNSProofTask: must have manager role to add");
         require(keepCount > 0, "SCPNSProofTask: The minimum value of a is 1.");
         keepTaskCountOfUseRightId = keepCount;
