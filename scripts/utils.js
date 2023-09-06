@@ -129,6 +129,10 @@ function contract_arguments_parse(json, args) {
     return args;
 }
 
+function json_to_w2str(data) {
+    return str_to_w3str(JSON.stringify(data));
+}
+
 function str_to_w3str(data) {
     return web3.eth.abi.encodeParameter("string", data);
 }

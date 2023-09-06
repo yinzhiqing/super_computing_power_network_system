@@ -30,8 +30,8 @@ contract SCPNSGpuList is SCPNSBase, ISCPNSGpuList {
         _unitType("gpu");
     }
 
-    function mint(address to, uint256 tokenId, bytes32 name_, string memory datas) public virtual override {
-        _mint(to, tokenId, name_, datas);
+    function mint(uint256 tokenId, bytes32 name_, string memory datas) public virtual override {
+        _mint(_msgSender(), tokenId, name_, datas);
     }
 
     //must be at end

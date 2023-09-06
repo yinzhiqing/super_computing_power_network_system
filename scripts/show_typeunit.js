@@ -1,3 +1,4 @@
+
 const fs        = require('fs');
 const path      = require("path");
 const program   = require('commander');
@@ -14,7 +15,7 @@ async function get_contract(name, address) {
 }
 
 function is_target_name(token_name) {
-    let target_token_name = "SCPNSGpuList";
+    let target_token_name = "SCPNSTypeUnit";
     return (target_token_name == "" || target_token_name == token_name) && token_name != "";
 }
 
@@ -29,16 +30,20 @@ async function show_tokens(token) {
     logger.debug("totalSupply: " + amounts);
     let list = [];
     for (let i = 0; i < amounts; i++) {
-        let row = {}
+        let row = new Map();
         row["tokenId"] = web3.utils.toHex(await cobj.tokenByIndex(i));
-        row["owner"]   = await cobj.ownerOf(row["tokenId"]);
         row["name"]   = utils.w3bytes32_to_str(await cobj.nameOf(row["tokenId"]));
-        row["datas"]    = JSON.parse(utils.w3str_to_str(await cobj.datasOf(row["tokenId"])));
+        let datas = utils.w3str_to_str(await cobj.datasOf(row["tokenId"]));
+
+        logger.info("tokenId: " + row["tokenId"], "token info");
+        logger.info("name: " + row["name"]);
+        logger.info("datas: ");
+        logger.info(JSON.parse(datas));
 
         list.push(row);
 
     } 
-    logger.debug(list);
+    logger.table(list);
 }
 
 async function run() {
