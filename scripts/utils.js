@@ -107,7 +107,7 @@ function contract_argument_parse(json, arg) {
             path += key;
             if (!data) {
                 continue;
-                throw Error("contract_argument_parse: " + path + " is empty or not found value.");
+                //throw Error("contract_argument_parse: " + path + " is empty or not found value.");
             }
             path += ARG_VAL_SPLIT;
         }
@@ -129,23 +129,31 @@ function contract_arguments_parse(json, args) {
     return args;
 }
 
-function str_to_web3bytes(data) {
+function str_to_w3str(data) {
+    return web3.eth.abi.encodeParameter("string", data);
+}
+
+function w3str_to_str(data) {
+    return web3.eth.abi.decodeParameter("string", data);
+}
+
+function str_to_w3bytes(data) {
     return web3.eth.abi.encodeParameter("bytes", web3.utils.toHex(data));
 }
 
 function w3bytes32_to_str(data) {
-    return web3.eth.abi.decodeParameter("bytes32", data);
+    return web3.utils.hexToUtf8(web3.eth.abi.decodeParameter("bytes32", data));
 }
 
 function w3uint256_to_str(data) {
     return web3.eth.abi.decodeParameter("uint256", web3.utils.toHex(data));
 }
 
-function str_to_web3bytes32(data) {
+function str_to_w3bytes32(data) {
     return web3.eth.abi.encodeParameter("bytes32", web3.utils.toHex(data));
 }
 
-function str_to_web3uint256(data) {
+function str_to_w3uint256(data) {
     return web3.eth.abi.encodeParameter("uint256", web3.utils.toHex(data));
 }
 
@@ -154,11 +162,11 @@ function lstr_to_lweb3bytes32(datas, size) {
     start = datas.length;
 
     for(var i = 0; i < start; i++) {
-        lbytes32.push(str_to_web3bytes32(datas[i]));
+        lbytes32.push(str_to_w3bytes32(datas[i]));
     }
 
     for (var i = start; i < size - start; i++) {
-        lbytes32.push(str_to_web3bytes32(""));
+        lbytes32.push(str_to_w3bytes32(""));
     }
     return web3.eth.abi.encodeParameter("bytes32[]", lbytes32);
 }
@@ -175,10 +183,12 @@ module.exports = {
     filename_parse,
     contract_arguments_parse,
     contract_argument_parse,
-    str_to_web3bytes32,
-    str_to_web3bytes,
+    str_to_w3bytes32,
+    str_to_w3bytes,
     lstr_to_lweb3bytes32,
-    str_to_web3uint256,
+    str_to_w3uint256,
     w3uint256_to_str,
-    w3bytes32_to_str
+    w3bytes32_to_str,
+    str_to_w3str,
+    w3str_to_str
 }

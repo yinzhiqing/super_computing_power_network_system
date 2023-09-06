@@ -57,6 +57,12 @@ args = [
         "premise":  "",
     },
     {
+        "name":     "run",
+        "value":    "",
+        "desc":     "run scripts/XXX.js. ex. make run md=XXX",
+        "premise":  "",
+    },
+    {
         "name":     "open",
         "value":    "target=[deploy | upgrade] index=["+ tokens + "]",
         "desc":     "make prj contract can deploy. open switchs in jsons/contracts/contract_NETWORK.json",

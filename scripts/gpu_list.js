@@ -24,7 +24,7 @@ async function show_accounts() {
 }
 
 async function conv_type_id(id) {
-    return web3.utils.soliditySha3(utils.str_to_web3uint256(id));
+    return web3.utils.soliditySha3(utils.str_to_w3uint256(id));
 }
 async function has_role(cobj, address, role) {
     let brole = web3.eth.abi.encodeParameter("bytes32", web3.utils.soliditySha3(role));
@@ -85,7 +85,7 @@ async function run() {
         logger.debug("token_id= " + token_id);
 
 
-        let utid = utils.str_to_web3uint256(token_id);
+        let utid = utils.str_to_w3uint256(token_id);
         logger.debug("token_id(uint256) = " + utid);
 
         await show_gpus(cobj);

@@ -14,7 +14,7 @@ async function get_contract(name, address) {
 }
 
 function is_target_name(token_name) {
-    let target_token_name = "SCPNSUnitGpu";
+    let target_token_name = "SCPNSGpuList";
     return (target_token_name == "" || target_token_name == token_name) && token_name != "";
 }
 
@@ -24,7 +24,7 @@ async function show_accounts() {
 }
 
 async function conv_type_id(id) {
-    return web3.utils.soliditySha3(utils.str_to_web3uint256(id));
+    return web3.utils.soliditySha3(utils.str_to_w3uint256(id));
 }
 async function has_role(cobj, address, role) {
     let brole = web3.eth.abi.encodeParameter("bytes32", web3.utils.soliditySha3(role));
@@ -35,14 +35,14 @@ async function has_role(cobj, address, role) {
 }
 
 async function count_of(client) {
-    let count = await client.countOf();
+    let count = await client.totalSupply();
     logger.debug(count);
     return count;
 }
 
 async function mint(client, signer, token_id, name, datas) {
     logger.debug("mint from " + await signer.getAddress() + " to with token_id = " + token_id);
-    return await client.connect(signer).mint(token_id, name, datas);
+    return await client.connect(signer).mint(signer.getAddress(), token_id, name, datas);
 }
 
 async function new_token_id() {
@@ -75,14 +75,15 @@ async function run() {
         logger.debug("token_id= " + token_id);
 
 
-        let utid = utils.str_to_web3uint256(token_id);
+        let utid = utils.str_to_w3uint256(token_id);
         logger.debug("token_id(uint256) = " + utid);
 
         await count_of(cobj);
         mydate = new Date();
         let name = mydate.toLocaleTimeString();
-        name = utils.str_to_web3bytes32("A100");
-        let tx = await mint(cobj, signer, token_id, name, web3.utils.toHex(JSON.stringify({type: "A100", "date": mydate.toLocaleTimeString(), producer: "NVIDIA", FP64: 9.7, FP64TC: 19.5, FP32:19.5, gpu_memory:"80GB HBM2", gpu_bw:1935, TDP:300, INT8:624})));
+        name = utils.str_to_w3bytes32("A100");
+        logger.warning("name :" + name);
+        let tx = await mint(cobj, signer, token_id, name, utils.str_to_w3str(JSON.stringify({type: "A100", "date": mydate.toLocaleTimeString(), producer: "NVIDIA", FP64: 9.7, FP64TC: 19.5, FP32:19.5, gpu_memory:"80GB HBM2", gpu_bw:1935, TDP:300, INT8:624})));
         logger.debug(tx);
         await count_of(cobj);
     }

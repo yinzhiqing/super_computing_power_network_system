@@ -1,28 +1,8 @@
 {
-	"SCPNSComputilityUnit": {
-		"name": "SCPNSComputilityUnit",
-		"address": "",
-		"deploy": true,
-		"upgrade": false,
-		"fixed": false,
-		"params": [
-			"!REFSCPNSTypeUnit.address"
-		]
-	},
-	"SCPNSComputilityVM": {
-		"name": "SCPNSComputilityVM",
-		"address": "",
-		"deploy": true,
-		"upgrade": false,
-		"fixed": false,
-		"params": [
-			"!REFSCPNSComputilityUnit.address"
-		]
-	},
 	"SCPNSDns": {
 		"name": "SCPNSDns",
-		"address": "",
-		"deploy": true,
+		"address": "0x1fA02b2d6A771842690194Cf62D91bdd92BfE28d",
+		"deploy": false,
 		"upgrade": false,
 		"fixed": false,
 		"params": [
@@ -30,31 +10,50 @@
 			"SCPNSDns"
 		]
 	},
-	"SCPNSProofTask": {
-		"name": "SCPNSProofTask",
-		"address": "",
-		"deploy": true,
+	"SCPNSComputilityUnit": {
+		"name": "SCPNSComputilityUnit",
+		"address": "0xdbC43Ba45381e02825b14322cDdd15eC4B3164E6",
+		"deploy": false,
 		"upgrade": false,
 		"fixed": false,
 		"params": [
-			"!REFSCPNSUseRightToken.address",
-			"!REFSCPNSProofParameter.address"
+			"!REF:SCPNSDns.address"
+		]
+	},
+	"SCPNSComputilityVM": {
+		"name": "SCPNSComputilityVM",
+		"address": "0x04C89607413713Ec9775E14b954286519d836FEf",
+		"deploy": false,
+		"upgrade": false,
+		"fixed": false,
+		"params": [
+			"!REF:SCPNSDns.address"
+		]
+	},
+	"SCPNSProofTask": {
+		"name": "SCPNSProofTask",
+		"address": "0x4C4a2f8c81640e47606d3fd77B353E87Ba015584",
+		"deploy": false,
+		"upgrade": false,
+		"fixed": false,
+		"params": [
+			"!REF:SCPNSDns.address"
 		]
 	},
 	"SCPNSUseRightToken": {
 		"name": "SCPNSUseRightToken",
-		"address": "",
-		"deploy": true,
+		"address": "0x21dF544947ba3E8b3c32561399E88B52Dc8b2823",
+		"deploy": false,
 		"upgrade": false,
 		"fixed": false,
 		"params": [
-			"!REFSCPNSComputilityVM.address"
+			"!REF:SCPNSDns.address"
 		]
 	},
 	"SCPNSNotes": {
 		"name": "SCPNSNotes",
-		"address": "",
-		"deploy": true,
+		"address": "0x2E2Ed0Cfd3AD2f1d34481277b3204d807Ca2F8c2",
+		"deploy": false,
 		"upgrade": false,
 		"fixed": false,
 		"params": [
@@ -64,36 +63,42 @@
 	},
 	"SCPNSGpuList": {
 		"name": "SCPNSGpuList",
-		"address": "",
-		"deploy": true,
+		"address": "0xD8a5a9b31c3C0232E196d518E89Fd8bF83AcAd43",
+		"deploy": false,
 		"upgrade": false,
 		"fixed": false,
 		"params": []
 	},
 	"SCPNSComputilityRanking": {
 		"name": "SCPNSComputilityRanking",
-		"address": "",
-		"deploy": true,
-		"upgrade": false,
-		"fixed": false,
-		"params": []
-	},
-	"SCPNSProofParameter": {
-		"name": "SCPNSProofParameter",
-		"address": "",
-		"deploy": true,
+		"address": "0xDC11f7E700A4c898AE5CAddB1082cFfa76512aDD",
+		"deploy": false,
 		"upgrade": false,
 		"fixed": false,
 		"params": [
-			"!REFSCPNSTypeUnit"
+			"SCPNSComputilityRanking",
+			"SCPNSComputilityRanking",
+			"!REF:SCPNSDns.address"
+		]
+	},
+	"SCPNSProofParameter": {
+		"name": "SCPNSProofParameter",
+		"address": "0x51A1ceB83B83F1985a81C295d1fF28Afef186E02",
+		"deploy": false,
+		"upgrade": false,
+		"fixed": false,
+		"params": [
+			"!REF:SCPNSDns.address"
 		]
 	},
 	"SCPNSTypeUnit": {
 		"name": "SCPNSTypeUnit",
-		"address": "",
-		"deploy": true,
+		"address": "0x36b58F5C1969B7b6591D752ea6F5486D069010AB",
+		"deploy": false,
 		"upgrade": false,
 		"fixed": false,
-		"params": []
+		"params": [
+			"!REF:SCPNSDns.address"
+		]
 	}
 }

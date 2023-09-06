@@ -3,7 +3,7 @@
 pragma solidity ^0.8.2;
 
 interface ISCPNSBase {
-    event Transfer(address indexed from, address indexed to, uint256 indexed tokenId, bytes32 tokenName, string data);
+    event UpdateDatas(address indexed from, address indexed to, uint256 indexed tokenId, bytes32 tokenName, string data);
 
     function update(uint256 tokenId, string memory datas) external;
     function pause() external;

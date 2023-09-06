@@ -31,9 +31,6 @@ import "./ContractProject.sol";
  * and pauser roles to other accounts.
  */
 contract SCPNSBase is Initializable, ContextUpgradeable, AccessControlEnumerableUpgradeable, ERC721EnumerableUpgradeable, ERC721BurnableUpgradeable, ERC721PausableUpgradeable, ISCPNSBase {
-    function initialize(string memory name_, string memory symbol_, string memory baseTokenURI) public virtual initializer {
-        __SCPNSBase_init(name_, symbol_, baseTokenURI);
-    }
 
     using CountersUpgradeable for CountersUpgradeable.Counter;
     using ArrayAddresses for ArrayAddresses.PairAddress;
@@ -104,6 +101,8 @@ contract SCPNSBase is Initializable, ContextUpgradeable, AccessControlEnumerable
         _name2IDs[name_] = tokenId;
         _id2Names[tokenId] = name_;
         _tokenDatas[tokenId] = datas;
+
+        emit UpdateDatas(_msgSender(), _msgSender(), tokenId, _id2Names[tokenId], datas);
     }
 
     /**
@@ -200,7 +199,7 @@ contract SCPNSBase is Initializable, ContextUpgradeable, AccessControlEnumerable
 
         _tokenDatas[tokenId] = datas;
 
-        emit Transfer(_msgSender(), _msgSender(), tokenId, _id2Names[tokenId], datas);
+        emit UpdateDatas(_msgSender(), _msgSender(), tokenId, _id2Names[tokenId], datas);
 
     }
     
