@@ -42,7 +42,7 @@ async function set(client, signer, name, address){
 async function run() {
     logger.debug("start working...", "notes");
 
-    token = tokens["AssemblyDNS"];
+    token = tokens["SCPNSDns"];
     let cobj = await get_contract(token.name, token.address);
 
     const accounts = await web3.eth.getAccounts();
