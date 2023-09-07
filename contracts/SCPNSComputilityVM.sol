@@ -105,6 +105,11 @@ contract SCPNSComputilityVM is
 
     }
 
+    function isFree(uint256 tokenId) public view virtual override returns(bool) {
+        require(!_exists(tokenId), "SCPNS: token is nonexists.");
+        return _lockLines[tokenId] < block.timestamp;
+    }
+
     function deadLine(uint256 tokenId) public view virtual override returns(uint256) {
         return _deadlines[tokenId];
     }
@@ -120,6 +125,8 @@ contract SCPNSComputilityVM is
         return _tokenComputilityUnits[tokenId].keyOfByIndex(index);
         
     }
+
+
      uint256[48] private __gap;
    }
 

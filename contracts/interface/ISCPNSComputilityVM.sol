@@ -17,4 +17,5 @@ interface ISCPNSComputilityVM is
     function deadLine(uint256 tokenId) external view returns(uint256);
     function computilityUnitCountOf(uint256 tokenId) external view returns(uint256);
     function computilityUnitIdByIndex(uint256 tokenId, uint256 index) external view returns(uint256);
+    function isFree(uint256 tokenId) external view returns(bool);
 }

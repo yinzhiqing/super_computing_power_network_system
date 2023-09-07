@@ -15,5 +15,6 @@ interface ISCPNSBase {
     function tokenIdOf(bytes32 name_) external view returns(uint256);
     function exists(uint256 tokenId) external view returns(bool);
     function isController(address controller) external view returns(bool);
+    function isOwner(uint256 tokenId, address owner) external view returns(bool);
 
 }

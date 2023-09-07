@@ -140,7 +140,13 @@ contract SCPNSComputilityUnit is
         uint256 typeUnitCount = _id2TypeUnitCount[tokenId];
         return typeUnitCount;
     }
-    
+
+    /*
+    function ownerOf(uint256 tokenId) public view virtual override(ERC721Upgradeable, ISCPNSComputilityUnit) returns(address) {
+        return super.ownerOf(tokenId);
+    }
+    */
+   
     function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal virtual override {
         super._beforeTokenTransfer(from, to, tokenId);
 

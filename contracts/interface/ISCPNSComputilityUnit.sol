@@ -15,4 +15,5 @@ interface ISCPNSComputilityUnit is
     function typeUnitIdOf(uint256 tokenId) external view returns(uint256);
     function typeUnitCountOf(uint256 tokenId) external view returns(uint256);
     function leaveCountOf(uint256 tokenId) external view returns(uint256);
+    //function ownerOf(uint256 tokenId) external view returns(address);
 }

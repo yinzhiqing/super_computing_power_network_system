@@ -210,5 +210,10 @@ contract SCPNSBase is Initializable, ContextUpgradeable, AccessControlEnumerable
     function exists(uint256 tokenId) public view virtual override(ISCPNSBase) returns(bool) {
         return _exists(tokenId);
     }
+
+    function isOwner(uint256 tokenId, address owner) public view virtual override returns(bool) {
+        return super.ownerOf(tokenId) == owner && owner != address(0);
+    }
+
     uint256[48] private __gap;
 }

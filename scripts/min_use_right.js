@@ -43,48 +43,39 @@ async function contract(name) {
 async function run() {
     logger.debug("start working...", "mint");
 
-    let computility_unit = await contract("SCPNSComputilityUnit");
-    let computility_vm   = await contract("SCPNSComputilityVM");
+    let computility_vm = await contract("SCPNSComputilityVM");
+    let use_right      = await contract("SCPNSComputilityUnit");
 
     let role   = "MINTER_ROLE";
     let signer = ethers.provider.getSigner(0); 
     let minter = await signer.getAddress(); 
 
-    let has_miter = await has_role(computility_vm, minter, role);
+    let has_miter = await has_role(use_right, minter, role);
     if (has_miter != true) {
         logger.error(personal + " no minter role." );
         return;
     } 
 
-    let computility_unit_count = await computility_unit.totalSupply();
+    let computility_vm_count = await computility_vm.totalSupply();
 
     let to = await signer.getAddress();
-    let deadline = Math.floor(((new Date()).getTime() + 31536000) / 1000);
+    let deadline = Math.floor(((new Date()).getTime() + 11536000) / 1000);
 
     let rows = [];
 
-    for (var i = 0; i < computility_unit_count; i++) {
-        let computility_unit_id = utils.w3uint256_to_hex(await computility_unit.tokenByIndex(i));
-        let count = 1;
+    for (var i = 0; i < computility_vm_count; i++) {
+        let computility_vm_id = utils.w3uint256_to_hex(await computility_vm.tokenByIndex(i));
 
-        let leaveCount = await computility_unit.leaveCountOf(computility_unit_id);
-        if (leaveCount < count) {
-            logger.error("resources(" + computility_unit_id +")  cannot meet demand in SCPNSComputilityUnit");
-            continue;
-        }
-
-        let token_id = await new_token_id(computility_unit_id);
-        let datas = utils.json_to_w3str({data: computility_unit_id});
+        let token_id = await new_token_id(computility_vm_id);
+        let datas = utils.json_to_w3str({data: computility_vm_id});
         logger.debug("new token: " + token_id + " deadline: " + deadline);
   
-        let tx = await computility_vm.connect(signer).mint(to, token_id,  deadline, 
-                    [computility_unit_id], [count], datas);
+        let tx = await use_right.connect(signer).mint(to, token_id,  deadline, 
+                    [computility_vm_id], datas);
 
         rows.push({
             o: to,
             token_id: token_id,
-            typeUnitCount: count,
-            leaveCount: leaveCount - count,
         })
     }
     logger.table(rows, "new tokens");

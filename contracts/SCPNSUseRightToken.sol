@@ -50,9 +50,15 @@ contract SCPNSUseRightToken is
                 "SCPNSUseRightToken: computilityVMs length is 0");
         require(deadline > block.timestamp, "SCPNSUseRightToken: deadline is too small.");
 
+        uint256 len = computilityVMs.length;
+        for (uint256 i = 0; i < len; i++) {
+            require(_computilityVMIf().isFree(computilityVMs[i]), "SCPNSUseRightToken: computilityVM token is not free");
+            require(_baseIf(ContractProject.DNS_NAME_COMPUTILITYVM).isOwner(computilityVMs[i], _msgSender()) || hasRole(MANAGER_ROLE, _msgSender()),
+                "SCPNSComputilityVM: must have role of manager or owner of token");
+        }
+
         _mint(to, tokenId, bytes32(tokenId), datas);
 
-        uint256 len = computilityVMs.length;
         for (uint256 i = 0; i < len; i++) {
             _tokenComputilityVMs[tokenId].set(computilityVMs[i], uint256(1));
 
