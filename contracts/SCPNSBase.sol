@@ -36,9 +36,8 @@ contract SCPNSBase is Initializable, ContextUpgradeable, AccessControlEnumerable
     using ArrayAddresses for ArrayAddresses.PairAddress;
 
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
-    bytes32 public constant MANAGE_ROLE = keccak256("MANAGE_ROLE");
+    bytes32 public constant MANAGER_ROLE = keccak256("MANAGER_ROLE");
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
-    bytes32 public constant USAGE_ROLE = keccak256("USAGE_ROLE");
     bytes32 public constant CONTROLLER_ROLE = keccak256("CONTROLLER_ROLE");
 
     string private _baseTokenURI;
@@ -77,7 +76,7 @@ contract SCPNSBase is Initializable, ContextUpgradeable, AccessControlEnumerable
         _baseTokenURI = baseTokenURI;
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _setupRole(MINTER_ROLE, _msgSender());
-        _setupRole(MANAGE_ROLE, _msgSender());
+        _setupRole(MANAGER_ROLE, _msgSender());
         _setupRole(PAUSER_ROLE, _msgSender());
     }
 

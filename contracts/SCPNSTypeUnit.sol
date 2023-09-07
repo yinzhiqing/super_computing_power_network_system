@@ -75,7 +75,7 @@ contract SCPNSTypeUnit is
     }
 
     function addUnitType(address unitAddr) public virtual whenNotPaused {
-        require(hasRole(MANAGE_ROLE, _msgSender()), "SCPNSTypeUnit: must have manager role to add");
+        require(hasRole(MANAGER_ROLE, _msgSender()), "SCPNSTypeUnit: must have manager role to add");
         require(unitAddr != address(0), "SCPNSTypeUnit: unitAddr is invalid address.");
         _validUnitTypes[unitAddr] = true;
 
@@ -83,7 +83,7 @@ contract SCPNSTypeUnit is
     }
 
     function removeUnitType(address unitAddr) public virtual whenNotPaused {
-        require(hasRole(MANAGE_ROLE, _msgSender()), "SCPNSTypeUnit: must have manager role to remove");
+        require(hasRole(MANAGER_ROLE, _msgSender()), "SCPNSTypeUnit: must have manager role to remove");
         if (_validUnitTypes[unitAddr]) {
             delete _validUnitTypes[unitAddr];
         }

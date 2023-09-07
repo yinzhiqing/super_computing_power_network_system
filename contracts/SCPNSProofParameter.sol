@@ -80,7 +80,7 @@ contract SCPNSProofParameter is
     }
 
     function setValueOfParameter(uint256 tokenId, bytes32 pname, uint256 pvalue) public virtual override whenNotPaused {
-        require(hasRole(MANAGE_ROLE, _msgSender()), "SCPNSProofParameter: must have manager role to remove");
+        require(hasRole(MANAGER_ROLE, _msgSender()), "SCPNSProofParameter: must have manager role to remove");
         __setValueOfParameter(tokenId, pname, pvalue);
     }
 

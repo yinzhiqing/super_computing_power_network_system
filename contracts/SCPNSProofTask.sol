@@ -64,8 +64,8 @@ ISCPNSProofTask
 
     function mint(address to, uint256 useRightId, bytes32 q, string memory datas) public virtual override whenNotPaused {
         require(_msgSender() == _useRightTokenIf().ownerOf(useRightId) 
-            || hasRole(MANAGE_ROLE, _msgSender()), 
-            "SCPNSProofTask: The sender is onwer of useRightId or sender has MANAGE_ROLE role.");
+            || hasRole(MANAGER_ROLE, _msgSender()), 
+            "SCPNSProofTask: The sender is onwer of useRightId or sender has MANAGER_ROLE role.");
 
         uint256 tokenId = _idGenerator.current();
         bytes32 tokenName = bytes32(tokenId);
@@ -136,7 +136,7 @@ ISCPNSProofTask
     }
 
      function updateKeepTaskCount(uint256 keepCount) public virtual override whenNotPaused {
-        require(hasRole(MANAGE_ROLE, _msgSender()), "SCPNSProofTask: must have manager role to add");
+        require(hasRole(MANAGER_ROLE, _msgSender()), "SCPNSProofTask: must have manager role to add");
         require(keepCount > 0, "SCPNSProofTask: The minimum value of a is 1.");
         keepTaskCountOfUseRightId = keepCount;
      }

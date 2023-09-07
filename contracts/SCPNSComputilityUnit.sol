@@ -44,7 +44,7 @@ contract SCPNSComputilityUnit is
 
     // Mapping from id to typeUnit id
     mapping (uint256 => uint256) internal _id2TypeUnitId;
-    // Mapping from id to typeUnit Count(typeUnitId to count) id => (typeUnitId => 10)
+    // Mapping from id to typeUnit Count
     mapping (uint256 => uint256) internal _id2TypeUnitCount;
     // Mapping from id to locked count
     mapping (uint256 => uint256) internal _id2TypeUnitCountLocked;
@@ -101,8 +101,8 @@ contract SCPNSComputilityUnit is
         uint256 lockedCount = _id2TypeUnitCountLocked[tokenId];
         uint256 allCount = _id2TypeUnitCount[tokenId];
 
-        require(_msgSender() == owner || hasRole(MANAGE_ROLE, _msgSender()), 
-                "SCPNSComputilityUnit: must have manager role to locking or owner of token");
+        require(_msgSender() == owner || hasRole(MANAGER_ROLE, _msgSender()) || hasRole(CONTROLLER_ROLE, _msgSender()), 
+                "SCPNSComputilityUnit: must have manager(controller) role to locking or owner of token");
         require(typeUnitCount + lockedCount <= allCount, "SCPNSComputilityUnit: resources cannot meet demand");
 
        _ownedTypeUnitCountLocked[owner][typeUnitId] += typeUnitCount;
@@ -116,12 +116,16 @@ contract SCPNSComputilityUnit is
         address owner = super.ownerOf(tokenId);
         uint256 lockedCount = _id2TypeUnitCountLocked[tokenId];
 
-        require(_msgSender() == owner || hasRole(MANAGE_ROLE, _msgSender()), 
-                "SCPNSComputilityUnit: must have manager role to locking or owner of token");
+        require(_msgSender() == owner || hasRole(MANAGER_ROLE, _msgSender()) || hasRole(CONTROLLER_ROLE, _msgSender()), 
+                "SCPNSComputilityUnit: must have manager(controller)) role to locking or owner of token");
         require(typeUnitCount <= lockedCount, "SCPNSComputilityUnit: resources cannot meet demand");
 
        _ownedTypeUnitCountLocked[owner][typeUnitId] -= typeUnitCount;
        _id2TypeUnitCountLocked[tokenId] -= typeUnitCount;
+    }
+
+    function leaveCountOf(uint256 tokenId) public view override returns(uint256) {
+        return _id2TypeUnitCount[tokenId] - _id2TypeUnitCountLocked[tokenId];
     }
 
     function countOfTypeUnit(uint256 typeUnitId) public view override returns(uint256) {

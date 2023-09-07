@@ -93,12 +93,14 @@ contract SCPNSComputilityVM is
 
     function typeUnitCountOf(uint256 tokenId) public view virtual override returns(uint256) {
         uint256 len = _tokenComputilityUnits[tokenId].length();
-        require(len > 0, "SCPNSComputilityVM: no computility unit ");
 
         uint256 total = 0;
-        for(uint256 i = 0; i < len; i++) {
-            total += _tokenComputilityUnits[tokenId].valueOfByIndex(i);
+        if (len > 0) {
+            for(uint256 i = 0; i < len; i++) {
+                total += _tokenComputilityUnits[tokenId].valueOfByIndex(i);
+            }
         }
+
         return total;
 
     }
@@ -107,6 +109,17 @@ contract SCPNSComputilityVM is
         return _deadlines[tokenId];
     }
 
+    function computilityUnitCountOf(uint256 tokenId) public view virtual override returns(uint256) {
+        return _tokenComputilityUnits[tokenId].length();
+    }
+
+    function computilityUnitIdByIndex(uint256 tokenId, uint256 index) public view virtual override returns(uint256) {
+        uint256 len = _tokenComputilityUnits[tokenId].length();
+        require(len > index, "SCPNSComputilityVM: index out of bounds");
+
+        return _tokenComputilityUnits[tokenId].keyOfByIndex(index);
+        
+    }
      uint256[48] private __gap;
    }
 

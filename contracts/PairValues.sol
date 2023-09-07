@@ -69,7 +69,7 @@ library PairValues {
             uint256 index = pu._keys.length;
             unchecked {
                 pu._keys.push(key);
-                pu._values.push(key);
+                pu._values.push(value);
                 pu._keysIndex[key] = index;
             }
         }

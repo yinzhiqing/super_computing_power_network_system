@@ -15,4 +15,6 @@ interface ISCPNSComputilityVM is
     function typeUnitCountOf(uint256 tokenId) external view returns(uint256);
     function lockResources(uint256 tokenId, uint256 lockLine) external;
     function deadLine(uint256 tokenId) external view returns(uint256);
+    function computilityUnitCountOf(uint256 tokenId) external view returns(uint256);
+    function computilityUnitIdByIndex(uint256 tokenId, uint256 index) external view returns(uint256);
 }

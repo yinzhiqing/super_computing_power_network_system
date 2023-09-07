@@ -1,3 +1,4 @@
+
 const fs        = require('fs');
 const path      = require("path");
 const program   = require('commander');
@@ -24,7 +25,7 @@ async function show_accounts() {
 }
 
 async function conv_type_id(id) {
-    return web3.utils.soliditySha3(utils.str_to_web3uint256(id));
+    return web3.utils.soliditySha3(utils.str_to_w3uint256(id));
 }
 async function has_role(cobj, address, role) {
     let brole = web3.eth.abi.encodeParameter("bytes32", web3.utils.soliditySha3(role));
@@ -35,29 +36,35 @@ async function has_role(cobj, address, role) {
 }
 
 async function count_of(client) {
-    let count = await client.countOf();
+    let count = await client.totalSupply();
     logger.debug(count);
     return count;
 }
 
 async function mint(client, signer, token_id, name, unitAddr, unitId, datas) {
     logger.debug("mint from " + await signer.getAddress() + " to with token_id = " + token_id);
-    return await client.connect(signer).mint(token_id, name, unitAddr, unitId, datas);
+    return await client.connect(signer).mint(token_id, name, unitAddr, unitAddr, datas);
 }
 
 async function new_token_id() {
     var myDate = new Date();
     return web3.utils.soliditySha3(myDate.toLocaleTimeString());
 }
+
 async function run() {
     logger.debug("start working...", "mint");
+
+    let gpu_token = tokens["SCPNSGpuList"];
+    let gpu_cobj = await get_contract(gpu_token.name, gpu_token.address);
+    let gpu_addr = gpu_token.address;
+
+
     for (var token_name in tokens) {
         if (!is_target_name(token_name)) continue;
 
         logger.debug("#contract name: " + token_name);
         token = tokens[token_name];
         let cobj = await get_contract(token.name, token.address);
-        logger.debug("nft address: " + token.address);
 
         const accounts = await web3.eth.getAccounts();
         let role = "MINTER_ROLE";
@@ -71,16 +78,31 @@ async function run() {
             return;
         } 
 
-        let token_id = await new_token_id();
-        logger.debug("token_id= " + token_id);
+        //append unitType address to 
+        if (! await cobj.isValidUnitType(gpu_addr)) {
+            logger.warning("add unit type: " + gpu_addr);
+            await cobj.connect(signer).addUnitType(gpu_addr);
+            await cobj.isValidUnitType(gpu_addr);
 
+        }
 
-        let name = utils.str_to_web3bytes32("GPU-A100");
-        let unitAddr = '0x59b670e9fA9D0A427751Af201D676719a970857b';
-        let unitId = '0x25c464a9250da72a7222a0ec0fdd108afc879949eec8d4fcef81e3ffe2afa698';
-        let tx = await mint(cobj, signer, token_id, name, unitAddr, unitId, web3.utils.toHex("this is comptility datas"));
-        logger.debug(tx);
-        await count_of(cobj);
+        let gpu_count = await gpu_cobj.totalSupply();
+
+        for (var i = 0; i < gpu_count; i++) {
+            let token_id = await gpu_cobj.tokenByIndex(i);
+            let token_name = await gpu_cobj.nameOf(token_id);
+
+            let existed = await cobj.exists(token_id);
+            if (existed) {
+                logger.warning("token is existed. id : " + token_id);
+                continue;
+            } else {
+                logger.info("new token. id : " + token_id);
+                let datas = utils.str_to_w3str(JSON.stringify({data:"test"}));
+                let tx = await mint(cobj, signer, token_id, token_name, gpu_addr, token_id, datas);
+                logger.debug(tx);
+            }
+        }
     }
 }
 

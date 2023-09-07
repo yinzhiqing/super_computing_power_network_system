@@ -8,10 +8,11 @@ interface ISCPNSComputilityUnit is
     ISCPNSBase
 {
     function mint(address to, uint256 tokenId, uint256 typeUnitId, uint256 typeUnitCount_, string memory datas) external;
+    function lockResources(uint256 tokenId, uint256 typeUnitCount) external;
+    function unlockResources(uint256 tokenId, uint256 typeUnitCount) external;
 
     function countOfTypeUnit(uint256 tokenId) external view returns(uint256);
     function typeUnitIdOf(uint256 tokenId) external view returns(uint256);
     function typeUnitCountOf(uint256 tokenId) external view returns(uint256);
-    function lockResources(uint256 tokenId, uint256 typeUnitCount) external;
-    function unlockResources(uint256 tokenId, uint256 typeUnitCount) external;
+    function leaveCountOf(uint256 tokenId) external view returns(uint256);
 }
