@@ -46,23 +46,19 @@ contract SCPNSUseRightToken is
     function mint(address to, uint256 tokenId, uint256 deadline,
                   uint256[] memory computilityVMs, string memory datas) public virtual override whenNotPaused {
 
-        require(computilityVMs.length > 0, 
-                "SCPNSUseRightToken: computilityVMs length is 0");
-        require(deadline > block.timestamp, "SCPNSUseRightToken: deadline is too small.");
-
         uint256 len = computilityVMs.length;
-        for (uint256 i = 0; i < len; i++) {
-            require(_computilityVMIf().isFree(computilityVMs[i]), "SCPNSUseRightToken: computilityVM token is not free");
-            require(_baseIf(ContractProject.DNS_NAME_COMPUTILITYVM).isOwner(computilityVMs[i], _msgSender()) || hasRole(MANAGER_ROLE, _msgSender()),
-                "SCPNSComputilityVM: must have role of manager or owner of token");
-        }
+        require(len > 0, "SCPNSUseRightToken: computilityVMs length is 0");
+        require(deadline > block.timestamp, "SCPNSUseRightToken: deadline is too small.");
 
         _mint(to, tokenId, bytes32(tokenId), datas);
 
         for (uint256 i = 0; i < len; i++) {
-            _tokenComputilityVMs[tokenId].set(computilityVMs[i], uint256(1));
+            require(_baseIf(ContractProject.DNS_NAME_COMPUTILITYVM).isOwner(computilityVMs[i], _msgSender()) 
+                || hasRole(MANAGER_ROLE, _msgSender()),
+                "SCPNSComputilityVM: must have role of manager or owner of token");
 
             _computilityVMIf().lockResources(computilityVMs[i], deadline);
+            _tokenComputilityVMs[tokenId].set(computilityVMs[i], uint256(1));
         }
 
         _deadlines[tokenId] = deadline;

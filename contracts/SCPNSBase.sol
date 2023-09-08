@@ -172,10 +172,6 @@ contract SCPNSBase is Initializable, ContextUpgradeable, AccessControlEnumerable
         return __unitType;
     }
 
-    function isController(address controller) public view virtual override returns(bool) {
-        return hasRole(CONTROLLER_ROLE, controller);
-    }
-
     function _unitType(string memory unitType_) internal virtual {
         __unitType = unitType_;
     }

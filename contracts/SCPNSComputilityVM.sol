@@ -66,19 +66,20 @@ contract SCPNSComputilityVM is
     }
 
     function changeUser(address to, uint256 tokenId) public virtual override whenNotPaused {
-        require(_msgSender() == super.ownerOf(tokenId) || super.isController(_msgSender()), 
+        require(_msgSender() == super.ownerOf(tokenId) || hasRole(CONTROLLER_ROLE, _msgSender()), 
                 "SCPNSComputilityVM: only owner of token can change user");
         require(to != address(0), "SCPNSComputilityVM: new user address is address(0)");
-        require(!_exists(tokenId), "SCPNS: token is nonexists.");
+        require(!_exists(tokenId), "SCPNSComputilityVM: token is nonexists.");
 
         _users[tokenId] = to;
     }
 
     function lockResources(uint256 tokenId, uint256 lockline) public virtual override whenNotPaused {
-        require(_msgSender() == super.ownerOf(tokenId) || super.isController(_msgSender()), 
-                "SCPNSComputilityVM: only owner of token can change user");
-        require(!_exists(tokenId), "SCPNS: token is nonexists.");
+        require(_msgSender() == super.ownerOf(tokenId) || hasRole(CONTROLLER_ROLE , _msgSender()), 
+                "SCPNSComputilityVM: only owner of token or have controller role can lock resources");
+        require(_exists(tokenId), "SCPNSComputilityVM: token is nonexists.");
         require(lockline <= _deadlines[tokenId], "SCPNSComputilityVM: locked time > deadline");
+        require(_lockLines[tokenId] < block.timestamp, "SCPNSComputilityVM: token is locked");
 
         _lockLines[tokenId] = lockline;
     }
@@ -106,7 +107,7 @@ contract SCPNSComputilityVM is
     }
 
     function isFree(uint256 tokenId) public view virtual override returns(bool) {
-        require(!_exists(tokenId), "SCPNS: token is nonexists.");
+        require(_exists(tokenId), "SCPNSComputilityVM: token is nonexists.");
         return _lockLines[tokenId] < block.timestamp;
     }
 

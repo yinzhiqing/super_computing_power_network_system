@@ -44,7 +44,7 @@ async function run() {
     logger.debug("start working...", "mint");
 
     let computility_vm = await contract("SCPNSComputilityVM");
-    let use_right      = await contract("SCPNSComputilityUnit");
+    let use_right      = await contract("SCPNSUseRightToken");
 
     let role   = "MINTER_ROLE";
     let signer = ethers.provider.getSigner(0); 
@@ -66,9 +66,17 @@ async function run() {
     for (var i = 0; i < computility_vm_count; i++) {
         let computility_vm_id = utils.w3uint256_to_hex(await computility_vm.tokenByIndex(i));
 
+        let free = await computility_vm.isFree(computility_vm_id);
+        if (false == free) {
+            logger.warning(computility_vm_id + " is locked. next..");
+            continue;
+        }
+
         let token_id = await new_token_id(computility_vm_id);
-        let datas = utils.json_to_w3str({data: computility_vm_id});
+        let datas = utils.json_to_w3str({data: "test"});
         logger.debug("new token: " + token_id + " deadline: " + deadline);
+        logger.debug("vm id: " + computility_vm_id);
+
   
         let tx = await use_right.connect(signer).mint(to, token_id,  deadline, 
                     [computility_vm_id], datas);
