@@ -34,25 +34,11 @@ async function show_tokens(token) {
         row["tokenId"] = utils.w3uint256_to_hex(await cobj.tokenByIndex(i));
         row["name"] = utils.w3bytes32_to_str(await cobj.nameOf(row["tokenId"]));
 
-        let pnames = [];
-        let pvalues = [];
-        let pcount = await cobj.parameterCountOf(row["tokenId"]);
-        logger.debug("pcount:" + pcount.toString());
-        for (var pi = 0; pi < pcount; pi++) {
-            let pname = await cobj.parameterNameOf(row['tokenId'], pi);
-            let pvalue = await cobj.valueOfParameter(row["tokenId"], pname);
-            pnames.push(utils.w3bytes32_to_str(pname));
-            pvalues.push(pvalue.toString());
-
-        }
-        logger.debug(pnames);
-        logger.debug(pvalues);
-
-
+        let parameter = utils.w3str_to_str(await cobj.parameterOf(row["tokenId"]));
         let datas = utils.w3str_to_str(await cobj.datasOf(row["tokenId"]));
-        logger.info("tokenId: " + row["tokenId"], "token info");
-        logger.info("datas: ");
-        logger.info(JSON.parse(datas));
+        logger.info("info: tokenId: " + row["tokenId"] + " name: " + row["name"] +  ")");
+        logger.info(">> parameter: " + JSON.parse(parameter));
+        logger.info(">> datas: " + JSON.parse(datas));
 
         list.push(row);
 

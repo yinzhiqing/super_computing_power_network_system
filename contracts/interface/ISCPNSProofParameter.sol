@@ -8,13 +8,10 @@ import  "./ISCPNSBase.sol";
 interface ISCPNSProofParameter is 
     ISCPNSBase
 {
-    function mint(address to, uint256 tokenId, bytes32 name_, uint256 typeUnitId, string memory datas) external;
-    function setValueOfParameter(uint256 tokenId, bytes32 pname, uint256 pvalue) external;
+    function mint(uint256 tokenId, bytes32 name_, string memory parameter, string memory datas) external;
+    function setDefaultToken(uint256 tokenId) external;
 
-    function valueOfParameter(uint256 tokenId, bytes32 pname) external view returns(uint256);
-    function typeUnitIdOf(uint256 tokenId) external view returns(uint256);
-    function tokenIdOfTypeUnitId(uint256 typeUnitId) external view returns(uint256);
-    function parameterCountOf(uint256 tokenId) external view returns(uint256);
-    function parameterNameOf(uint256 tokenId, uint256 index) external view returns(bytes32);
-    function parametersOf(uint256 tokenId) external view returns(bytes32[] memory names, uint256[] memory values);
+    function parameterOf(uint256 tokenId) external view returns(string memory);
+    function defaultToken() external view returns(uint256);
+    function selectParameterId(uint256 typeUnitId, uint256 typeUnitCount) external view returns(uint256);
 }

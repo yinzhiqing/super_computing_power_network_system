@@ -133,6 +133,10 @@ function json_to_w3str(data) {
     return str_to_w3str(JSON.stringify(data));
 }
 
+function json_to_str(data) {
+    return JSON.stringify(data);
+}
+
 function str_to_w3str(data) {
     return web3.eth.abi.encodeParameter("string", data);
 }
@@ -210,5 +214,6 @@ module.exports = {
     str_to_w3str,
     w3str_to_str,
     json_to_w3str,
+    json_to_str,
     hex_to_ascii
 }

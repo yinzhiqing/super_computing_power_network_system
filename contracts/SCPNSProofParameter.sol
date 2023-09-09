@@ -30,15 +30,11 @@ contract SCPNSProofParameter is
     using CountersUpgradeable for CountersUpgradeable.Counter;
 
     // Mapping from id to parameter list
-    mapping (uint256 => mapping(bytes32 => uint256)) internal _id2Parameters;
-    // Mapping from id to parameter name list
-    mapping (uint256 => mapping(uint256 => bytes32)) internal _id2ParameterNames;
-    // Mapping from id to parameter name count
-    mapping (uint256 => CountersUpgradeable.Counter) internal _id2ParameterCount;
-    // Mapping from id to typeUnitId
-    mapping (uint256 => uint256) internal _id2TypeUnitId;
-    // Mapping from typeUnitId to id
-    mapping (uint256 => uint256) internal _typeUnitId2Id;
+    mapping (uint256 => string) private _id2Parameters;
+    // Mapping typeUnitId to rate of per
+    mapping (uint256 => uint256) private _typeUnitRate;
+    // default id
+    uint256 private _defaultId;
 
     function initialize(address dns) public virtual initializer {
         __SCPNSBase_init("SCPNSProofParameter", "SCPNSProofParameter", "");
@@ -67,93 +63,46 @@ contract SCPNSProofParameter is
      *
      * - the caller must have the `MINTER_ROLE`.
      */
-    function mint(address to, uint256 tokenId, bytes32 name_, uint256 typeUnitId, string memory datas) public virtual override whenNotPaused {
-        require(_id2TypeUnitId[tokenId] == uint256(0), "SCPNSProofParameter: tokenId is exists.");
-        require(_typeUnitIf().exists(typeUnitId), "SCPNSProofParameter: typeUnitId is invalid.");
-        require(_typeUnitId2Id[typeUnitId] == uint256(0), "SCPNSProofParameter: typeUnitId was setting.");
+    function mint(uint256 tokenId, bytes32 name_, string memory parameter, string memory datas) public virtual override whenNotPaused {
+        require(bytes(parameter).length > 0,  "SCPNSProofParameter: parameter is empty");
 
-        _id2TypeUnitId[tokenId] = typeUnitId;
-        _typeUnitId2Id[typeUnitId] = tokenId;
+        _mint(_msgSender(), tokenId, name_, datas);
 
-        _mint(to, tokenId, name_, datas);
-
-    }
-
-    function setValueOfParameter(uint256 tokenId, bytes32 pname, uint256 pvalue) public virtual override whenNotPaused {
-        require(hasRole(MANAGER_ROLE, _msgSender()), "SCPNSProofParameter: must have manager role to remove");
-        __setValueOfParameter(tokenId, pname, pvalue);
-    }
-
-    function valueOfParameter(uint256 tokenId, bytes32 pname) public view override returns(uint256) {
-        return _id2Parameters[tokenId][pname];
-    }
-
-    function typeUnitIdOf(uint256 tokenId) public view override returns(uint256) {
-        return _id2TypeUnitId[tokenId];
-    }
-
-    function tokenIdOfTypeUnitId(uint256 typeUnitId) public view override returns(uint256) {
-        return _typeUnitId2Id[typeUnitId];
-    }
-
-    function parameterCountOf(uint256 tokenId) public view override returns(uint256) {
-        return _id2ParameterCount[tokenId].current();
-    }
-
-    function parameterNameOf(uint256 tokenId, uint256 index) public view virtual override returns(bytes32) {
-        require(index < _id2ParameterCount[tokenId].current(), "SCPNSProofParameter: index out of bounds.");
-        return _id2ParameterNames[tokenId][index];
-    }
-
-    function parametersOf(uint256 tokenId) public view virtual override returns(bytes32[] memory names, uint256[] memory values) {
-        uint256 index = _id2ParameterCount[tokenId].current();
-        uint i = 0;
-        while(index > 0) {
-            bytes32 pname = _id2ParameterNames[tokenId][index - 1];
-            names[i] = pname;
-            values[i] = _id2Parameters[tokenId][pname];
-            index = index - 1;
-            i = i + 1;
+        if (_defaultId == uint256(0)) {
+            _defaultId = tokenId;
         }
+        _id2Parameters[tokenId] = parameter;
+
+
     }
-    
+
+    function setDefaultToken(uint256 tokenId) public virtual override whenNotPaused {
+        require(hasRole(MINTER_ROLE, _msgSender()) || _msgSender() == super.ownerOf(tokenId), "SCPNSBase: must have minter role to set, or have manager role");
+
+        require(_exists(tokenId), "SCPNSProofParameter: token is nonexists.");
+
+        _defaultId = tokenId;
+    }
+
+
+    function parameterOf(uint256 tokenId) public view override returns(string memory) {
+        return _id2Parameters[tokenId];
+    }
+
+    function defaultToken() public view virtual override returns(uint256) {
+        return _defaultId;
+    }
+
+    function selectParameterId(uint256 typeUnitId, uint256 typeUnitCount) public view virtual override returns(uint256) {
+        if (typeUnitId > 0 && typeUnitCount > 0) {
+            return _defaultId;
+        }
+        return _defaultId;
+    }
+
     function _burn(uint256 tokenId) internal virtual override(SCPNSBase) {
-        super._burn(tokenId);
-
-        while(_id2ParameterCount[tokenId].current() > 0) {
-            _id2ParameterCount[tokenId].decrement();
-            delete _id2Parameters[tokenId][_id2ParameterNames[tokenId][_id2ParameterCount[tokenId].current()]];
-            delete _id2ParameterNames[tokenId][_id2ParameterCount[tokenId].current()];
-        }
-        delete _id2ParameterCount[tokenId];
-
-        uint256 typeUnitId = _id2TypeUnitId[tokenId];
-        delete _typeUnitId2Id[typeUnitId];
-
-        delete _id2TypeUnitId[tokenId];
-
-    }
-
-    function __setValueOfParameter(uint256 tokenId, bytes32 pname, uint256 pvalue) internal virtual {
-        require(_exists(tokenId), "SCPNSProofParameter: tokenId is not exists.");
-        require(pname != bytes32(""), "SCPNSProofParameter: pname is invalid.");
-
-        // mabe is new parameter, check it and add to name list
-        if (uint256(0) == _id2Parameters[tokenId][pname]) {
-            uint256 index = _id2ParameterCount[tokenId].current();
-            while(index > 0) {
-                if (_id2ParameterNames[tokenId][index - 1] == pname) {
-                    break;
-                }
-                index = index - 1;
-            }
-            if (index == 0) {
-                _id2ParameterCount[tokenId].increment();
-                _id2ParameterNames[tokenId][_id2ParameterCount[tokenId].current()] = pname;
-            }
-        }
-
-        _id2Parameters[tokenId][pname] = pvalue;
+        require(false, "SCPNSProofParameter: can't burn anyone token");
+        require(_exists(tokenId), "SCPNSProofParameter: token is noexists");
     }
 
     uint256[48] private __gap;

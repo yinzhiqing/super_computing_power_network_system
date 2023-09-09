@@ -150,21 +150,19 @@ ISCPNSProofTask
     }
 
     function latestParametersByUseRightId(uint256 tokenId) public view virtual override returns(
-        bytes32 dynamicData, bytes32[] memory names, uint256[] memory values, uint256 taskId) {
+        bytes32 dynamicData, string memory parameter, uint256 taskId) {
         uint256[] storage taskIds = _useRightId2TaskIds[tokenId];
 
         if (taskIds.length > 0) {
             taskId = taskIds[taskIds.length - 1];
-            (dynamicData, names, values) = SCPNSProofTask.parametersOf(taskId);
+            (dynamicData, parameter) = SCPNSProofTask.parameterOf(taskId);
         } 
     }
 
-    function parametersOf(uint256 tokenId) public view virtual override returns(bytes32 dynamicData, 
-                                                                       bytes32[] memory names, 
-                                                                       uint256[] memory values) {
+    function parameterOf(uint256 tokenId) public view virtual override returns(bytes32 dynamicData, string memory parameter) {
         TaskParameter storage tp = _id2TaskParameter[tokenId];
         dynamicData = tp.dynamicData;
-        (names, values) = _proofParameterIf().parametersOf(tp.parameterId);
+        parameter = _proofParameterIf().parameterOf(tp.parameterId);
     }
 
     function latestTaskDataByUseRightId(uint256 tokenId) public view virtual override returns(TaskParameter memory parameter, 
@@ -204,7 +202,8 @@ ISCPNSProofTask
 
     function __selectParameterId(uint256 useRightId) internal view returns(uint256) {
         uint256 typeUnitId = _useRightTokenIf().typeUnitIdOf(useRightId);
-        uint256 parameterId = _proofParameterIf().tokenIdOfTypeUnitId(typeUnitId);
+        uint256 typeUnitCount = _useRightTokenIf().typeUnitCountOf(useRightId);
+        uint256 parameterId = _proofParameterIf().selectParameterId(typeUnitId, typeUnitCount);
         return parameterId;
     }
 

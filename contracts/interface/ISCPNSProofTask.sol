@@ -33,9 +33,9 @@ interface ISCPNSProofTask is
 
     function eventCountOf() external view returns(uint256);
     function latestParametersByUseRightId(uint256 tokenId) external view returns(
-        bytes32 dynamicData, bytes32[] memory names, uint256[] memory values, uint256 taskId);
-    function parametersOf(uint256 tokenId) external view returns(
-        bytes32 dynamicData, bytes32[] memory names, uint256[] memory values);
+        bytes32 dynamicData, string memory parameter, uint256 taskId);
+    function parameterOf(uint256 tokenId) external view returns(
+        bytes32 dynamicData, string memory parameter);
     function latestTaskDataByUseRightId(uint256 tokenId) external view returns(
         TaskParameter memory parameter, TaskDetail memory result);
     function taskDataOfUseRightId(uint256 tokenId, uint256 index) external view returns(

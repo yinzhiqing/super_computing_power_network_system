@@ -58,10 +58,11 @@ async function run() {
     let rows = [];
     let token_ids = [];
 
-    let tokens = {};
-    tokens["min"] = {leaf_count: 100000000,       leaf_deep: 1000000};
-    tokens["mid"] = {leaf_count: 10000000000,     leaf_deep: 100000000};
-    tokens["max"] = {leaf_count: 10000000000000,  leaf_deep: 10000000000};
+    let tokens = {
+        min: {leaf_count: 100000000,       leaf_deep: 1000000},
+        mid: {leaf_count: 10000000000,     leaf_deep: 100000000},
+        max: {leaf_count: 10000000000000,  leaf_deep: 10000000000}
+    }
 
     for (var key in tokens) {
         let token = tokens[key];
@@ -76,22 +77,17 @@ async function run() {
             continue;
         }
 
-        let pnames = [];
-        let pvalues = [];
-        for (var name in token) {
-            pnames.push(utils.str_to_w3bytes32(name));
-            pvalues.push(token[name]);
-        }
-
         token_name = utils.str_to_w3bytes32(token_name);
+        let parameter = utils.json_to_w3str(token);
         let datas = utils.json_to_w3str({data: key});
         logger.debug("new token: " + token_id);
   
-        let tx = await proof_parameter.connect(signer).mint(token_id, token_name, pnames, pvalues, datas);
+        let tx = await proof_parameter.connect(signer).mint(token_id, token_name, parameter, datas);
 
         rows.push({
             token_id: token_id,
-            token_name: key
+            token_name: key,
+            parameter: utils.json_to_str(token)
         });
     }
     logger.table(rows, "new tokens");
