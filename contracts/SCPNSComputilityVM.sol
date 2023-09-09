@@ -53,7 +53,7 @@ contract SCPNSComputilityVM is
                 "SCPNSComputilityVM: computilityUnits and typeUnitCounts length is differ");
         require(deadline > block.timestamp, "SCPNSComputilityVM: deadline is too small.");
 
-        _mint(to, tokenId, bytes32(tokenId), datas);
+        _mint(to, tokenId, NO_NAME, datas);
 
         uint256 len = computilityUnits.length;
         for (uint256 i = 0; i < len; i++) {
@@ -108,7 +108,7 @@ contract SCPNSComputilityVM is
 
     function isFree(uint256 tokenId) public view virtual override returns(bool) {
         require(_exists(tokenId), "SCPNSComputilityVM: token is nonexists.");
-        return _lockLines[tokenId] < block.timestamp;
+        return _lockLines[tokenId] < block.timestamp && _deadlines[tokenId] > block.timestamp;
     }
 
     function deadLine(uint256 tokenId) public view virtual override returns(uint256) {

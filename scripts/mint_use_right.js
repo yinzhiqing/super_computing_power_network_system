@@ -59,7 +59,6 @@ async function run() {
     let computility_vm_count = await computility_vm.totalSupply();
 
     let to = await signer.getAddress();
-    let deadline = Math.floor(((new Date()).getTime() + 11536000) / 1000);
 
     let rows = [];
 
@@ -72,6 +71,7 @@ async function run() {
             continue;
         }
 
+        let deadline = await computility_vm.deadLine(computility_vm_id);
         let token_id = await new_token_id(computility_vm_id);
         let datas = utils.json_to_w3str({data: "test"});
         logger.debug("new token: " + token_id + " deadline: " + deadline);

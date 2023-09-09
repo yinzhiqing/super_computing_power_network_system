@@ -50,7 +50,7 @@ contract SCPNSUseRightToken is
         require(len > 0, "SCPNSUseRightToken: computilityVMs length is 0");
         require(deadline > block.timestamp, "SCPNSUseRightToken: deadline is too small.");
 
-        _mint(to, tokenId, bytes32(tokenId), datas);
+        _mint(to, tokenId, NO_NAME, datas);
 
         for (uint256 i = 0; i < len; i++) {
             require(_baseIf(ContractProject.DNS_NAME_COMPUTILITYVM).isOwner(computilityVMs[i], _msgSender()) 

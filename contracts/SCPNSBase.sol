@@ -40,6 +40,8 @@ contract SCPNSBase is Initializable, ContextUpgradeable, AccessControlEnumerable
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
     bytes32 public constant CONTROLLER_ROLE = keccak256("CONTROLLER_ROLE");
 
+    bytes32 public constant NO_NAME = bytes32("###%NO_NAME");
+
     string private _baseTokenURI;
     string internal __unitType;
 
@@ -93,11 +95,13 @@ contract SCPNSBase is Initializable, ContextUpgradeable, AccessControlEnumerable
      */
     function _mint(address to, uint256 tokenId, bytes32 name_, string memory datas) internal virtual {
         require(hasRole(MINTER_ROLE, _msgSender()), "SCPNSBase: must have minter role to mint");
-        require(!_exists(_name2IDs[name_]), "SCPNSBase: token name is exists.");
+        require(name_ == NO_NAME || !_exists(_name2IDs[name_]), "SCPNSBase: token name is exists.");
 
         super._mint(to, tokenId);
 
-        _name2IDs[name_] = tokenId;
+        if (name_ != NO_NAME) {
+            _name2IDs[name_] = tokenId;
+        }
         _id2Names[tokenId] = name_;
         _tokenDatas[tokenId] = datas;
 
@@ -181,7 +185,9 @@ contract SCPNSBase is Initializable, ContextUpgradeable, AccessControlEnumerable
         delete _tokenDatas[tokenId];
 
         bytes32 name_ = _id2Names[tokenId];
-        delete _name2IDs[name_];
+        if (name_ != NO_NAME) {
+            delete _name2IDs[name_];
+        }
         delete _id2Names[tokenId];
 
         super._burn(tokenId);

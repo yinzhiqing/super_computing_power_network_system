@@ -87,8 +87,7 @@ contract SCPNSComputilityUnit is
         require(_typeUnitIf().exists(typeUnitId), "SCPNSComputilityUnit: typeUnitId is not exists.");
         require(typeUnitCount_ > 0, "SCPNSComputilityUnit: The typeUnit quantity value must be greater than 0");
 
-        bytes32 _name = bytes32(tokenId);
-        _mint(to, tokenId, _name, datas);
+        _mint(to, tokenId, NO_NAME, datas);
         _addTokenToAll(to, tokenId, typeUnitId, typeUnitCount_);
 
     }

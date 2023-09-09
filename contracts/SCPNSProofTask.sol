@@ -10,6 +10,8 @@ import "./interface/ISCPNSUseRightToken.sol";
 import "./interface/ISCPNSProofParameter.sol";
 import "./interface/ISCPNSComputilityRanking.sol";
 import "./ContractProject.sol";
+import "./PairValues.sol";
+import "./ArraryUint256.sol";
 
 contract SCPNSProofTask is 
 SCPNSBase, 
@@ -17,26 +19,29 @@ ContractProject,
 ISCPNSProofTask
 {
     using CountersUpgradeable for CountersUpgradeable.Counter;
+    using ArrayUnit256 for ArrayUnit256.Uint256s;
 
     // Per-UseRightToken keep count of task
     uint256 public keepTaskCountOfUseRightId;
 
     // The block number where the previous event was located.
-    uint256 internal _preBlockNumber;
+    uint256 private _preBlockNumber;
     // Task index(0~n)
-    CountersUpgradeable.Counter _eventIndex;
+    CountersUpgradeable.Counter private _eventIndex;
     // Task Id Generator
-    CountersUpgradeable.Counter _idGenerator;
+    CountersUpgradeable.Counter private _idGenerator;
     // Mapping from task id to parameter
-    mapping (uint256 => TaskParameter) internal _id2TaskParameter;
+    mapping (uint256 => TaskParameter) private _id2TaskParameter;
     // Mapping from task id to task Detail
-    mapping (uint256 => TaskDetail) internal _id2TaskDetail;
+    mapping (uint256 => TaskDetail) private _id2TaskDetail;
     // Mapping from task id to use right id
-    mapping (uint256 => uint256) internal _id2useRightId;
+    mapping (uint256 => uint256) private _id2useRightId;
     // Mapping from use right id to task id list;
-    mapping (uint256 => uint256[]) internal _useRightId2TaskIds;
+    mapping (uint256 => uint256[]) private _useRightId2TaskIds;
     // Mapping from id to question(q)
-    mapping (uint256 => bytes32) internal _id2Question;
+    mapping (uint256 => bytes32) private _id2Question;
+    // Mapping from sender to id
+    mapping (address => ArrayUnit256.Uint256s) private _ownedTokens;
 
     function initialize(address dns) 
     initializer 
@@ -68,8 +73,7 @@ ISCPNSProofTask
             "SCPNSProofTask: The sender is onwer of useRightId or sender has MANAGER_ROLE role.");
 
         uint256 tokenId = _idGenerator.current();
-        bytes32 tokenName = bytes32(tokenId);
-        _mint(to, tokenId, tokenName, datas);
+        _mint(to, tokenId, NO_NAME, datas);
 
         TaskParameter storage tp = _id2TaskParameter[tokenId];
         tp.taskType = TaskType.Manual;
@@ -90,9 +94,10 @@ ISCPNSProofTask
         emit TaskData(_eventIndex.current(), useRightId, tokenId, _preBlockNumber, _msgSender(), tp, td, datas);
 
         // next mint use 
-        _preBlockNumber = block.number;
         _idGenerator.increment();
+        _preBlockNumber = block.number;
         _eventIndex.increment();
+        _ownedTokens[_msgSender()].add(tokenId);
     }
 
     function taskEnd(uint256 tokenId, string memory result, bytes32 a) public virtual override whenNotPaused {
@@ -192,6 +197,13 @@ ISCPNSProofTask
         result = _id2TaskDetail[tokenId];
     }
 
+    function __uint2Bytes32(uint256 x) internal pure returns (bytes memory b) {
+        b = new bytes(32);
+        for (uint i = 0; i < 32; i++) {
+            b[i] = bytes1(uint8(x / (2**(8*(31 - i)))));
+        }
+        
+    }
     function __prefixed(bytes32 hash) internal pure returns (bytes32) {
         return keccak256(abi.encodePacked("\x19Dynamic Data Head:\n32", hash));
     }
