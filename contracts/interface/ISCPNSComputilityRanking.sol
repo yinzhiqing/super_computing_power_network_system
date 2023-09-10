@@ -16,4 +16,8 @@ interface ISCPNSComputilityRanking
     function lastBlockNumber() external view returns(uint256);
     function excTimeDistTableOf(uint256 parameterId, uint256 scale) external view returns(uint256[] memory keys, uint256[] memory values);
     function lastEventIndex() external view returns(uint256);
+
+    function countOf(uint256 parameterId, uint256 scale) external view returns(uint256);
+    function excTimeByIndex(uint256 parameterId, uint256 scale, uint256 index) external view returns(uint256 x, uint256 y);
+    function parameters() external view returns(uint256[] memory);
 }

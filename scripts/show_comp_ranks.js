@@ -1,3 +1,4 @@
+
 const fs        = require('fs');
 const path      = require("path");
 const program   = require('commander');
@@ -14,7 +15,7 @@ async function get_contract(name, address) {
 }
 
 function is_target_name(token_name) {
-    let target_token_name = "SCPNSProofTask";
+    let target_token_name = "SCPNSComputilityRanking";
     return (target_token_name == "" || target_token_name == token_name) && token_name != "";
 }
 
@@ -25,28 +26,29 @@ async function show_tokens(token) {
     let name = await cobj.name();
     logger.debug("name: " + name);
 
-    let amounts = await cobj.totalSupply();
-    logger.debug("totalSupply: " + amounts);
-    let list = [];
-    for (let i = 0; i < amounts; i++) {
-        let row = new Map();
-        row["tokenId"] = utils.w3uint256_to_hex(await cobj.tokenByIndex(i));
-        row["isInProof"] = await cobj.isInProofOf(row["tokenId"]);
-
-        let parameters = await cobj.parameterOf(row["tokenId"]);
-        let parameter = utils.w3str_to_str(parameters[1]);
-        let datas = utils.w3str_to_str(await cobj.datasOf(row["tokenId"]));
-
-        logger.debug("id; "             + row["tokenId"]);
-        logger.info(">> isInProof "     + row["isInProof"]);
-        logger.info(">> dynamicData: "  + parameters[0]);
-        logger.info(">> parameter: "    + parameter);
-        logger.info(">> datas: "        + datas);
-
-        list.push(row);
-
+    let parameters = await cobj.parameters();
+    let list = {};
+    for (let i = 0; i < parameters.length; i++) {
+        logger.debug("parameter: " + parameters[i]);
+        let scales = await cobj.scalesOf(parameters[i]);
+        let s = {}
+        for (let j = 0; j < scales.length; j++) {
+            logger.debug("scale: " + scales[j]);
+            let datas = [];
+            let count = await cobj.countOf(parameters[i], scales[j]);
+            logger.debug("count: " + count);
+            for (var k = 0; k < count; k++) {
+                let xy = await cobj.excTimeByIndex(parameters[i], scales[j], k);
+                datas.push({
+                    x: xy[0].toString(),
+                    y: xy[1].toString(),
+                });
+            }
+            s[scales[j]] = datas;
+        }
+        list[utils.w3uint256_to_hex(parameters[i])] = s;
     } 
-    logger.table(list);
+    logger.info(list);
 }
 
 async function run() {

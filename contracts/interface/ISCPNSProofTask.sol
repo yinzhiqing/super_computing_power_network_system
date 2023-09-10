@@ -7,14 +7,14 @@ import  "./ISCPNSBase.sol";
 interface ISCPNSProofTask is 
     ISCPNSBase 
 {
-    enum TaskType {Manual, Auto, Type3, Type4}
+    enum TaskType {None, Manual, Auto, Type3, Type4}
     struct TaskParameter {
         uint256  parameterId;
         bytes32  dynamicData;
         TaskType taskType;
     }
 
-    enum TaskState {Start, End, Cancel, ERROR}
+    enum TaskState {None, Start, End, Cancel, ERROR}
     struct TaskDetail {
         uint256 tokenId;
         uint256 start;
@@ -33,7 +33,7 @@ interface ISCPNSProofTask is
 
     function eventCountOf() external view returns(uint256);
     function latestParametersByUseRightId(uint256 tokenId) external view returns(
-        bytes32 dynamicData, string memory parameter, uint256 taskId);
+        bytes32 dynamicData, string memory parameter, uint256 taskId, bool has);
     function parameterOf(uint256 tokenId) external view returns(
         bytes32 dynamicData, string memory parameter);
     function latestTaskDataByUseRightId(uint256 tokenId) external view returns(
@@ -44,4 +44,6 @@ interface ISCPNSProofTask is
     function taskDataOf(uint256 tokenId) external view returns(
         TaskParameter memory parameter, TaskDetail memory result);
     function useRightIdOf(uint256 tokenId) external view returns(uint256);
+    function isInProofOf(uint256 tokenId) external view returns(bool);
+    function isInProofOfUseRightId(uint256 tokenId) external view returns(bool);
 }

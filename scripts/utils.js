@@ -154,7 +154,7 @@ function w3bytes32_to_str(data) {
 }
 
 function w3uint256_to_hex(data) {
-    return web3.utils.toHex(data);
+    return web3.utils.toHex(data.toString());
 }
 
 function w3uint256_to_str(data) {

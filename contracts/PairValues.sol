@@ -48,6 +48,15 @@ library PairValues {
         return pu._values[index];
     }
 
+    function valueOfWithDefault(PairUint256 storage pu, uint256 key, uint256 defaultValue) internal view returns(uint256) {
+        if(!pu._keysExists[key]) {
+            return defaultValue;
+        } else {
+            uint256 index = pu._keysIndex[key];
+            return pu._values[index];
+        }
+    }
+
     function exists(PairUint256 storage pu, uint256 key) internal view returns(bool) {
         return pu._keysExists[key];
     }
@@ -71,6 +80,7 @@ library PairValues {
                 pu._keys.push(key);
                 pu._values.push(value);
                 pu._keysIndex[key] = index;
+                pu._keysExists[key] = true;
             }
         }
     }

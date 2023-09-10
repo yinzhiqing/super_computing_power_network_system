@@ -50,6 +50,8 @@ contract SCPNSComputilityRanking is
     mapping (uint256 => ArrayUnit256.Uint256s) private _scales ;
     // Mapping (parameterId => (scale => (excTimeOfScale => count)))
     mapping (uint256 => mapping(uint256 => PairValues.PairUint256)) private _excTimeDistTables;
+    //0
+    ArrayUnit256.Uint256s private _parameters;
 
     uint256 private _preBlockNumber;
 
@@ -131,11 +133,12 @@ contract SCPNSComputilityRanking is
         uint256 __execTime  = (end - start);
         _updateExcTimeDistTables(parameterId, tokenId, __execTime);
 
+        _parameters.add(parameterId);
         _id2ParameterIds[parameterId] = taskId;
         _id2ParameterIds[tokenId] = parameterId;
         _id2ExcTime[parameterId].set(tokenId, __execTime);
         
-        emit Set(_eventIndex.current() - 1, parameterId, tokenId, _preBlockNumber, _id2PreBlockNumber[parameterId].valueOf(tokenId), __execTime, taskId);
+        emit Set(_eventIndex.current(), parameterId, tokenId, _preBlockNumber, _id2PreBlockNumber[parameterId].valueOfWithDefault(tokenId, 0), __execTime, taskId);
 
         _preBlockNumber = block.number;
         _id2PreBlockNumber[parameterId].set(tokenId, block.number);
@@ -144,7 +147,7 @@ contract SCPNSComputilityRanking is
     }
     
     function excTimeDistTableOf(uint256 parameterId, uint256 scale) public view virtual override returns(uint256[] memory keys, uint256[] memory values) {
-        require(scale > 0, "SCPNSComputilityRanking: the scale value must be greater than 0");
+        require(_scales[parameterId].exists(scale), "SCPNSComputilityRanking: the scale is nonexists");
 
         PairValues.PairUint256 storage _excTimeDistTable = _excTimeDistTables[parameterId][scale];
         keys = _excTimeDistTable.keysOf();
@@ -204,6 +207,21 @@ contract SCPNSComputilityRanking is
         return _eventIndex.current();
     }
 
+    function countOf(uint256 parameterId, uint256 scale) public view virtual override returns(uint256) {
+        return _excTimeDistTables[parameterId][scale].length();
+    }
+
+    function excTimeByIndex(uint256 parameterId, uint256 scale, uint256 index) public view virtual override returns(uint256 x, uint256 y) {
+        require(SCPNSComputilityRanking.countOf(parameterId, scale) > index, "SCPNSComputilityRanking: excTime index is out of bounds");
+        x = _excTimeDistTables[parameterId][scale].keyOfByIndex(index);
+        y = _excTimeDistTables[parameterId][scale].valueOf(x);
+
+    }
+
+    function parameters() public view virtual override returns(uint256[] memory) {
+        return _parameters.valuesOf();
+    }
+
     function _updateExcTimeDistTables(uint256 parameterId, uint256 tokenId, uint256 _execTime) private {
         // decrement old time dist table of tokenId
         if (_id2Times[parameterId].exists(tokenId) && _id2Times[parameterId].valueOf(tokenId) > 0) {
@@ -212,9 +230,18 @@ contract SCPNSComputilityRanking is
             for(uint256 i = 0; i < _scales[parameterId].length(); i++) {
                 uint256 __scale = _scales[parameterId].valueOf(i);
                 uint256 __scalePreExecTime = __preExecTime / __scale;
-                _excTimeDistTables[parameterId][__scale].decrement(__scalePreExecTime, 1);
-                _excTimeDistTables[parameterId][__scale].removeMatched(__scalePreExecTime, 0);
+
+                if (_excTimeDistTables[parameterId][__scale].exists(__scalePreExecTime)) {
+                    _excTimeDistTables[parameterId][__scale].decrement(__scalePreExecTime, 1);
+                    _excTimeDistTables[parameterId][__scale].removeMatched(__scalePreExecTime, 0);
+                }
             }
+        }
+
+        if (!_scales[parameterId].exists(1)) {
+            _scales[parameterId].add(1);
+            _scales[parameterId].add(60);
+            _scales[parameterId].add(600);
         }
 
         // increment times of scales

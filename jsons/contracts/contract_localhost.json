@@ -32,7 +32,7 @@
 	},
 	"SCPNSProofTask": {
 		"name": "SCPNSProofTask",
-		"address": "0x205Cfc23ef26922E116135500abb4B12Ab6d4668",
+		"address": "0xd6A0A8E18934Bb04eb1787De1C7bD48013579935",
 		"deploy": false,
 		"upgrade": false,
 		"fixed": false,
@@ -71,7 +71,7 @@
 	},
 	"SCPNSComputilityRanking": {
 		"name": "SCPNSComputilityRanking",
-		"address": "0x4D1338Fa46ca6060F1472b70599cc635Ad275EDa",
+		"address": "0x263f307a067B559972302ED69A68f7a2FfBb7639",
 		"deploy": false,
 		"upgrade": false,
 		"fixed": false,

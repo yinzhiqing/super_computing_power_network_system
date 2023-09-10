@@ -49,7 +49,8 @@ library ArrayUnit256 {
             uint256 index = pu._values.length;
             unchecked {
                 pu._values.push(value);
-                pu._valuesIndex[value] = index;
+                pu._valuesIndex[value]  = index;
+                pu._valuesExists[value] = true;
             }
         }
     }
