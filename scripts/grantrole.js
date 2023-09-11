@@ -17,7 +17,7 @@ async function get_contract(name, address) {
 }
 
 function is_target_name(token_name) {
-    let target_token_name = "";
+    let target_token_name = "SCPNSProofTask";
     return (target_token_name == "" || target_token_name == token_name) && token_name != "";
 }
 
@@ -79,9 +79,7 @@ async function run() {
         let platform = accounts[2];
 
         let addresses = [
-            personal,
-            platform,
-            "0xcDed1ab3DA25eBB46e7bbb32CfeFbdace71f9E50"
+            "0xFbB84C3b36b61356425e8B916D81bB977071BbD0"
         ]
 
         for (let i = 0; i < addresses.length; i++) {

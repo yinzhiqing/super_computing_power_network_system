@@ -13,17 +13,19 @@ import "./interface/ISCPNSProofTask.sol";
 import "./interface/ISCPNSTypeUnit.sol";
 import "./interface/ISCPNSUseRightToken.sol";
 import "./interface/ISCPNSGpuList.sol";
+import "./interface/ISCPNSVerifyTask.sol";
 
 abstract contract ContractProject is Initializable {
 
-    string public constant DNS_NAME_COMPUTILITYRANKING = "SCPNSComputilityRanking";
-    string public constant DNS_NAME_COMPUTILITYUNIT = "SCPNSComputilityUnit";
-    string public constant DNS_NAME_COMPUTILITYVM = "SCPNSComputilityVM";
-    string public constant DNS_NAME_GPULIST = "SCPNSGpuList";
-    string public constant DNS_NAME_PROOFPARAMETER = "SCPNSProofParameter";
-    string public constant DNS_NAME_PROOFTASK = "SCPNSProofTask";
-    string public constant DNS_NAME_TYPEUNIT = "SCPNSTypeUnit";
-    string public constant DNS_NAME_USERIGHTTOKEN = "SCPNSUseRightToken";
+    string public constant DNS_NAME_COMPUTILITYRANKING  = "SCPNSComputilityRanking";
+    string public constant DNS_NAME_COMPUTILITYUNIT     = "SCPNSComputilityUnit";
+    string public constant DNS_NAME_COMPUTILITYVM       = "SCPNSComputilityVM";
+    string public constant DNS_NAME_GPULIST             = "SCPNSGpuList";
+    string public constant DNS_NAME_PROOFPARAMETER      = "SCPNSProofParameter";
+    string public constant DNS_NAME_PROOFTASK           = "SCPNSProofTask";
+    string public constant DNS_NAME_TYPEUNIT            = "SCPNSTypeUnit";
+    string public constant DNS_NAME_USERIGHTTOKEN       = "SCPNSUseRightToken";
+    string public constant DNS_NAME_CHALLENGE           = "SCPNSVerifyTask";
 
     address private __dnsAddress;
     ISCPNSDns private _dnsIf;
@@ -81,4 +83,7 @@ abstract contract ContractProject is Initializable {
         return ISCPNSUseRightToken(_addressOf(DNS_NAME_USERIGHTTOKEN));
     }
 
+    function _verifyTaskIf() internal view virtual returns(ISCPNSVerifyTask) {
+        return ISCPNSVerifyTask(_addressOf(DNS_NAME_CHALLENGE));
+    }
 }

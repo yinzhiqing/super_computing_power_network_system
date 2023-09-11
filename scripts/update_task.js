@@ -81,7 +81,7 @@ async function run() {
         let dynamicData = utils.w3uint256_to_hex(parameters[0]);
         let parameter   = JSON.parse(utils.w3str_to_str(parameters[1]));
         let leaf_count  = parameter["leaf_count"];
-        let leaf_deep   = parameter["leaf_count"];
+        let leaf_deep   = parameter["leaf_deep"];
         let taskId      = utils.w3uint256_to_hex(parameters[2]);
 
         logger.debug("dynamicData: " + dynamicData, "parameters of use_right_id(" + use_right_id + ")");

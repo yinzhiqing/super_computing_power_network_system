@@ -94,7 +94,7 @@ async function run() {
     let dynamicData = web3.utils.toHex(parameters[0].toString());
     let parameter   = JSON.parse(utils.w3str_to_str(parameters[1]));
     let leaf_count  = parameter["leaf_count"];
-    let leaf_deep   = parameter["leaf_count"];
+    let leaf_deep   = parameter["leaf_deep"];
     let taskId      = parameters[2];
 
     //生成Merkel树, 并获取树根
