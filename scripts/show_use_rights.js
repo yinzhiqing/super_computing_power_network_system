@@ -33,7 +33,7 @@ async function show_tokens(token) {
         row["tokenId"] = utils.w3uint256_to_hex(await cobj.tokenByIndex(i));
         row["owner"] = await cobj.ownerOf(row["tokenId"]);
         row["deadline"] = utils.w3uint256_to_str(await cobj.deadLine(row["tokenId"]));
-        row["deadline"] = (new Date(Number(row["deadline"]) * 1000)).toLocaleString();
+        row["deadline"] = (new Date(Number(row["deadline"]))).toLocaleString();
 
 
         let datas = utils.w3str_to_str(await cobj.datasOf(row["tokenId"]));

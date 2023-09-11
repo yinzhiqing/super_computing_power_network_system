@@ -37,8 +37,8 @@ async function show_tokens(token) {
         let parameter = utils.w3str_to_str(await cobj.parameterOf(row["tokenId"]));
         let datas = utils.w3str_to_str(await cobj.datasOf(row["tokenId"]));
         logger.info("info: tokenId: " + row["tokenId"] + " name: " + row["name"] +  ")");
-        logger.info(">> parameter: " + JSON.parse(parameter));
-        logger.info(">> datas: " + JSON.parse(datas));
+        logger.info(">> parameter: " + parameter);
+        logger.info(">> datas: " + datas);
 
         list.push(row);
 
