@@ -5,6 +5,7 @@ const utils     = require("./utils");
 const logger    = require("./logger");
 const prj       = require("../prj.config.js");
 const readline  = require('readline');
+const merkle    = require("./merkle");
 
 const bak_path  = prj.caches_contracts;
 const tokens  = require(prj.contract_conf);
@@ -92,6 +93,7 @@ async function run() {
     //has: 此处不用 
     let parameters  = await proof_task.connect(signer).latestParametersByUseRightId(use_right_id); 
     let dynamicData = web3.utils.toHex(parameters[0].toString());
+    logger.info("parameter: " + parameters[1]);
     let parameter   = JSON.parse(utils.w3str_to_str(parameters[1]));
     let leaf_count  = parameter["leaf_count"];
     let leaf_deep   = parameter["leaf_deep"];

@@ -187,6 +187,15 @@ function lstr_to_lweb3bytes32(datas, size) {
     return web3.eth.abi.encodeParameter("bytes32[]", lbytes32);
 }
 
+function create_leaf_hash(dynamicData, index, deep) {
+    let hash = web3.utils.soliditySha3(dynamicData, index);
+    for (var i = 0; i < deep; i++) {
+       hash = web3.utils.soliditySha3(dynamicData, index);
+    }
+    return str_to_w3bytes32(hash);
+
+}
+
 function hex_to_ascii(data) {
     return web3.utils.hexToAscii(data);
 }
@@ -215,5 +224,6 @@ module.exports = {
     w3str_to_str,
     json_to_w3str,
     json_to_str,
-    hex_to_ascii
+    hex_to_ascii,
+    create_leaf_hash
 }

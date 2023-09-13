@@ -59,9 +59,9 @@ async function run() {
     let token_ids = [];
 
     let tokens = {
-        min: {leaf_count: 100000000,       leaf_deep: 1000000},
-        mid: {leaf_count: 10000000000,     leaf_deep: 100000000},
-        max: {leaf_count: 10000000000000,  leaf_deep: 10000000000}
+        min: {leaf_count: 800    * 1024 * 1024,   leaf_deep: 100},
+        mid: {leaf_count: 8000   * 1024 * 1024,   leaf_deep: 2000},
+        max: {leaf_count: 800000 * 1024 * 1024,   leaf_deep: 30000000000}
     }
 
     for (var key in tokens) {
@@ -90,7 +90,7 @@ async function run() {
             parameter: utils.json_to_str(token)
         });
     }
-    logger.table(rows, "new tokens");
+        let tx = proof_parameter.connect(signer).setDefaultToken(create_token_id(tokens["min"]));
 
 }
 

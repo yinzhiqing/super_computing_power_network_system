@@ -59,7 +59,7 @@ async function run() {
     let computility_unit_count = await computility_unit.totalSupply();
 
     let to = await signer.getAddress();
-    let deadline = Math.floor(((new Date()).getTime() )) + 31536000;
+    let deadline = Math.floor(((new Date()).getTime() )) + 315360000000;
 
     let rows = [];
 
@@ -86,6 +86,7 @@ async function run() {
             typeUnitCount: count,
             leaveCount: leaveCount - count,
         })
+        break;
     }
     logger.table(rows, "new tokens");
 }

@@ -3,6 +3,7 @@
 pragma solidity ^0.8.2;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
 import "./interface/ISCPNSDns.sol";
 import "./interface/ISCPNSBase.sol";
 import "./interface/ISCPNSComputilityRanking.sol";
@@ -46,6 +47,10 @@ abstract contract ContractProject is Initializable {
     function _addressOf(string memory name_) internal view virtual returns(address) {
         require(_dnsIf.exists(name_), "SCPNSBase: the name of dns is invalid");
         return _dnsIf.addressOf(name_);
+    }
+
+    function _stdIf(string memory name_) internal view virtual returns(IERC721Upgradeable) {
+        return IERC721Upgradeable(_addressOf(name_));
     }
 
     function _baseIf(string memory name_) internal view virtual returns(ISCPNSBase) {
