@@ -46,18 +46,19 @@ contract SCPNSUseRightToken is
     function mint(address to, uint256 tokenId, uint256 deadline,
                   uint256[] memory computilityVMs, string memory datas) public virtual override whenNotPaused {
 
-        uint256 len = computilityVMs.length;
-        require(len > 0, "SCPNSUseRightToken: computilityVMs length is 0");
-        require(deadline > block.timestamp, "SCPNSUseRightToken: deadline is too small.");
+        require(computilityVMs.length > 0, 
+                "SCPNSUseRightToken: computilityVMs length is 0");
+        require(deadline > block.timestamp, 
+                "SCPNSUseRightToken: deadline is too small.");
 
         _mint(to, tokenId, NO_NAME, datas);
 
-        for (uint256 i = 0; i < len; i++) {
+        for (uint256 i = 0; i < computilityVMs.length; i++) {
             require(_baseIf(ContractProject.DNS_NAME_COMPUTILITYVM).isOwner(computilityVMs[i], _msgSender()) 
                 || hasRole(MANAGER_ROLE, _msgSender()),
                 "SCPNSComputilityVM: must have role of manager or owner of token");
 
-            _computilityVMIf().lockResources(computilityVMs[i], deadline);
+            _computilityVMIf().lockResources(computilityVMs[i],  deadline);
             _tokenComputilityVMs[tokenId].set(computilityVMs[i], uint256(1));
         }
 
@@ -66,9 +67,11 @@ contract SCPNSUseRightToken is
 
     function typeUnitIdOf(uint256 tokenId) public view virtual override returns(uint256) {
         uint256 len = _tokenComputilityVMs[tokenId].length();
-        require(len > 0, "SCPNSComputilityVM: no computility unit ");
+        require(len > 0, 
+                "SCPNSComputilityVM: no computility unit ");
 
         uint256 computilityVMId = _tokenComputilityVMs[tokenId].keyOfByIndex(len - 1);
+
         return _computilityVMIf().typeUnitIdOf(computilityVMId);
     }
 
@@ -95,6 +98,7 @@ contract SCPNSUseRightToken is
     function isValid(uint256 tokenId) public view virtual override returns(bool) {
         return _deadlines[tokenId] > block.timestamp;
     }
+
      uint256[48] private __gap;
    }
 

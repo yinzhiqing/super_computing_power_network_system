@@ -97,8 +97,11 @@ library PairValues {
     }
 
     function decrement(PairUint256 storage pu, uint256 key, uint256 value) internal {
-        require(PairValues.exists(pu, key), "PairValues: key is nonexists");
-        require(PairValues.valueOf(pu, key) >= value, "PairValues: value out of range");
+        require(PairValues.exists(pu, key),  
+                "PairValues: key is nonexists");
+        require(PairValues.valueOf(pu, key) >= value, 
+                "PairValues: value out of range");
+
         uint256 curtIndex = pu._keysIndex[key];
         unchecked {
             pu._values[curtIndex] -= value;
@@ -112,14 +115,13 @@ library PairValues {
     }
     function remove(PairUint256 storage pu, uint256 key) internal {
         if (PairValues.exists(pu, key)) {
-            uint256 curtindex = pu._keysIndex[key];
-            uint256 lastIndex = pu._keys.length - 1;
+            uint256 curtindex    = pu._keysIndex[key];
+            uint256 lastIndex    = pu._keys.length - 1;
             uint256 lastIndexKey = pu._keys[lastIndex];
             unchecked {
                 if (curtindex != lastIndex) {
                     pu._keys[curtindex]   = pu._keys[lastIndex];
                     pu._values[curtindex] = pu._values[lastIndex];
-
                     pu._keysIndex[lastIndexKey] = curtindex;
                 }
 

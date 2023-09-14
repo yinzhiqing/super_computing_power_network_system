@@ -50,7 +50,7 @@ contract SCPNSComputilityRanking is
     mapping (uint256 => ArrayUnit256.Uint256s) private _scales ;
     // Mapping (parameterId => (scale => (excTimeOfScale => count)))
     mapping (uint256 => mapping(uint256 => PairValues.PairUint256)) private _excTimeDistTables;
-    //0
+    // parameter list
     ArrayUnit256.Uint256s private _parameters;
 
     uint256 private _preBlockNumber;
@@ -85,15 +85,14 @@ contract SCPNSComputilityRanking is
     }
 
 
-    function name() public view virtual returns(string memory) 
-    {
+    function name() public view virtual returns(string memory) {
         return _name;
     }
 
-    function symbol() public view virtual returns(string memory) 
-    {
+    function symbol() public view virtual returns(string memory) {
         return _symbol;
     }
+
     /**
      * @dev Pauses all token transfers.
      *
@@ -104,7 +103,9 @@ contract SCPNSComputilityRanking is
      * - the caller must have the `PAUSER_ROLE`.
      */
     function pause() public virtual {
-        require(hasRole(PAUSER_ROLE, _msgSender()), "SCPNSComputilityRanking: must have pauser role to pause");
+        require(hasRole(PAUSER_ROLE, _msgSender()), 
+                "SCPNSComputilityRanking: must have pauser role to pause");
+
         _pause();
     }
 
@@ -118,7 +119,9 @@ contract SCPNSComputilityRanking is
      * - the caller must have the `PAUSER_ROLE`.
      */
     function unpause() public virtual {
-        require(hasRole(PAUSER_ROLE, _msgSender()), "SCPNSComputilityRanking: must have pauser role to unpause");
+        require(hasRole(PAUSER_ROLE, _msgSender()), 
+                "SCPNSComputilityRanking: must have pauser role to unpause");
+
         _unpause();
     }
 
@@ -127,30 +130,35 @@ contract SCPNSComputilityRanking is
     }
 
     function set(uint256 tokenId, uint256 start, uint256 end, uint256 parameterId, uint256 taskId) public whenNotPaused virtual override {
-        require(hasRole(CONTROLLER_ROLE, _msgSender()), "SCPNSComputilityRanking: must have controller role to mint");
-        require(end > start, "SCPNSComputilityRanking: start and end value is abnormal");
+        require(hasRole(CONTROLLER_ROLE, _msgSender()), 
+                "SCPNSComputilityRanking: must have controller role to mint");
+        require(end > start, 
+                "SCPNSComputilityRanking: start and end value is abnormal");
 
         uint256 __execTime  = (end - start);
         _updateExcTimeDistTables(parameterId, tokenId, __execTime);
 
-        _parameters.add(parameterId);
         _id2ParameterIds[parameterId] = taskId;
-        _id2ParameterIds[tokenId] = parameterId;
+        _id2ParameterIds[tokenId]     = parameterId;
+        _parameters.add(parameterId);
         _id2ExcTime[parameterId].set(tokenId, __execTime);
         
         emit Set(_eventIndex.current(), parameterId, tokenId, _preBlockNumber, _id2PreBlockNumber[parameterId].valueOfWithDefault(tokenId, 0), __execTime, taskId);
 
         _preBlockNumber = block.number;
-        _id2PreBlockNumber[parameterId].set(tokenId, block.number);
         _eventIndex.increment();
+        _id2PreBlockNumber[parameterId].set(tokenId, block.number);
 
     }
     
-    function excTimeDistTableOf(uint256 parameterId, uint256 scale) public view virtual override returns(uint256[] memory keys, uint256[] memory values) {
-        require(_scales[parameterId].exists(scale ), "SCPNSComputilityRanking: the scale is nonexists");
+    function excTimeDistTableOf(uint256 parameterId, uint256 scale) public view virtual override 
+        returns(uint256[] memory keys, uint256[] memory values) {
+
+        require(_scales[parameterId].exists(scale ), 
+                "SCPNSComputilityRanking: the scale is nonexists");
 
         PairValues.PairUint256 storage _excTimeDistTable = _excTimeDistTables[parameterId][scale];
-        keys = _excTimeDistTable.keysOf();
+        keys   = _excTimeDistTable.keysOf();
         values = _excTimeDistTable.valuesOf();
 
         uint256 __swap = 0;
@@ -167,11 +175,13 @@ contract SCPNSComputilityRanking is
 
             // swap minValue to order end
             if (__minKeyIndex != i) {
-                __swap = keys[i];
+                //save
+                __swap  = keys[i];
                 keys[i] = __minKey;
                 keys[__minKeyIndex] = __swap;
 
-                __swap = values[i];
+                //change
+                __swap    = values[i];
                 values[i] = values[__minKeyIndex];
                 values[__minKeyIndex] = __swap;
             }
@@ -179,7 +189,9 @@ contract SCPNSComputilityRanking is
     }
 
     function postionOf(uint256 parameterId, uint256 tokenId, uint256 scale) public view virtual override returns(uint256) {
-        require(_scales[parameterId].exists(scale), "SCPNSComputilityRanking: the scale is invalied");
+        require(_scales[parameterId].exists(scale), 
+                "SCPNSComputilityRanking: the scale is invalied");
+
         return _id2ExcTime[parameterId].valueOf(tokenId) / scale;
     }
 
@@ -212,7 +224,9 @@ contract SCPNSComputilityRanking is
     }
 
     function excTimeByIndex(uint256 parameterId, uint256 scale, uint256 index) public view virtual override returns(uint256 x, uint256 y) {
-        require(SCPNSComputilityRanking.countOf(parameterId, scale) > index, "SCPNSComputilityRanking: excTime index is out of bounds");
+        require(SCPNSComputilityRanking.countOf(parameterId, scale) > index, 
+                "SCPNSComputilityRanking: excTime index is out of bounds");
+
         x = _excTimeDistTables[parameterId][scale].keyOfByIndex(index);
         y = _excTimeDistTables[parameterId][scale].valueOf(x);
 
@@ -230,9 +244,8 @@ contract SCPNSComputilityRanking is
         // decrement old time dist table of tokenId
         if (_id2Times[parameterId].exists(tokenId) && _id2Times[parameterId].valueOf(tokenId) > 0) {
             uint256 __preExecTime = _id2ExcTime[parameterId].valueOf(tokenId);
-
             for(uint256 i = 0; i < _scales[parameterId].length(); i++) {
-                uint256 __scale = _scales[parameterId].valueOf(i);
+                uint256 __scale            = _scales[parameterId].valueOf(i);
                 uint256 __scalePreExecTime = __preExecTime / __scale;
 
                 if (_excTimeDistTables[parameterId][__scale].exists(__scalePreExecTime)) {
@@ -243,8 +256,8 @@ contract SCPNSComputilityRanking is
         }
 
         if (!_scales[parameterId].exists(1)) {
-            _scales[parameterId].add(1 * _pricision());
-            _scales[parameterId].add(60 * _pricision());
+            _scales[parameterId].add(1   * _pricision());
+            _scales[parameterId].add(60  * _pricision());
             _scales[parameterId].add(600 * _pricision());
         }
 

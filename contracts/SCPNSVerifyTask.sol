@@ -72,13 +72,18 @@ contract SCPNSVerifyTask is
     }
 
     function mint(uint256 useRightId, uint256 proofId, bytes32 q, string memory datas) public virtual override {
-        require(_proofTaskIf().exists(proofId), "SCPNSVerifyTask: proof task token is nonexists");
-        require(!_proofTaskIf().isInProofOfUseRightId(useRightId), "SCPNSVerifyTask: useRight token is in proof");
-        require(!SCPNSVerifyTask.isInVerifyOfUseRightId(useRightId), "SCPNSVerifyTask: useRight token is in verify");
+        require(_proofTaskIf().exists(proofId), 
+                "SCPNSVerifyTask: proof task token is nonexists");
+        require(!_proofTaskIf().isInProofOfUseRightId(useRightId), 
+                "SCPNSVerifyTask: useRight token is in proof");
+        require(!SCPNSVerifyTask.isInVerifyOfUseRightId(useRightId), 
+                "SCPNSVerifyTask: useRight token is in verify");
 
         (, , uint256 curProofId, bool has) = _proofTaskIf().latestParametersByUseRightId(useRightId);
-        require(has, "SCPNSVerifyTask: useRight token none data to verify");
-        require(proofId == curProofId, "SCPNSVerifyTask: proof task token is too old");
+        require(has, 
+                "SCPNSVerifyTask: useRight token none data to verify");
+        require(proofId == curProofId, 
+                "SCPNSVerifyTask: proof task token is too old");
 
         //update old
         _updateVerifyState(useRightId);
@@ -86,44 +91,48 @@ contract SCPNSVerifyTask is
         uint256 tokenId = _idGenerator.current();
         _mint(_stdIf(ContractProject.DNS_NAME_PROOFTASK).ownerOf(proofId), tokenId, NO_NAME, datas);
 
-        _id2UseRightId[tokenId] = useRightId;
-        _useRightId2Id[useRightId] = tokenId;
-        VerifyParameter storage vp = _id2VerifyParameter[tokenId];
-        vp.q = q;
-        vp.state = VerifyState.Start;
-        vp.proofId = proofId;
-        vp.tokenId = tokenId;
-        vp.startBlockNumber = block.number;
+        _id2UseRightId[tokenId]     = useRightId;
+        _useRightId2Id[useRightId]  = tokenId;
 
-        VerifyStat storage vs = _useRightId2VerifyStat[useRightId];
-        vs.total += 1;
+        VerifyStat      storage vs  = _useRightId2VerifyStat[useRightId];
+        VerifyParameter storage vp  = _id2VerifyParameter[tokenId];
+        vp.startBlockNumber = block.number;
+        vp.state            = VerifyState.Start;
+        vp.proofId          = proofId;
+        vp.tokenId          = tokenId;
+        vp.q                = q;
+        vs.total            += 1;
 
         emit TaskData(_eventIndex.current(), useRightId, _preBlockNumber, _msgSender(), vp, datas);
 
         // next mint use 
-        _idGenerator.increment();
         _preBlockNumber = block.number;
+        _idGenerator.increment();
         _eventIndex.increment();
         _tokensSender[_msgSender()].add(tokenId);
     }
 
     function taskVerify(uint256 tokenId, uint256 a, bytes32[] memory proof) public virtual override whenNotPaused {
-        require(_useRightTokenIf().exists(_id2UseRightId[tokenId]), "SCPNSVerifyTask: useRight token is nonexists");
+
+        require(_useRightTokenIf().exists(_id2UseRightId[tokenId]), 
+                "SCPNSVerifyTask: useRight token is nonexists");
         require(SCPNSVerifyTask.isInVerifyOf(tokenId), 
                 "SCPNSVerifyTask: token is not in verify(state != start or timeout)");
-        require(_msgSender() == super.ownerOf(tokenId), "SCPNSVerifyTask: must be owner of token");
+        require(_msgSender() == super.ownerOf(tokenId), 
+                "SCPNSVerifyTask: must be owner of token");
 
-        VerifyStat storage vs = _useRightId2VerifyStat[_id2UseRightId[tokenId]];
+        VerifyStat      storage vs = _useRightId2VerifyStat[_id2UseRightId[tokenId]];
         VerifyParameter storage vp = _id2VerifyParameter[tokenId];
-        vp.verifyBlockNumber = block.number;
-        vp.a = a;
+        vp.verifyBlockNumber       = block.number;
+        vp.a                       = a;
+
         for (uint256 i = 0; i < proof.length; i++) {
             vp.proof.push(proof[i]);
         }
 
         bool __valid = _is_valid_proof(tokenId, proof);
         if (!__valid) {
-            vs.failed += 1;
+            vs.failed  += 1;
         } else {
             vs.succees += 1;
         }
@@ -137,11 +146,11 @@ contract SCPNSVerifyTask is
     }
 
     function _is_valid_proof(uint256 tokenId, bytes32[] memory proof) internal view returns(bool) {
-        VerifyParameter storage vp = _id2VerifyParameter[tokenId];
-        uint256 proofId = vp.proofId;
-        bytes32 q = vp.q;
-        bytes32 merkleRoot = _proofTaskIf().merkleRootOf(proofId);
 
+        VerifyParameter storage vp = _id2VerifyParameter[tokenId];
+        uint256 proofId     = vp.proofId;
+        bytes32 q           = vp.q;
+        bytes32 merkleRoot  = _proofTaskIf().merkleRootOf(proofId);
 
         //bytes32 leaf = keccak256(bytes.concat(keccak256(abi.encode(leaf_data))));
         return MerkleProofUpgradeable.verify(proof, merkleRoot, q);
@@ -163,8 +172,8 @@ contract SCPNSVerifyTask is
         return _exists(_useRightId2Id[tokenId]) && SCPNSVerifyTask.isInVerifyOf(_useRightId2Id[tokenId]);
     }
 
-    function proofParametersByUseRightId(uint256 tokenId) public view virtual override returns(bytes32 dynamicData, string memory parameter, uint256 proofId, bool has) {
-
+    function proofParametersByUseRightId(uint256 tokenId) public view virtual override returns(
+        bytes32 dynamicData, string memory parameter, uint256 proofId, bool has) {
         (dynamicData, parameter, proofId, has) = _proofTaskIf().latestParametersByUseRightId(tokenId);
     }
 
@@ -174,19 +183,22 @@ contract SCPNSVerifyTask is
     }
 
     function hasVerifyTask(uint256 useRightId) public view virtual override returns(bool) {
-        require(_useRightTokenIf().exists(useRightId), "SCPNSVerifyTask: useRight is nonexist");
+        require(_useRightTokenIf().exists(useRightId), 
+                "SCPNSVerifyTask: useRight is nonexist");
+
         return VerifyState.Start ==_id2VerifyParameter[_useRightId2Id[useRightId]].state;
     }
 
     function verifyParameterOf(uint256 tokenId) public view virtual override returns(
         uint256 useRightId, bytes32 q, VerifyState state) {
 
-        require(_exists(tokenId), "SCPNSVerifyTask: token is nonexists");
+        require(_exists(tokenId), 
+                "SCPNSVerifyTask: token is nonexists");
 
-        useRightId = _id2UseRightId[tokenId];
         VerifyParameter storage vp = _id2VerifyParameter[tokenId];
-        q = vp.q;
-        state = vp.state;
+        state       = vp.state;
+        q           = vp.q;
+        useRightId  = _id2UseRightId[tokenId];
     }
 
     function verifyParameterOfUseRightId(uint256 useRightId) public view virtual override returns(
@@ -194,17 +206,17 @@ contract SCPNSVerifyTask is
 
         VerifyParameter storage vp = _id2VerifyParameter[_useRightId2Id[useRightId]];
         tokenId = vp.tokenId;
-        q = vp.q;
-        state = vp.state;
+        state   = vp.state;
+        q       = vp.q;
     }
 
     function verifyStatOfUseRightId(uint256 useRightId) public view virtual override returns(
         uint256 total, uint256 succees, uint256 failed) {
 
         VerifyStat storage vs = _useRightId2VerifyStat[useRightId];
-        total   = vs.total;
-        succees = vs.succees;
-        failed  = vs.failed;
+        total       = vs.total;
+        succees     = vs.succees;
+        failed      = vs.failed;
     }
 
     function _updateVerifyState(uint256 useRightId) internal {

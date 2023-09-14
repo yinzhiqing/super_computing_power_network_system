@@ -66,6 +66,7 @@ contract SCPNSDns is
     {
         return _symbol;
     }
+
     /**
      * @dev Pauses all token transfers.
      *
@@ -99,11 +100,11 @@ contract SCPNSDns is
         if (_exists[name_]) {
             _addresses[_hosts[name_]] = addr_;
         } else {
-            _hosts[name_] = _count;
+            _hosts[name_]      = _count;
             _addresses[_count] = addr_;
-            _names[_count] = name_;
-            _exists[name_] = true;
-            _count = _count + 1;
+            _names[_count]     = name_;
+            _exists[name_]     = true;
+            _count             = _count + 1;
         }
         emit Set(name_, addr_, _msgSender());
     }

@@ -32,9 +32,9 @@
 	},
 	"SCPNSProofTask": {
 		"name": "SCPNSProofTask",
-		"address": "0xC798b5d17E27857C3aF6E5a8Bf12b42dfAF22fFD",
+		"address": "0xa1fa9cb9eCE2Fbd746d104a4039B493Dfd039d24",
 		"deploy": false,
-		"upgrade": false,
+		"upgrade": true,
 		"fixed": false,
 		"params": [
 			"!REF:SCPNSDns.address"

@@ -44,6 +44,7 @@ contract SCPNSTypeUnit is
         __ContractProject_init(dns);
         __SCPNSTypeUnit_init();
     }
+
     /**
      * @dev Grants `DEFAULT_ADMIN_ROLE`, `MINTER_ROLE` and `PAUSER_ROLE` to the
      * account that deploys the contract.
@@ -66,24 +67,32 @@ contract SCPNSTypeUnit is
      *
      * - the caller must have the `MINTER_ROLE`.
      */
-    function mint(uint256 tokenId, bytes32 name_, address unitAddr, uint256 unitId, string memory datas) public virtual override whenNotPaused {
-        require(_validUnitTypes[unitAddr], "SCPNSTypeUnit: unitAddr is not existed.");
+    function mint(uint256 tokenId, bytes32 name_, address unitAddr, uint256 unitId, string memory datas) 
+        public virtual override whenNotPaused {
+
+        require(_validUnitTypes[unitAddr], 
+                "SCPNSTypeUnit: unitAddr is not existed.");
 
         _mint(_msgSender(), tokenId, name_, datas);
-        _id2UnitIds[tokenId] = unitId;
+
+        _id2UnitIds[tokenId]     = unitId;
         _unitId2UnitAddr[unitId] = unitAddr;
     }
 
     function addUnitType(address unitAddr) public virtual whenNotPaused {
-        require(hasRole(MANAGER_ROLE, _msgSender()), "SCPNSTypeUnit: must have manager role to add");
-        require(unitAddr != address(0), "SCPNSTypeUnit: unitAddr is invalid address.");
-        _validUnitTypes[unitAddr] = true;
+        require(hasRole(MANAGER_ROLE, _msgSender()), 
+                "SCPNSTypeUnit: must have manager role to add");
+        require(unitAddr != address(0), 
+                "SCPNSTypeUnit: unitAddr is invalid address.");
 
+        _validUnitTypes[unitAddr] = true;
         _allUnitTypes.push(unitAddr);
     }
 
     function removeUnitType(address unitAddr) public virtual whenNotPaused {
-        require(hasRole(MANAGER_ROLE, _msgSender()), "SCPNSTypeUnit: must have manager role to remove");
+        require(hasRole(MANAGER_ROLE, _msgSender()), 
+                "SCPNSTypeUnit: must have manager role to remove");
+
         if (_validUnitTypes[unitAddr]) {
             delete _validUnitTypes[unitAddr];
         }

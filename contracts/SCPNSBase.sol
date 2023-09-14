@@ -94,15 +94,17 @@ contract SCPNSBase is Initializable, ContextUpgradeable, AccessControlEnumerable
      * - the caller must have the `MINTER_ROLE`.
      */
     function _mint(address to, uint256 tokenId, bytes32 name_, string memory datas) internal virtual {
-        require(hasRole(MINTER_ROLE, _msgSender()), "SCPNSBase: must have minter role to mint");
-        require(name_ == NO_NAME || !_exists(_name2IDs[name_]), "SCPNSBase: token name is exists.");
+        require(hasRole(MINTER_ROLE, _msgSender()), 
+                "SCPNSBase: must have minter role to mint");
+        require(name_ == NO_NAME || !_exists(_name2IDs[name_]), 
+                "SCPNSBase: token name is exists.");
 
         super._mint(to, tokenId);
 
         if (name_ != NO_NAME) {
             _name2IDs[name_] = tokenId;
         }
-        _id2Names[tokenId] = name_;
+        _id2Names[tokenId]   = name_;
         _tokenDatas[tokenId] = datas;
 
         emit UpdateDatas(_msgSender(), _msgSender(), tokenId, _id2Names[tokenId], datas);
@@ -113,7 +115,6 @@ contract SCPNSBase is Initializable, ContextUpgradeable, AccessControlEnumerable
       *
     */
     function update(uint256 tokenId, string memory datas) public virtual override {
-
         _update(tokenId, datas);
     }
     /**
@@ -126,7 +127,9 @@ contract SCPNSBase is Initializable, ContextUpgradeable, AccessControlEnumerable
      * - the caller must have the `PAUSER_ROLE`.
      */
     function pause() public virtual override {
-        require(hasRole(PAUSER_ROLE, _msgSender()), "SCPNSBase: must have pauser role to pause");
+        require(hasRole(PAUSER_ROLE, _msgSender()), 
+                "SCPNSBase: must have pauser role to pause");
+
         _pause();
     }
 
@@ -140,14 +143,18 @@ contract SCPNSBase is Initializable, ContextUpgradeable, AccessControlEnumerable
      * - the caller must have the `PAUSER_ROLE`.
      */
     function unpause() public virtual override {
-        require(hasRole(PAUSER_ROLE, _msgSender()), "SCPNSBase: must have pauser role to unpause");
+        require(hasRole(PAUSER_ROLE, _msgSender()), 
+                "SCPNSBase: must have pauser role to unpause");
+
         _unpause();
     }
 
     /**
      * @dev See {IERC165-supportsInterface}.
      */
-    function supportsInterface(bytes4 interfaceId) public view virtual override(AccessControlEnumerableUpgradeable, ERC721Upgradeable, ERC721EnumerableUpgradeable) returns (bool) {
+    function supportsInterface(bytes4 interfaceId) public view virtual 
+        override(AccessControlEnumerableUpgradeable, ERC721Upgradeable, ERC721EnumerableUpgradeable) returns (bool) {
+
         return super.supportsInterface(interfaceId);
     }
 
@@ -181,7 +188,6 @@ contract SCPNSBase is Initializable, ContextUpgradeable, AccessControlEnumerable
     }
 
     function _burn(uint256 tokenId) internal virtual override(ERC721Upgradeable) {
-        
         delete _tokenDatas[tokenId];
 
         bytes32 name_ = _id2Names[tokenId];

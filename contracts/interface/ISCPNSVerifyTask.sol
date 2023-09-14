@@ -29,9 +29,9 @@ interface ISCPNSVerifyTask is
         uint256 failed;
     }
 
-
     event TaskData(uint256 indexed index, uint256 indexed useRightId, 
                    uint256 preBlockNumber,  address sender, VerifyParameter vp, string datas);
+
     function mint(uint256 useRightId, uint256 proofId, bytes32 q, string memory datas) external;
     function taskVerify(uint256 tokenId, uint256 a, bytes32[] memory proof) external;
 
@@ -44,7 +44,8 @@ interface ISCPNSVerifyTask is
         uint256 tokenId, bytes32 q, VerifyState state);
     function verifyParameterOf(uint256 tokenId) external view returns(
         uint256 useRightId, bytes32 q, VerifyState state);
-    function verifyStatOfUseRightId(uint256 useRightId) external view returns(uint256 total, uint256 succees, uint256 failed);
+    function verifyStatOfUseRightId(uint256 useRightId) external view returns(
+        uint256 total, uint256 succees, uint256 failed);
     function useRightIdOf(uint256 tokenId) external view returns(uint256);
     function isInVerifyOf(uint256 tokenId) external view returns(bool);
     function isInVerifyOfUseRightId(uint256 tokenId) external view returns(bool);

@@ -72,41 +72,42 @@ ISCPNSProofTask
             || hasRole(MANAGER_ROLE, _msgSender()), 
             "SCPNSProofTask: The sender is onwer of useRightId or sender has MANAGER_ROLE role.");
 
-        require(!SCPNSProofTask.isInProofOfUseRightId(useRightId), "SCPNSProofTask: useRight token is in proof");
+        require(!SCPNSProofTask.isInProofOfUseRightId(useRightId), 
+                "SCPNSProofTask: useRight token is in proof");
 
         uint256 tokenId = _idGenerator.current();
         _mint(to, tokenId, NO_NAME, datas);
 
-
         TaskParameter storage tp = _id2TaskParameter[tokenId];
-        tp.taskType = TaskType.Manual;
         tp.dynamicData = __prefixed(keccak256(abi.encodePacked(block.timestamp, _msgSender(), tokenId, tp.taskType)));
         tp.parameterId = __selectParameterId(useRightId);
+        tp.taskType    = TaskType.Manual;
 
-        TaskDetail storage td = _id2TaskDetail[tokenId];
-        td.tokenId = tokenId;
-        td.start = block.timestamp;
-        td.state = TaskState.Start;
+        TaskDetail    storage td = _id2TaskDetail[tokenId];
+        td.tokenId     = tokenId;
+        td.start       = block.timestamp;
+        td.state       = TaskState.Start;
 
         _useRightId2TaskIds[useRightId].push(tokenId);
-        _id2useRightId[tokenId] = useRightId;
 
-        _id2Question[tokenId] = q;
+        _id2useRightId[tokenId]  = useRightId;
+        _id2Question[tokenId]    = q;
 
         //purge some data in memory
         _purgeMemory(useRightId, keepTaskCountOfUseRightId);
         emit TaskData(_eventIndex.current(), useRightId, tokenId, _preBlockNumber, _msgSender(), tp, td, datas);
 
         // next mint use 
-        _idGenerator.increment();
         _preBlockNumber = block.number;
+        _idGenerator.increment();
         _eventIndex.increment();
         _ownedTokens[_msgSender()].add(tokenId);
     }
 
     function taskEnd(uint256 tokenId, bytes32 merkleRoot, bytes32 a) public virtual override whenNotPaused {
-        uint256 useRightId = _id2useRightId[tokenId];
-        require(_exists(tokenId), "SCPNSProofTask: token is nonexists");
+        uint256 useRightId   = _id2useRightId[tokenId];
+        require(_exists(tokenId), 
+                "SCPNSProofTask: token is nonexists");
         require(_msgSender() == _useRightTokenIf().ownerOf(_id2useRightId[tokenId]) || _msgSender() == super.ownerOf(tokenId), 
                 "SCPNSProofTask: sender has not use-right, and is not owner of tokenId ");
         require(_id2TaskDetail[tokenId].state == TaskState.Start, 
@@ -138,15 +139,17 @@ ISCPNSProofTask
 
     function taskCancel(uint256 tokenId) public virtual override whenNotPaused {
         uint256 useRightId = _id2useRightId[tokenId];
-        require(_exists(tokenId), "SCPNSProofTask: token is nonexists");
-        require(hasRole(MINTER_ROLE, _msgSender()), "SCPNSProofTask: must have minter role to add");
+        require(_exists(tokenId), 
+                "SCPNSProofTask: token is nonexists");
+        require(hasRole(MINTER_ROLE, _msgSender()), 
+                "SCPNSProofTask: must have minter role to add");
         require(_msgSender() == _useRightTokenIf().ownerOf(_id2useRightId[tokenId]), 
                 "SCPNSProofTask: tokenId owner is not sender");
         require(_id2TaskDetail[tokenId].state == TaskState.Start, 
                 "SCPNSProofParameter: task state is not Start, can't cancel");
 
         TaskParameter storage tp = _id2TaskParameter[tokenId];
-        TaskDetail storage td = _id2TaskDetail[tokenId];
+        TaskDetail    storage td = _id2TaskDetail[tokenId];
         td.state = TaskState.Cancel;
 
         emit TaskData(_eventIndex.current(), useRightId, tokenId, _preBlockNumber, _msgSender(), tp, td, "");
@@ -157,8 +160,11 @@ ISCPNSProofTask
     }
 
      function updateKeepTaskCount(uint256 keepCount) public virtual override whenNotPaused {
-        require(hasRole(MANAGER_ROLE, _msgSender()), "SCPNSProofTask: must have manager role to add");
-        require(keepCount > 0, "SCPNSProofTask: The minimum value of a is 1.");
+        require(hasRole(MANAGER_ROLE, _msgSender()), 
+                "SCPNSProofTask: must have manager role to add");
+        require(keepCount > 0, 
+                "SCPNSProofTask: The minimum value of a is 1.");
+
         keepTaskCountOfUseRightId = keepCount;
      }
 
@@ -171,26 +177,31 @@ ISCPNSProofTask
     }
 
     function isInProofOf(uint256 tokenId) public view virtual override returns(bool) {
-        require(_exists(tokenId), "SCPNSProofTask: token is nonexists");
+        require(_exists(tokenId), 
+                "SCPNSProofTask: token is nonexists");
+
         return _id2TaskDetail[tokenId].state == TaskState.Start;
     }
 
     function isInProofOfUseRightId(uint256 tokenId) public view virtual override returns(bool) {
-        require(_useRightTokenIf().exists(tokenId), "SCPNSProofTask: useRight token is nonexists");
+        require(_useRightTokenIf().exists(tokenId), 
+                "SCPNSProofTask: useRight token is nonexists");
 
         uint256[] storage taskIds = _useRightId2TaskIds[tokenId];
         if (taskIds.length > 0) {
-            uint256 taskId = _useRightId2TaskIds[tokenId][taskIds.length -1];
+            uint256 taskId        = _useRightId2TaskIds[tokenId][taskIds.length -1];
             TaskDetail storage td = _id2TaskDetail[taskId];
+
             return td.state == TaskState.Start;
         }
         return false;
     }
 
-    function latestParametersByUseRightId(uint256 tokenId) 
-        public view virtual override returns( bytes32 dynamicData, string memory parameter, uint256 taskId, bool has) {
+    function latestParametersByUseRightId(uint256 tokenId) public view virtual override 
+        returns(bytes32 dynamicData, string memory parameter, uint256 taskId, bool has) {
 
-        require(_useRightTokenIf().exists(tokenId), "SCPNSProofTask: useRight token is nonexists");
+        require(_useRightTokenIf().exists(tokenId), 
+                "SCPNSProofTask: useRight token is nonexists");
 
         uint256[] storage taskIds = _useRightId2TaskIds[tokenId];
 
@@ -201,18 +212,23 @@ ISCPNSProofTask
         }
     }
 
-    function parameterOf(uint256 tokenId) public view virtual override returns(bytes32 dynamicData, string memory parameter) {
-        require(_exists(tokenId), "SCPNSProofTask: token is nonexists");
+    function parameterOf(uint256 tokenId) public view virtual override 
+        returns(bytes32 dynamicData, string memory parameter) {
+
+        require(_exists(tokenId), 
+                "SCPNSProofTask: token is nonexists");
 
         TaskParameter storage tp = _id2TaskParameter[tokenId];
         dynamicData = tp.dynamicData;
-        parameter = _proofParameterIf().parameterOf(tp.parameterId);
+        parameter   = _proofParameterIf().parameterOf(tp.parameterId);
     }
 
     function latestTaskDataByUseRightId(uint256 tokenId) 
         public view virtual override returns(TaskParameter memory parameter, TaskDetail memory result) {
 
-        require(_useRightTokenIf().exists(tokenId), "SCPNSProofTask: useRight token is nonexists");
+        require(_useRightTokenIf().exists(tokenId), 
+                "SCPNSProofTask: useRight token is nonexists");
+
         if (_useRightId2TaskIds[tokenId].length > 0) {
             (parameter, result) = SCPNSProofTask.taskDataOfUseRightId(tokenId, _useRightId2TaskIds[tokenId].length - 1);
         }
@@ -221,8 +237,10 @@ ISCPNSProofTask
     function taskDataOfUseRightId(uint256 tokenId, uint256 index) 
         public view virtual override returns(TaskParameter memory parameter, TaskDetail memory result) {
 
-        require(_useRightTokenIf().exists(tokenId), "SCPNSProofTask: useRight token is nonexists");
-        require(SCPNSProofTask.taskDataCountOfUseRightId(tokenId) > index, "SCPNSProofTask: index is out bound of result.");
+        require(_useRightTokenIf().exists(tokenId), 
+                "SCPNSProofTask: useRight token is nonexists");
+        require(SCPNSProofTask.taskDataCountOfUseRightId(tokenId) > index, 
+                "SCPNSProofTask: index is out bound of result.");
 
         uint256[] storage taskIds = _useRightId2TaskIds[tokenId];
         if (taskIds.length > index) {
@@ -231,16 +249,20 @@ ISCPNSProofTask
     }
 
     function taskDataCountOfUseRightId(uint256 tokenId) public view virtual override returns(uint256) {
-        require(_useRightTokenIf().exists(tokenId), "SCPNSProofTask: useRight token is nonexists");
+        require(_useRightTokenIf().exists(tokenId), 
+                "SCPNSProofTask: useRight token is nonexists");
+
         return _useRightId2TaskIds[tokenId].length;
     }
 
-    function taskDataOf(uint256 tokenId) public view virtual override returns(TaskParameter memory parameter, 
-                                                                     TaskDetail memory result) {
-        require(_exists(tokenId), "SCPNSProofTask: token is nonexists");
+    function taskDataOf(uint256 tokenId) public view virtual override 
+        returns(TaskParameter memory parameter, TaskDetail memory result) {
+
+        require(_exists(tokenId), 
+                "SCPNSProofTask: token is nonexists");
 
         parameter = _id2TaskParameter[tokenId];
-        result = _id2TaskDetail[tokenId];
+        result    = _id2TaskDetail[tokenId];
     }
 
     function merkleRootOf(uint256 tokenId) public view virtual override returns(bytes32) {
@@ -252,7 +274,6 @@ ISCPNSProofTask
         for (uint i = 0; i < 32; i++) {
             b[i] = bytes1(uint8(x / (2**(8*(31 - i)))));
         }
-        
     }
     function __prefixed(bytes32 hash) internal pure returns (bytes32) {
         return keccak256(abi.encodePacked("\x19Dynamic Data Head:\n32", hash));
@@ -263,9 +284,10 @@ ISCPNSProofTask
     }
 
     function __selectParameterId(uint256 useRightId) internal view returns(uint256) {
-        uint256 typeUnitId = _useRightTokenIf().typeUnitIdOf(useRightId);
+        uint256 typeUnitId    = _useRightTokenIf().typeUnitIdOf(useRightId);
         uint256 typeUnitCount = _useRightTokenIf().typeUnitCountOf(useRightId);
-        uint256 parameterId = _proofParameterIf().selectParameterId(typeUnitId, typeUnitCount);
+        uint256 parameterId   = _proofParameterIf().selectParameterId(typeUnitId, typeUnitCount);
+
         return parameterId;
     }
 
@@ -293,11 +315,13 @@ ISCPNSProofTask
 
     function _checkA(uint256 tokenId, bytes32 a) internal view {
         if (_id2Question[tokenId] != bytes32(0)) {
-            bytes32 q = _id2Question[tokenId];
+            bytes32 q   = _id2Question[tokenId];
             bytes32 a2q = SCPNSProofTask.cretateQ(a);
+
             require(q == a2q, "SCPNSProofTask: wrong answer");
         }
     }
+
     //must be at end
     uint256[48] private __gap;
 }

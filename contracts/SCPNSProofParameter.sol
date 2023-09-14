@@ -64,7 +64,8 @@ contract SCPNSProofParameter is
      * - the caller must have the `MINTER_ROLE`.
      */
     function mint(uint256 tokenId, bytes32 name_, string memory parameter, string memory datas) public virtual override whenNotPaused {
-        require(bytes(parameter).length > 0,  "SCPNSProofParameter: parameter is empty");
+        require(bytes(parameter).length > 0,  
+                "SCPNSProofParameter: parameter is empty");
 
         _mint(_msgSender(), tokenId, name_, datas);
 
@@ -72,12 +73,11 @@ contract SCPNSProofParameter is
             _defaultId = tokenId;
         }
         _id2Parameters[tokenId] = parameter;
-
-
     }
 
     function setDefaultToken(uint256 tokenId) public virtual override whenNotPaused {
-        require(hasRole(MINTER_ROLE, _msgSender()) || _msgSender() == super.ownerOf(tokenId), "SCPNSBase: must have minter role to set, or have manager role");
+        require(hasRole(MINTER_ROLE, _msgSender()) || _msgSender() == super.ownerOf(tokenId), 
+                "SCPNSBase: must have minter role to set, or have manager role");
 
         require(_exists(tokenId), "SCPNSProofParameter: token is nonexists.");
 
@@ -101,8 +101,10 @@ contract SCPNSProofParameter is
     }
 
     function _burn(uint256 tokenId) internal virtual override(SCPNSBase) {
-        require(false, "SCPNSProofParameter: can't burn anyone token");
-        require(_exists(tokenId), "SCPNSProofParameter: token is noexists");
+        require(false, 
+                "SCPNSProofParameter: can't burn anyone token");
+        require(_exists(tokenId), 
+                "SCPNSProofParameter: token is noexists");
     }
 
     uint256[48] private __gap;
