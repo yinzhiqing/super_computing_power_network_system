@@ -19,9 +19,15 @@ function is_target_name(token_name) {
     return (target_token_name == "" || target_token_name == token_name) && token_name != "";
 }
 
-async function show_tokens(token) {
-    let cobj = await get_contract(token.name, token.address);
-    logger.debug("token address: " + token.address);
+async function contract(name) {
+    let token = tokens[name];
+    return await get_contract(token.name, token.address);
+}
+
+async function show_tokens() {
+    let cobj = await contract("SCPNSComputilityRanking");
+    let proof_parameter = await contract("SCPNSProofParameter");
+    logger.debug("token address: " + cobj.address);
 
     let name = await cobj.name();
     logger.debug("name: " + name);
@@ -48,18 +54,17 @@ async function show_tokens(token) {
         }
         list[utils.w3uint256_to_hex(parameters[i])] = s;
     } 
+    logger.debug("pricision: " + await cobj.pricision());
+    for(var key in list) {
+        let parameter = list[key];
+        logger.table(parameter, "parameter: " + utils.w3bytes32_to_str(await proof_parameter.nameOf(key)));
+    }
     logger.info(list);
 }
 
 async function run() {
     logger.debug("start working...", "show_tokens");
-    for (var token_name in tokens) {
-        if (!is_target_name(token_name)) continue;
-
-        logger.debug("#contract name: " + token_name);
-        token = tokens[token_name];
-        await show_tokens(token);
-    }
+    await show_tokens();
 }
 run()
   .then(() => process.exit(0))

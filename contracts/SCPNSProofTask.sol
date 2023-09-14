@@ -118,7 +118,7 @@ ISCPNSProofTask
         TaskParameter storage tp = _id2TaskParameter[tokenId];
         TaskDetail    storage td = _id2TaskDetail[tokenId];
 
-        td.end          = block. timestamp;
+        td.end          = block.timestamp;
         td.state        = TaskState.End;
         td.merkleRoot   = merkleRoot;
 

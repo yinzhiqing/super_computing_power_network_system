@@ -17,8 +17,8 @@ async function get_contract(name, address) {
 }
 
 function is_target_name(token_name) {
-    let target_token_name = "SCPNSProofTask";
-    return (target_token_name == "" || target_token_name == token_name) && token_name != "";
+    let target_token_name = ['SCPNSProofTask', 'SCPNSVerifyTask'];
+    return target_token_name.length == 0 || target_token_name.includes(token_name) === true;
 }
 
 async function show_accounts() {
@@ -27,7 +27,6 @@ async function show_accounts() {
 }
 
 async function grant_role(cobj, address, role) {
-    logger.debug("start working...", "grant_role");
     let has = await has_role(cobj, address, role);
     if (has != true) {
         logger.info("grant role :" +  role + " for " + address);
@@ -67,7 +66,8 @@ async function run() {
     const accounts = await web3.eth.getAccounts();
 
     for (var token_name in tokens) {
-        if (!is_target_name(token_name)) continue;
+        if(!is_target_name(token_name)) continue;
+
 
         logger.debug("#contract name: " + token_name);
         token = tokens[token_name];

@@ -42,9 +42,14 @@ async function show_tokens(token) {
         let parameter = utils.w3str_to_str(parameters[1]);
         logger.info(">> parameter: "    + parameter);
 
-        let datas = utils.w3str_to_str(await cobj.datasOf(row["tokenId"]));
-        logger.info(">> datas: "        + datas);
-        logger.info(datas);
+        let datas = await cobj.taskDataOf(row["tokenId"]);
+        logger.info(datas[1]);
+        let taskDetail = datas[1];
+        logger.info("tokenId:" + utils.w3uint256_to_str(taskDetail[0]));
+        logger.info("start: "+ utils.w3uint256_to_str(taskDetail[1]));
+        logger.info("end: "+ utils.w3uint256_to_str(taskDetail[2]));
+        logger.info("merkleRoot: "+ taskDetail[3]);
+        logger.info("state: "+ utils.w3uint256_to_str(taskDetail[3]));
 
         list.push(row);
 

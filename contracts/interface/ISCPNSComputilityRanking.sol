@@ -20,4 +20,5 @@ interface ISCPNSComputilityRanking
     function countOf(uint256 parameterId, uint256 scale) external view returns(uint256);
     function excTimeByIndex(uint256 parameterId, uint256 scale, uint256 index) external view returns(uint256 x, uint256 y);
     function parameters() external view returns(uint256[] memory);
+    function pricision() external view returns(uint256);
 }

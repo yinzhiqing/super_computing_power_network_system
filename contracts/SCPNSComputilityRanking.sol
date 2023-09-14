@@ -54,6 +54,7 @@ contract SCPNSComputilityRanking is
     ArrayUnit256.Uint256s private _parameters;
 
     uint256 private _preBlockNumber;
+    uint256 private __pricision;
 
     function initialize(string memory name_, string memory symbol_, address dns) 
     initializer 
@@ -82,6 +83,7 @@ contract SCPNSComputilityRanking is
         _setupRole(MANAGER_ROLE, _msgSender());
         _setupRole(PAUSER_ROLE, _msgSender());
         //other init
+        __pricision = _pricision();
     }
 
 
@@ -135,7 +137,8 @@ contract SCPNSComputilityRanking is
         require(end > start, 
                 "SCPNSComputilityRanking: start and end value is abnormal");
 
-        uint256 __execTime  = (end - start);
+        // swap to seconds
+        uint256 __execTime  = (end - start) / _pricision();
         _updateExcTimeDistTables(parameterId, tokenId, __execTime);
 
         _id2ParameterIds[parameterId] = taskId;
@@ -236,7 +239,14 @@ contract SCPNSComputilityRanking is
         return _parameters.valuesOf();
     }
 
+    function pricision() public view virtual override returns(uint256) {
+        return __pricision;
+    }
+
     function _pricision() internal view returns(uint256) {
+        if (__pricision > 0) {
+            return __pricision;
+        }
         return (block.timestamp > 1000000000000) ? 1000 : 1;
     }
 
@@ -256,9 +266,9 @@ contract SCPNSComputilityRanking is
         }
 
         if (!_scales[parameterId].exists(1)) {
-            _scales[parameterId].add(1   * _pricision());
-            _scales[parameterId].add(60  * _pricision());
-            _scales[parameterId].add(600 * _pricision());
+            _scales[parameterId].add(1);
+            _scales[parameterId].add(60);
+            _scales[parameterId].add(600);
         }
 
         // increment times of scales

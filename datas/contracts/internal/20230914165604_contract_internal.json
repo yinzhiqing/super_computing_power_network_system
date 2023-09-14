@@ -71,8 +71,8 @@
 	},
 	"SCPNSComputilityRanking": {
 		"name": "SCPNSComputilityRanking",
-		"address": "0x0B6D80b8B3E8470255FC93a07f0781ED704E5745",
-		"deploy": false,
+		"address": "0x1DF85dF5b8375AD8C0f6c23Bbf4710EfAC31ecf3",
+		"deploy": true,
 		"upgrade": false,
 		"fixed": false,
 		"params": [
