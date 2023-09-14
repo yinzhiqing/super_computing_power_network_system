@@ -51,7 +51,7 @@ async function select_use_right_id() {
         logger.debug("use_right_id: " + use_right_id);
 
         let deadline = await use_right.deadLine(use_right_id);
-        let now_utc_time = Math.floor(((new Date()).getTime()) / 1000);
+        let now_utc_time = Math.floor(((new Date()).getTime()));
 
         if (deadline < now_utc_time) {
             continue;

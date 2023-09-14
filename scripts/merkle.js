@@ -13,6 +13,7 @@ function crate_values(dynamicData, leaf_count, leaf_deep) {
     let values = [];
     for (var i = 0; i < leaf_count; i++) {
         var leaf = utils.create_leaf_hash(dynamicData, i, leaf_deep);
+        logger.debug("(" + i +"):" + leaf);
         values.push([leaf]);
     }
     return values;
@@ -30,10 +31,12 @@ function create_merkel(filename, dynamicData, leaf_count, leaf_deep) {
 
 function get_tree(dynamicData, leaf_count, leaf_deep) {
     let filename = dynamicData + "-tree.json";
-    if (fs.exists(filename)) {
-       return StandardMerkleTree.load(JSON.parse(fs.readFileSync(filename, "utf8")));
+    console.log(filename);
+    if(fs.existsSync(filename)) {
+            return StandardMerkleTree.load(JSON.parse(fs.readFileSync(filename, "utf8")));
+    } else {
+            return create_merkel(filename, dynamicData, leaf_count, leaf_deep);
     }
-    return create_merkel(filename, dynamicData, leaf_count, leaf_deep);
 }
 
 function get_root(dynamicData, leaf_count, leaf_deep) {
@@ -45,7 +48,7 @@ function get_proof(leaf, dynamicData, leaf_count, leaf_deep) {
     let tree = get_tree(dynamicData, leaf_count, leaf_deep);
 
     for (const [i, v] of tree.entries()) {
-        if (v[0] === leaf) {
+        if (tree.leafHash(v) === leaf) {
             return tree.getProof(i);
         }
     }
@@ -56,12 +59,22 @@ function get_leaf(index, dynamicData, leaf_count, leaf_deep) {
 
     for (const [i, v] of tree.entries()) {
         if (i === index) {
-            return v[0] ;
+            return tree.leafHash(v) ;
         }
     }
     throw "没有发现leaf";
 }
 
+function get_leaf_index(leaf, dynamicData, leaf_count, leaf_deep) {
+    let tree = get_tree(dynamicData, leaf_count, leaf_deep);
+
+    for (const [i, v] of tree.entries()) {
+        if (tree.leafHash(v) === leaf) {
+            return i ;
+        }
+    }
+    throw "没有发现leaf";
+}
 function verify(root, leaf, proof) {
     let isValid =  StandardMerkleTree.verify(root, ["bytes32"], leaf, proof);
     logger.info(leaf + " is vailed: " + isValid);
@@ -71,5 +84,6 @@ module.exports = {
     get_root,
     get_proof,
     get_leaf,
+    get_leaf_index,
     verify
 }

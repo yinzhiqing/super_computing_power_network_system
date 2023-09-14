@@ -147,7 +147,7 @@ contract SCPNSComputilityRanking is
     }
     
     function excTimeDistTableOf(uint256 parameterId, uint256 scale) public view virtual override returns(uint256[] memory keys, uint256[] memory values) {
-        require(_scales[parameterId].exists(scale), "SCPNSComputilityRanking: the scale is nonexists");
+        require(_scales[parameterId].exists(scale ), "SCPNSComputilityRanking: the scale is nonexists");
 
         PairValues.PairUint256 storage _excTimeDistTable = _excTimeDistTables[parameterId][scale];
         keys = _excTimeDistTable.keysOf();
@@ -222,6 +222,10 @@ contract SCPNSComputilityRanking is
         return _parameters.valuesOf();
     }
 
+    function _pricision() internal view returns(uint256) {
+        return (block.timestamp > 1000000000000) ? 1000 : 1;
+    }
+
     function _updateExcTimeDistTables(uint256 parameterId, uint256 tokenId, uint256 _execTime) private {
         // decrement old time dist table of tokenId
         if (_id2Times[parameterId].exists(tokenId) && _id2Times[parameterId].valueOf(tokenId) > 0) {
@@ -239,9 +243,9 @@ contract SCPNSComputilityRanking is
         }
 
         if (!_scales[parameterId].exists(1)) {
-            _scales[parameterId].add(1);
-            _scales[parameterId].add(60);
-            _scales[parameterId].add(600);
+            _scales[parameterId].add(1 * _pricision());
+            _scales[parameterId].add(60 * _pricision());
+            _scales[parameterId].add(600 * _pricision());
         }
 
         // increment times of scales

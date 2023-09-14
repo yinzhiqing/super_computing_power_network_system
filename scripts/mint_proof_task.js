@@ -72,7 +72,7 @@ async function run() {
         }
 
         let deadline = await use_right.deadLine(use_right_id);
-        let now_utc_time = Math.floor(((new Date()).getTime()) / 1000);
+        let now_utc_time = Math.floor(((new Date()).getTime()));
         logger.info(" check use_right_id(" + use_right_id + "deadline is " + deadline, "now time:" + now_utc_time);
 
         if (deadline < now_utc_time) {
@@ -92,6 +92,7 @@ async function run() {
             to: to,
             use_right_id: use_right_id
         })
+        break;
     }
     logger.table(rows, "new tokens");
 }

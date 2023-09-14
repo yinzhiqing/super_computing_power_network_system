@@ -14,7 +14,7 @@ async function get_contract(name, address) {
 }
 
 function is_target_name(token_name) {
-    let target_token_name = "SCPNSProofTask";
+    let target_token_name = "SCPNSVerifyTask";
     return (target_token_name == "" || target_token_name == token_name) && token_name != "";
 }
 
@@ -31,21 +31,20 @@ async function show_tokens(token) {
     for (let i = 0; i < amounts; i++) {
         let row = new Map();
         row["tokenId"] = utils.w3uint256_to_hex(await cobj.tokenByIndex(i));
-        logger.info(">> tokenId; "     + row["tokenId"]);
-        row["isInProof"] = await cobj.isInProofOf(row["tokenId"]);
-        logger.info(">> isInProof "     + row["isInProof"]);
+        logger.info(">> tokenId; "     + row["tokenId"], "verify info");
+        row["use_right_id"] = utils.w3uint256_to_hex(await cobj.useRightIdOf(row["tokenId"]));
+        row["isInVerify"] = await cobj.isInVerifyOf(row["tokenId"]);
+        logger.info(">> isInVerify; "     + row["isInVerify"]);
 
-        let parameters = await cobj.parameterOf(row["tokenId"]);
+        let parameters = await cobj.verifyParameterOf(row["tokenId"]);
         logger.debug(parameters);
-        logger.info(">> dynamicData: "  + parameters[0]);
+        logger.info(">> useRightId: "  + parameters[0]);
 
-        let parameter = utils.w3str_to_str(parameters[1]);
-        logger.info(">> parameter: "    + parameter);
+        logger.info(">> q: "    + parameters[1]);
+        logger.info(">> state :" + parameters[2].toString());
 
-        let datas = utils.w3str_to_str(await cobj.datasOf(row["tokenId"]));
-        logger.info(">> datas: "        + datas);
-        logger.info(datas);
-
+        let verify_stat = await cobj.verifyStatOfUseRightId(row["use_right_id"]);
+        logger.info(">> verify stat: " + verify_stat);
         list.push(row);
 
     } 

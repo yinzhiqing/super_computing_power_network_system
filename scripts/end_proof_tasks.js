@@ -4,7 +4,7 @@ const program   = require('commander');
 const utils     = require("./utils");
 const logger    = require("./logger");
 const prj       = require("../prj.config.js");
-const readline  = require('readline');
+const merkle  = require('./merkle');
 
 const bak_path  = prj.caches_contracts;
 const tokens  = require(prj.contract_conf);
@@ -42,15 +42,12 @@ async function contract(name) {
     return await get_contract(token.name, token.address);
 }
 
-const rl = readline.createInterface({input: process.stdin, output: process.stdout});
-async function create_merkly_datas(dynamicData, leaf_count, leaf_deep) {
-    logger.table({dynamicData: dynamicData, leaf_count: leaf_count, leaf_deep: leaf_deep}, "create merkly tree")
-    rl.on('line', function(input) {logger.info("input: " + input)});
-    //create merkly
-    //test root 
-    let merkly_root = web3.utils.soliditySha3(dynamicData, leaf_count, leaf_deep);
-    logger.info("merkly_root: " + merkly_root);
-    return merkly_root;
+async function create_merkle_datas(dynamicData, leaf_count, leaf_deep) {
+    logger.table({dynamicData: dynamicData, leaf_count: leaf_count, leaf_deep: leaf_deep}, "create merkle tree")
+    //create merkle
+    let merkle_root = merkle.get_root(dynamicData, leaf_count, leaf_deep);
+    logger.info("merkle_root: " + merkle_root);
+    return merkle_root;
 }
 
 async function run() {
@@ -74,10 +71,13 @@ async function run() {
         if (!isInProof) {
             logger.info("useRight token(" + use_right_id +") is not in proof, next...");
             continue;
+        } else {
+            logger.info("update: " + use_right_id);
         }
 
         //[dynamicData, parameter, taskId, has]  
         let parameters  = await proof_task.connect(signer).latestParametersByUseRightId(use_right_id); 
+        logger.debug(parameters);
         let dynamicData = utils.w3uint256_to_hex(parameters[0]);
         let parameter   = JSON.parse(utils.w3str_to_str(parameters[1]));
         let leaf_count  = parameter["leaf_count"];
@@ -96,12 +96,12 @@ async function run() {
         }
         rows.push(info)
 
-        let merkly_root = await create_merkly_datas(dynamicData, leaf_count, leaf_deep);
+        let merkle_root = await create_merkle_datas(dynamicData, leaf_count, leaf_deep);
 
 
         let owner = await proof_task.ownerOf(taskId);
         logger.debug("owner: " + owner);
-        let tx = await proof_task.connect(signer).taskEnd(taskId, merkly_root, utils.str_to_w3bytes32(""));
+        let tx = await proof_task.connect(signer).taskEnd(taskId, merkle_root, utils.str_to_w3bytes32(""));
         
         break;
     }

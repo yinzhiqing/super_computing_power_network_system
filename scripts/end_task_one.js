@@ -47,7 +47,7 @@ async function create_merkel_datas(dynamicData, leaf_count, leaf_deep) {
     logger.table({dynamicData: dynamicData, leaf_count: leaf_count, leaf_deep: leaf_deep}, "create merkel tree")
     //create merkel
     //test root 
-    let merkel_root = web3.utils.soliditySha3(dynamicData, leaf_count, leaf_deep);
+    let merkel_root = merkle.get_root(dynamicData, leaf_count, leaf_deep);
     logger.info("merkel_root: " + merkel_root);
     return merkel_root;
 }

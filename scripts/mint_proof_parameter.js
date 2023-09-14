@@ -57,11 +57,14 @@ async function run() {
 
     let rows = [];
     let token_ids = [];
+    let def_id = "";
+    let def_key = "test01";
 
     let tokens = {
         min: {leaf_count: 800    * 1024 * 1024,   leaf_deep: 100},
         mid: {leaf_count: 8000   * 1024 * 1024,   leaf_deep: 2000},
-        max: {leaf_count: 800000 * 1024 * 1024,   leaf_deep: 30000000000}
+        max: {leaf_count: 800000 * 1024 * 1024,   leaf_deep: 30000000000},
+        test01: {leaf_count: 1 * 1024,   leaf_deep: 10},
     }
 
     for (var key in tokens) {
@@ -71,9 +74,14 @@ async function run() {
 
         token_ids.push(token_id);
 
+        if(key == def_key) {
+            def_id = token_id;
+        }
+
         let isExists = await proof_parameter.exists(token_id); 
         if (isExists == true) {
-            logger.debug("token(id = " + token_id +" name =" + token_name + ") is exists");
+            logger.debug(tokens[key]);
+            logger.debug("token(id = " + token_id +" name =" + token_name + ") is exists, key=" + key);
             continue;
         }
 
@@ -90,7 +98,9 @@ async function run() {
             parameter: utils.json_to_str(token)
         });
     }
-        let tx = proof_parameter.connect(signer).setDefaultToken(create_token_id(tokens["min"]));
+    //let def_id = await create_token_id(tokens["test"]);
+    logger.info("set default token: " + def_id);
+    let tx = await proof_parameter.connect(signer).setDefaultToken(def_id);
 
 }
 
