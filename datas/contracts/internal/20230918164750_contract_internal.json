@@ -93,7 +93,7 @@
 	},
 	"SCPNSTypeUnit": {
 		"name": "SCPNSTypeUnit",
-		"address": "0xe7b6F6Eb2A32AedB152cc4bEc0B7286b7d02eb26",
+		"address": "0xfe1CF148ac8567A70E3E2499a37B2E3247AFF444",
 		"deploy": false,
 		"upgrade": false,
 		"fixed": false,
@@ -105,7 +105,7 @@
 		"name": "SCPNSVerifyTask",
 		"address": "0x7E9Ac321124b4ED2E8Eb64E57f9ec3e6525B6950",
 		"deploy": false,
-		"upgrade": false,
+		"upgrade": true,
 		"fixed": false,
 		"params": [
 			"!REF:SCPNSDns.address"

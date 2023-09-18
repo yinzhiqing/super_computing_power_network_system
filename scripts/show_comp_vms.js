@@ -19,8 +19,15 @@ function is_target_name(token_name) {
     return (target_token_name == "" || target_token_name == token_name) && token_name != "";
 }
 
+async function contract(name) {
+    let token = tokens[name];
+    return await get_contract(token.name, token.address);
+}
+
 async function show_tokens(token) {
-    let cobj = await get_contract(token.name, token.address);
+    let cobj = await contract("SCPNSComputilityVM");
+    let compUnit = await contract("SCPNSComputilityUnit");
+    let typeUnit = await contract("SCPNSTypeUnit");
     logger.debug("token address: " + token.address);
 
     let name = await cobj.name();
@@ -32,14 +39,17 @@ async function show_tokens(token) {
     for (let i = 0; i < amounts; i++) {
         let row = new Map();
         row["tokenId"] = utils.w3uint256_to_hex(await cobj.tokenByIndex(i));
-        row["computilityUnitCount"] = utils.w3uint256_to_str(await cobj.computilityUnitCountOf(row["tokenId"]));
-        row["typeUnitCount"] = utils.w3uint256_to_str(await cobj.typeUnitCountOf(row["tokenId"]));
+        row["算力单元数量"] = utils.w3uint256_to_str(await cobj.computilityUnitCountOf(row["tokenId"]));
+        let typeUnitId = await cobj.typeUnitIdOf(row["tokenId"])
+        let typeUnitName  = utils.w3bytes32_to_str(await typeUnit.nameOf(typeUnitId));
+        row["型号"] = typeUnitName;
+        row["数量"] = utils.w3uint256_to_str(await cobj.typeUnitCountOf(row["tokenId"]));
 
 
         let datas = utils.w3str_to_str(await cobj.datasOf(row["tokenId"]));
-        logger.info("tokenId: " + row["tokenId"], "token info");
-        logger.info("datas: ");
-        logger.info(JSON.parse(datas));
+        logger.debug("tokenId: " + row["tokenId"], "token info");
+        logger.debug("datas: ");
+        logger.debug(JSON.parse(datas));
 
         list.push(row);
 

@@ -75,6 +75,7 @@ async function run() {
     let leaf_count = 1024;
     let leaf_deep = 10;
     let root = await create_merkel(dynamicData, leaf_count, leaf_deep);
+    console.log("root:", root);
     let leaf = await get_leaf(99);
     let proof = await get_proof(leaf[0]);
     await verify(root, leaf, proof);

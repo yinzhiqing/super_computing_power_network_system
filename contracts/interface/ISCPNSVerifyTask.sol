@@ -34,6 +34,7 @@ interface ISCPNSVerifyTask is
 
     function mint(uint256 useRightId, uint256 proofId, bytes32 q, string memory datas) external;
     function taskVerify(uint256 tokenId, uint256 a, bytes32[] memory proof) external;
+    function updateWaitBlockNumber(uint256 newBlockNumber) external;
 
     function canVerifyOfUseRightId(uint256 tokenId) external view returns(bool);
     function proofParametersByUseRightId(uint256 tokenId) external view returns(

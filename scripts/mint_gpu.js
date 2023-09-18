@@ -87,13 +87,13 @@ async function run() {
                 logger.warning("token is existed. id : " + token_id);
                 continue;
             } else {
-                logger.info("new token. id : " + token_id);
+                logger.info("new token(" + name +"). id : " + token_id);
                 logger.debug(gpus[name]);
                 logger.debug("--------> toW3str")
                 let datas = utils.str_to_w3str(JSON.stringify(gpus[name]));
                 logger.debug(datas);
                 let tx = await mint(cobj, signer, token_id, utils.str_to_w3bytes32(name), datas);
-                logger.debug(tx);
+                logger.table(gpus[name]);
             }
         }
     }

@@ -4,6 +4,7 @@ const hardhat_conf= require("./hardhat.config.js");
 configs = {
     defaultNetwork : hardhat_conf.defaultNetwork,
     datas_path : "./datas",
+    debug: false,
     networks : {
         localhost: {
             contracts:"./jsons/contracts/contract_localhost.json",
@@ -51,5 +52,6 @@ module.exports = {
     contract_conf : conf_filename("contracts"),
     caches_contracts : caches("contracts"),
     dbs: configs.dbs,
+    debug: configs.debug,
 };
 

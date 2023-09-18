@@ -81,7 +81,7 @@ async function run() {
                     [computility_unit_id], [count], datas);
 
         rows.push({
-            o: to,
+            to: to,
             token_id: token_id,
             typeUnitCount: count,
             leaveCount: leaveCount - count,

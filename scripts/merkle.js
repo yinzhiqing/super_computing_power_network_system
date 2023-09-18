@@ -7,13 +7,12 @@ const prj       = require("../prj.config.js");
 
 const {StandardMerkleTree} = require("@openzeppelin/merkle-tree");
 
-
 function crate_values(dynamicData, leaf_count, leaf_deep) {
 
     let values = [];
     for (var i = 0; i < leaf_count; i++) {
         var leaf = utils.create_leaf_hash(dynamicData, i, leaf_deep);
-        logger.debug("(" + i +"):" + leaf);
+        logger.debug("(" + i +"):" + [leaf]);
         values.push([leaf]);
     }
     return values;
@@ -30,8 +29,7 @@ function create_merkel(filename, dynamicData, leaf_count, leaf_deep) {
 }
 
 function get_tree(dynamicData, leaf_count, leaf_deep) {
-    let filename = dynamicData + "-tree.json";
-    console.log(filename);
+    let filename = "./datas/merkles/" + dynamicData + "-tree.json";
     if(fs.existsSync(filename)) {
             return StandardMerkleTree.load(JSON.parse(fs.readFileSync(filename, "utf8")));
     } else {
@@ -47,14 +45,33 @@ function get_root(dynamicData, leaf_count, leaf_deep) {
 function get_proof(leaf, dynamicData, leaf_count, leaf_deep) {
     let tree = get_tree(dynamicData, leaf_count, leaf_deep);
 
+    let leaf_index = tree.leafLookup([leaf]);
+    return tree.getProof(leaf_index);
+}
+
+function get_proof_by_hash(leaf_hash, dynamicData, leaf_count, leaf_deep) {
+    let tree = get_tree(dynamicData, leaf_count, leaf_deep);
+
     for (const [i, v] of tree.entries()) {
-        if (tree.leafHash(v) === leaf) {
+        if (tree.leafHash(v) === leaf_hash) {
             return tree.getProof(i);
+        }
+    }
+    throw "没有发现proof";
+}
+
+function get_leaf(index, dynamicData, leaf_count, leaf_deep) {
+    let tree = get_tree(dynamicData, leaf_count, leaf_deep);
+
+    for (const [i, v] of tree.entries()) {
+        if (i === index) {
+            return v[0] ;
         }
     }
     throw "没有发现leaf";
 }
-function get_leaf(index, dynamicData, leaf_count, leaf_deep) {
+
+function get_leaf_hash(index, dynamicData, leaf_count, leaf_deep) {
     let tree = get_tree(dynamicData, leaf_count, leaf_deep);
 
     for (const [i, v] of tree.entries()) {
@@ -62,10 +79,21 @@ function get_leaf(index, dynamicData, leaf_count, leaf_deep) {
             return tree.leafHash(v) ;
         }
     }
-    throw "没有发现leaf";
+    throw "没有发现leaf hash";
 }
 
 function get_leaf_index(leaf, dynamicData, leaf_count, leaf_deep) {
+    let tree = get_tree(dynamicData, leaf_count, leaf_deep);
+
+    for (const [i, v] of tree.entries()) {
+        if (v[0] === leaf) {
+            return i ;
+        }
+    }
+    throw "没有发现leaf by index";
+}
+
+function get_leaf_index_by_hash(leaf, dynamicData, leaf_count, leaf_deep) {
     let tree = get_tree(dynamicData, leaf_count, leaf_deep);
 
     for (const [i, v] of tree.entries()) {
@@ -73,17 +101,22 @@ function get_leaf_index(leaf, dynamicData, leaf_count, leaf_deep) {
             return i ;
         }
     }
-    throw "没有发现leaf";
+    throw "没有发现leaf by index";
 }
+
 function verify(root, leaf, proof) {
-    let isValid =  StandardMerkleTree.verify(root, ["bytes32"], leaf, proof);
+    let isValid =  StandardMerkleTree.verify(root, ["bytes32"], [leaf], proof);
     logger.info(leaf + " is vailed: " + isValid);
+    return isValid;
 }
 
 module.exports = {
     get_root,
     get_proof,
+    get_proof_by_hash,
     get_leaf,
+    get_leaf_hash,
     get_leaf_index,
+    get_leaf_index_by_hash,
     verify
 }

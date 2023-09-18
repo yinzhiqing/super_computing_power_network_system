@@ -52,7 +52,7 @@ async function create_q(dynamicData, leaf_count, leaf_deep) {
 
     logger.table({dynamicData: dynamicData, leaf_count: leaf_count, leaf_deep: leaf_deep}, "create merkle tree")
     //create merkle
-    let leaf = merkle.get_leaf(leaf_count/2, dynamicData, leaf_count, leaf_deep);
+    let leaf = merkle.get_leaf_hash(leaf_count/2, dynamicData, leaf_count, leaf_deep);
     logger.info("leaf : " + leaf);
     return leaf;
 }

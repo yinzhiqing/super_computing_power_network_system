@@ -1,4 +1,6 @@
 
+const prj           = require("../prj.config.js");
+const debug_model   = prj.debug;
 function date_format(dash = "-", colon = ":", space = " ") {
     function pad(n) {return n < 10 ? "0" + n : n}
     function _date(p, split, val ) { return p.length > 0 ? p + split + pad(val): "" + pad(val)}
@@ -58,8 +60,11 @@ function warning(msg, title = "", kwargs = {}) {
 }
 
 function debug(msg, title = "", kwargs = {}) {
-    kwargs = __merge_kwargs(kwargs, {"type":"log"});
-    show_msg(msg, title, kwargs);
+    if (debug_model == true || debug_model == "true") 
+    {
+        kwargs = __merge_kwargs(kwargs, {"type":"log"});
+        show_msg(msg, title, kwargs);
+    }
 }
 
 function info(msg, title = "", kwargs = {}) {

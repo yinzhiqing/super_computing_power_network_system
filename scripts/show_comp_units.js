@@ -10,37 +10,36 @@ const bak_path  = prj.caches_contracts;
 const tokens  = require(prj.contract_conf);
 const {ethers, upgrades}    = require("hardhat");
 
-async function get_contract(name, address) {
-    return await utils.get_contract(name, address);
-}
-
-function is_target_name(token_name) {
     let target_token_name = "SCPNSComputilityUnit";
-    return (target_token_name == "" || target_token_name == token_name) && token_name != "";
-}
 
-async function show_tokens(token) {
-    let cobj = await get_contract(token.name, token.address);
-    logger.debug("token address: " + token.address);
+async function show_tokens() {
+    let compUnit = await utils.contract("SCPNSComputilityUnit");
+    let typeUnit = await utils.contract("SCPNSTypeUnit");
 
-    let name = await cobj.name();
+    logger.debug("token address: " + compUnit.address);
+
+    let name = await compUnit.name();
     logger.debug("name: " + name);
 
-    let amounts = await cobj.totalSupply();
+    let amounts = await compUnit.totalSupply();
     logger.debug("totalSupply: " + amounts);
     let list = [];
     for (let i = 0; i < amounts; i++) {
         let row = new Map();
-        row["tokenId"] = utils.w3uint256_to_hex(await cobj.tokenByIndex(i));
-        row["unitType"] = utils.w3uint256_to_hex(await cobj.typeUnitIdOf(row["tokenId"]));
-        row["unitTypeCount"] = utils.w3uint256_to_str(await cobj.typeUnitCountOf(row["tokenId"]));
-        row["leaveCount"] = utils.w3uint256_to_str(await cobj.leaveCountOf(row["tokenId"]));
+        row["tokenId"] = utils.w3uint256_to_hex(await compUnit.tokenByIndex(i));
+
+        typeUnitId = utils.w3uint256_to_hex(await compUnit.typeUnitIdOf(row["tokenId"]));
+        row["类型ID"] = typeUnitId;
+        row["型号"] = utils.w3bytes32_to_str(await typeUnit.nameOf(typeUnitId));
+        row["类型"] = await typeUnit.unitTypeOf(typeUnitId);
+        row["总数量"] = utils.w3uint256_to_str(await compUnit.typeUnitCountOf(row["tokenId"]));
+        row["剩余数量"] = utils.w3uint256_to_str(await compUnit.leaveCountOf(row["tokenId"]));
 
 
-        let datas = utils.w3str_to_str(await cobj.datasOf(row["tokenId"]));
-        logger.info("tokenId: " + row["tokenId"], "token info");
-        logger.info("datas: ");
-        logger.info(JSON.parse(datas));
+        let datas = utils.w3str_to_str(await compUnit.datasOf(row["tokenId"]));
+        logger.debug("tokenId: " + row["tokenId"], "token info");
+        logger.debug("datas: ");
+        logger.debug(JSON.parse(datas));
 
         list.push(row);
 
@@ -50,13 +49,7 @@ async function show_tokens(token) {
 
 async function run() {
     logger.debug("start working...", "show_tokens");
-    for (var token_name in tokens) {
-        if (!is_target_name(token_name)) continue;
-
-        logger.debug("#contract name: " + token_name);
-        token = tokens[token_name];
-        await show_tokens(token);
-    }
+    await show_tokens();
 }
 run()
   .then(() => process.exit(0))

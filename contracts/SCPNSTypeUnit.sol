@@ -8,6 +8,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "./SCPNSBase.sol";
 import "./interface/ISCPNSTypeUnit.sol";
+import "./interface/ISCPNSBase.sol";
 import "./ContractProject.sol";
 
 /**
@@ -108,12 +109,28 @@ contract SCPNSTypeUnit is
     }
 
     function unitTypeOf(uint256 tokenId) public view override returns(string memory) {
-        address unitAddr = _unitId2UnitAddr[tokenId];
+        address unitAddr = _unitId2UnitAddr[_id2UnitIds[tokenId]];
         if (unitAddr != address(0) && _validUnitTypes[unitAddr]) {
-           ISCPNSTypeUnit iuf = ISCPNSTypeUnit(unitAddr);
-           return iuf.unitType();
+           ISCPNSBase ibf = ISCPNSBase(unitAddr);
+           return ibf.unitType();
         }
         return "";
+    }
+
+    function unitIdOf(uint256 tokenId) public view virtual override returns(uint256) {
+        address unitAddr = _unitId2UnitAddr[_id2UnitIds[tokenId]];
+        if (unitAddr != address(0) && _validUnitTypes[unitAddr]) {
+           return _id2UnitIds[tokenId];
+        }
+        return 0;
+    }
+    function unitDatasOf(uint256 tokenId) public view virtual override returns(string memory) {
+        address unitAddr = _unitId2UnitAddr[_id2UnitIds[tokenId]];
+        if (unitAddr != address(0) && _validUnitTypes[unitAddr]) {
+            ISCPNSBase ibf = ISCPNSBase(unitAddr);
+            return ibf.datasOf(_id2UnitIds[tokenId]);
+        }
+        return "no";
     }
 
     uint256[48] private __gap;

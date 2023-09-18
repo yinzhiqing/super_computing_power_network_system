@@ -43,7 +43,7 @@ async function count_of(client) {
 
 async function mint(client, signer, token_id, name, unitAddr, unitId, datas) {
     logger.debug("mint from " + await signer.getAddress() + " to with token_id = " + token_id);
-    return await client.connect(signer).mint(token_id, name, unitAddr, unitAddr, datas);
+    return await client.connect(signer).mint(token_id, name, unitAddr, unitId, datas);
 }
 
 async function new_token_id() {

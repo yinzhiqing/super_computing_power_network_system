@@ -93,8 +93,8 @@
 	},
 	"SCPNSTypeUnit": {
 		"name": "SCPNSTypeUnit",
-		"address": "0xe7b6F6Eb2A32AedB152cc4bEc0B7286b7d02eb26",
-		"deploy": false,
+		"address": "0xfe1CF148ac8567A70E3E2499a37B2E3247AFF444",
+		"deploy": true,
 		"upgrade": false,
 		"fixed": false,
 		"params": [

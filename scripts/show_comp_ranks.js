@@ -32,6 +32,8 @@ async function show_tokens() {
     let name = await cobj.name();
     logger.debug("name: " + name);
 
+    logger.debug("pricision: " + await cobj.pricision());
+
     let parameters = await cobj.parameters();
     let list = {};
     for (let i = 0; i < parameters.length; i++) {
@@ -49,17 +51,13 @@ async function show_tokens() {
                     x: xy[0].toString(),
                     y: xy[1].toString(),
                 });
+                logger.debug(datas[datas.length -1]);
             }
             s[scales[j]] = datas;
+            logger.table(datas, "parameter = " + parameters[i] + " scale = " + scales[j]);
         }
         list[utils.w3uint256_to_hex(parameters[i])] = s;
     } 
-    logger.debug("pricision: " + await cobj.pricision());
-    for(var key in list) {
-        let parameter = list[key];
-        logger.table(parameter, "parameter: " + utils.w3bytes32_to_str(await proof_parameter.nameOf(key)));
-    }
-    logger.info(list);
 }
 
 async function run() {

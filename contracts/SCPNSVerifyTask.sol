@@ -145,6 +145,11 @@ contract SCPNSVerifyTask is
         _eventIndex.increment();
     }
 
+    function updateWaitBlockNumber(uint256 newBlockNumber) public virtual override {
+        require(hasRole(MANAGER_ROLE, _msgSender()), "SCPNSVerifyTask: must have manager role to update");
+        _waitBlockNumber = newBlockNumber;
+    }
+
     function _is_valid_proof(uint256 tokenId, bytes32[] memory proof) internal view returns(bool) {
 
         VerifyParameter storage vp = _id2VerifyParameter[tokenId];

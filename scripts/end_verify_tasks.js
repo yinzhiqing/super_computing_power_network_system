@@ -44,7 +44,7 @@ async function contract(name) {
 }
 
 async function get_leaf_index(leaf, dynamicData, leaf_count, leaf_deep) {
-    let index = merkle.get_leaf_index(leaf, dynamicData, leaf_count, leaf_deep);
+    let index = merkle.get_leaf_index_by_hash(leaf, dynamicData, leaf_count, leaf_deep);
     logger.info("leaf index: " + index);
     return index;
 }
@@ -53,7 +53,7 @@ async function get_leaf_index(leaf, dynamicData, leaf_count, leaf_deep) {
 async function get_proof(leaf, dynamicData, leaf_count, leaf_deep) {
     logger.table({dynamicData: dynamicData, leaf_count: leaf_count, leaf_deep: leaf_deep}, "create merkle tree")
     //create merkle
-    let proof = merkle.get_proof(leaf, dynamicData, leaf_count, leaf_deep);
+    let proof = merkle.get_proof_by_hash(leaf, dynamicData, leaf_count, leaf_deep);
     logger.info("proof: " + proof);
     return proof;
 }

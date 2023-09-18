@@ -31,25 +31,27 @@ async function show_tokens(token) {
     for (let i = 0; i < amounts; i++) {
         let row = new Map();
         row["tokenId"] = utils.w3uint256_to_hex(await cobj.tokenByIndex(i));
-        logger.info(">> tokenId; "     + row["tokenId"]);
+        logger.debug(">> tokenId; "     + row["tokenId"]);
+        row["useRightId"] = utils.w3uint256_to_hex(await cobj.useRightIdOf(row["tokenId"]));
+        logger.debug(">> useRightId; "     + row["useRightId"]);
         row["isInProof"] = await cobj.isInProofOf(row["tokenId"]);
-        logger.info(">> isInProof "     + row["isInProof"]);
+        logger.debug(">> isInProof "     + row["isInProof"]);
 
         let parameters = await cobj.parameterOf(row["tokenId"]);
         logger.debug(parameters);
-        logger.info(">> dynamicData: "  + parameters[0]);
+        logger.debug(">> dynamicData: "  + parameters[0]);
 
         let parameter = utils.w3str_to_str(parameters[1]);
-        logger.info(">> parameter: "    + parameter);
+        logger.debug(">> parameter: "    + parameter);
 
         let datas = await cobj.taskDataOf(row["tokenId"]);
-        logger.info(datas[1]);
         let taskDetail = datas[1];
-        logger.info("tokenId:" + utils.w3uint256_to_str(taskDetail[0]));
-        logger.info("start: "+ utils.w3uint256_to_str(taskDetail[1]));
-        logger.info("end: "+ utils.w3uint256_to_str(taskDetail[2]));
-        logger.info("merkleRoot: "+ taskDetail[3]);
-        logger.info("state: "+ utils.w3uint256_to_str(taskDetail[3]));
+        logger.debug("tokenId:" + utils.w3uint256_to_str(taskDetail[0]));
+        logger.debug("start: "+ utils.w3uint256_to_str(taskDetail[1]));
+        logger.debug("end: "+ utils.w3uint256_to_str(taskDetail[2]));
+        logger.debug("merkleRoot: "+ taskDetail[3]);
+        logger.debug("state: "+ utils.w3uint256_to_str(taskDetail[3]));
+        logger.debug("owner: "+ await cobj.ownerOf(row["tokenId"]));
 
         list.push(row);
 

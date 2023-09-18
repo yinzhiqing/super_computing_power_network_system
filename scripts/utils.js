@@ -2,8 +2,10 @@
 const fs    = require('fs');
 const path  = require("path");
 const logger    = require("./logger");
+const prj       = require("../prj.config.js");
 const { ethers, upgrades } = require("hardhat");
 
+const tokens  = require(prj.contract_conf);
 const ARG_FLG_TXT = "!REF:";
 const ARG_VAL_SPLIT = ".";
 
@@ -11,6 +13,11 @@ async function get_contract(name, address) {
     const cf = await ethers.getContractFactory(name);
     const c = await cf.attach(address);
     return c;
+}
+
+async function contract(name) {
+    let token = tokens[name];
+    return await get_contract(token.name, token.address);
 }
 
 function get_files(pathname, ext) {
@@ -190,7 +197,7 @@ function lstr_to_lweb3bytes32(datas, size) {
 function create_leaf_hash(dynamicData, index, deep) {
     let hash = web3.utils.soliditySha3(dynamicData, index);
     for (var i = 0; i < deep; i++) {
-       hash = web3.utils.soliditySha3(dynamicData, index);
+       hash = web3.utils.soliditySha3(hash);
     }
     return str_to_w3bytes32(hash);
 
@@ -202,6 +209,7 @@ function hex_to_ascii(data) {
 
 module.exports = {
     get_contract,
+    contract,
     file_exists,
     write_json,
     write_datas,
@@ -225,5 +233,5 @@ module.exports = {
     json_to_w3str,
     json_to_str,
     hex_to_ascii,
-    create_leaf_hash
+    create_leaf_hash,
 }

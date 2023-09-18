@@ -31,20 +31,20 @@ async function show_tokens(token) {
     for (let i = 0; i < amounts; i++) {
         let row = new Map();
         row["tokenId"] = utils.w3uint256_to_hex(await cobj.tokenByIndex(i));
-        logger.info(">> tokenId; "     + row["tokenId"], "verify info");
+        row["owner"] = utils.w3uint256_to_hex(await cobj.ownerOf(row["tokenId"]));
+        logger.debug(">> tokenId; "     + row["tokenId"], "verify info");
         row["use_right_id"] = utils.w3uint256_to_hex(await cobj.useRightIdOf(row["tokenId"]));
         row["isInVerify"] = await cobj.isInVerifyOf(row["tokenId"]);
-        logger.info(">> isInVerify; "     + row["isInVerify"]);
+        logger.debug(">> isInVerify; "     + row["isInVerify"]);
 
         let parameters = await cobj.verifyParameterOf(row["tokenId"]);
-        logger.debug(parameters);
-        logger.info(">> useRightId: "  + parameters[0]);
+        logger.debug(">> useRightId: "  + utils.w3uint256_to_hex(parameters[0]));
 
-        logger.info(">> q: "    + parameters[1]);
-        logger.info(">> state :" + parameters[2].toString());
+        logger.debug(">> q: "    + parameters[1]);
+        logger.debug(">> state :" + parameters[2].toString());
 
         let verify_stat = await cobj.verifyStatOfUseRightId(row["use_right_id"]);
-        logger.info(">> verify stat: " + verify_stat);
+        logger.debug(">> verify stat: [t, s, f] " + verify_stat);
         list.push(row);
 
     } 
