@@ -6,6 +6,8 @@ const utils     = require("./utils");
 const logger    = require("./logger");
 const prj       = require("../prj.config.js");
 const merkle    = require("./merkle");
+const {hexToBtyes} = require('ethereum-cryptograpy/utils');
+const {defaultAbiCoder} = require('@ethersproject/abi');
 
 const bak_path  = prj.caches_contracts;
 const tokens  = require(prj.contract_conf);
@@ -30,6 +32,13 @@ async function create_q(dynamicData, leaf_count, leaf_deep) {
  * 被挑战（算力节点）者需要回答叶子hash对应的路径
  *
  */
+
+async function crate_merge_data() {
+    var dynamicData = "0x0dd9fe0e2c33052886b7e30285180c63b44900f60f94f65c24bd29c6f40f377d";
+    var leaf_index = 512;
+    var hex_data = defaultAbiCoder.encode(['unit256', 'unit256'], [dynamicData, leaf_index]);
+    console.log('hex_data: ', hex_data);
+}
 
 async function test() {
     console.log("start test");
@@ -101,8 +110,9 @@ async function run() {
     logger.debug("start working...", "mint");
 
     //await proof1();
-    await test();
+    //await test();
     //logger.info("verify state: " + await proof());
+    await crate_merge_data();
 
 }
 

@@ -21,13 +21,14 @@ interface ISCPNSProofTask is
         uint256 end;
         bytes32 merkleRoot;
         TaskState state;
+        bool    useSha256;
     }
 
     event TaskData(uint256 indexed index, uint256 indexed useRightId, uint256 indexed taskId, 
                    uint256 preBlockNumber,  address sender, TaskParameter taskParameter, TaskDetail taskDetail, string datas);
 
     function mint(address to, uint256 useRightId, bytes32 q, string memory datas) external ;
-    function taskEnd(uint256 tokenId, bytes32 merkleRoot, bytes32 a) external;
+    function taskEnd(uint256 tokenId, bytes32 merkleRoot, bytes32 a, bool useSha256) external;
     function taskCancel(uint256 tokenId) external;
     function updateKeepTaskCount(uint256 keepCount) external;
 
@@ -47,4 +48,5 @@ interface ISCPNSProofTask is
     function isInProofOf(uint256 tokenId) external view returns(bool);
     function isInProofOfUseRightId(uint256 tokenId) external view returns(bool);
     function merkleRootOf(uint256 tokenId) external view returns(bytes32);
+    function useSha256Of(uint256 tokenId) external view returns(bool);
 }

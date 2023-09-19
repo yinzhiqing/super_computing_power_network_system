@@ -33,7 +33,7 @@ interface ISCPNSVerifyTask is
                    uint256 preBlockNumber,  address sender, VerifyParameter vp, string datas);
 
     function mint(uint256 useRightId, uint256 proofId, bytes32 q, string memory datas) external;
-    function taskVerify(uint256 tokenId, uint256 a, bytes32[] memory proof) external;
+    function taskVerify(uint256 tokenId, uint256 a, bytes32[] memory proof, bool[] memory pos) external;
     function updateWaitBlockNumber(uint256 newBlockNumber) external;
 
     function canVerifyOfUseRightId(uint256 tokenId) external view returns(bool);

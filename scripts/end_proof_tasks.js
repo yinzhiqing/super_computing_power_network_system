@@ -101,7 +101,7 @@ async function run() {
 
         let owner = await proof_task.ownerOf(taskId);
         logger.debug("owner: " + owner);
-        let tx = await proof_task.connect(signer).taskEnd(taskId, merkle_root, utils.str_to_w3bytes32(""));
+        let tx = await proof_task.connect(signer).taskEnd(taskId, merkle_root, utils.str_to_w3bytes32(""), false);
         
         break;
     }

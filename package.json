@@ -37,7 +37,9 @@
     "web3": "^1.5.2"
   },
   "dependencies": {
+    "@ethersproject/abi": "^5.7.0",
     "@openzeppelin/contracts-upgradeable": "^4.1.0",
+    "ethereum-cryptography": "^2.1.2",
     "redis": "^4.1.0",
     "sleep": "^6.3.0",
     "truffle": "^5.5.5",

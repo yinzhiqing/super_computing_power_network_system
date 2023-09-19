@@ -135,7 +135,7 @@ async function run() {
         /* 5. 
          * 回答挑战问题, 将根据回答问题有效性进行对错次数统计
          */
-        let tx = await verify_task.connect(signer).taskVerify(parameters[0]/* 任务ID*/, a /* 叶节点序号*/, proof /*路径*/);
+        let tx = await verify_task.connect(signer).taskVerify(parameters[0]/* 任务ID*/, a /* 叶节点序号*/, proof /*路径*/, [] /* 位置*/);
         
         break;
     }

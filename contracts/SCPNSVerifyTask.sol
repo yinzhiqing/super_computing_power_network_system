@@ -14,6 +14,7 @@ import "./ContractProject.sol";
 import "./PairValues.sol";
 import "./ArraryUint256.sol";
 import "./ArrayAddresses.sol";
+import "./MerkleProofUpgradableSha256.sol";
 
 contract SCPNSVerifyTask is 
   SCPNSBase, 
@@ -112,7 +113,7 @@ contract SCPNSVerifyTask is
         _tokensSender[_msgSender()].add(tokenId);
     }
 
-    function taskVerify(uint256 tokenId, uint256 a, bytes32[] memory proof) public virtual override whenNotPaused {
+    function taskVerify(uint256 tokenId, uint256 a, bytes32[] memory proof, bool[] memory pos) public virtual override whenNotPaused {
 
         require(_useRightTokenIf().exists(_id2UseRightId[tokenId]), 
                 "SCPNSVerifyTask: useRight token is nonexists");
@@ -130,7 +131,7 @@ contract SCPNSVerifyTask is
             vp.proof.push(proof[i]);
         }
 
-        bool __valid = _is_valid_proof(tokenId, proof);
+        bool __valid = _is_valid_proof(tokenId, proof, pos);
         if (!__valid) {
             vs.failed  += 1;
         } else {
@@ -150,14 +151,22 @@ contract SCPNSVerifyTask is
         _waitBlockNumber = newBlockNumber;
     }
 
-    function _is_valid_proof(uint256 tokenId, bytes32[] memory proof) internal view returns(bool) {
 
+    function _is_valid_proof(uint256 tokenId, bytes32[] memory proof, bool[] memory pos) internal view returns(bool) {
         VerifyParameter storage vp = _id2VerifyParameter[tokenId];
         uint256 proofId     = vp.proofId;
         bytes32 q           = vp.q;
         bytes32 merkleRoot  = _proofTaskIf().merkleRootOf(proofId);
+        bool useSha256      = _proofTaskIf().useSha256Of(proofId);
 
-        //bytes32 leaf = keccak256(bytes.concat(keccak256(abi.encode(leaf_data))));
+        return _merkeyProof(proof, pos, merkleRoot, q, useSha256);
+    }
+
+    function _merkeyProof(bytes32[] memory proof, bool[] memory pos, bytes32 merkleRoot, bytes32 q, bool useSha256) internal pure returns(bool) {
+
+        if (useSha256) {
+            return MerkleProofUpgradeableSha256.verify(proof, pos, merkleRoot, q);
+        }
         return MerkleProofUpgradeable.verify(proof, merkleRoot, q);
     }
 

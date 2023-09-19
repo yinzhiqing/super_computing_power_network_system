@@ -22,7 +22,7 @@ function is_dns(token_name) {
 async function has_role(client, address) {
     let role= await client.MANAGER_ROLE();
     let has = await client.hasRole(role, address);
-    logger.info(address + " check role(" + role + ") state: " + has);
+    logger.debug(address + " check role(" + role + ") state: " + has);
 
     return has;
 }
@@ -34,7 +34,7 @@ async function set(client, signer, name, address){
         return;
     } 
 
-    logger.debug("set dns(name, address): (" + name + " ," + address + ")");
+    logger.info("set dns(name, address): (" + name + " ," + address + ")");
     tx = await client.connect(signer).set(name, address);
     logger.debug(tx);
 }

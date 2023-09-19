@@ -104,7 +104,7 @@ ISCPNSProofTask
         _ownedTokens[_msgSender()].add(tokenId);
     }
 
-    function taskEnd(uint256 tokenId, bytes32 merkleRoot, bytes32 a) public virtual override whenNotPaused {
+    function taskEnd(uint256 tokenId, bytes32 merkleRoot, bytes32 a, bool useSha256) public virtual override whenNotPaused {
         uint256 useRightId   = _id2useRightId[tokenId];
         require(_exists(tokenId), 
                 "SCPNSProofTask: token is nonexists");
@@ -121,6 +121,7 @@ ISCPNSProofTask
         td.end          = block.timestamp;
         td.state        = TaskState.End;
         td.merkleRoot   = merkleRoot;
+        td.useSha256    = useSha256;
 
         _updateComputilityRanking(_id2useRightId[tokenId], tp, td);
 
@@ -267,6 +268,10 @@ ISCPNSProofTask
 
     function merkleRootOf(uint256 tokenId) public view virtual override returns(bytes32) {
         return _id2TaskDetail[tokenId].merkleRoot;
+    }
+
+    function useSha256Of(uint256 tokenId) public view virtual override returns(bool) {
+        return _id2TaskDetail[tokenId].useSha256;
     }
 
     function __uint2Bytes32(uint256 x) internal pure returns (bytes memory b) {
