@@ -51,4 +51,5 @@ interface ISCPNSVerifyTask is
     function isInVerifyOf(uint256 tokenId) external view returns(bool);
     function isInVerifyOfUseRightId(uint256 tokenId) external view returns(bool);
     function eventCountOf() external view returns(uint256);
+    function sha256Of(bytes memory data) external view returns(bytes32);
 }

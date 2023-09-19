@@ -14,23 +14,13 @@ async function get_contract(name, address) {
     return await utils.get_contract(name, address);
 }
 
-function is_target_name(token_name) {
-    let target_token_name = "SCPNSTypeUnit";
-    return (target_token_name == "" || target_token_name == token_name) && token_name != "";
-}
-
-async function show_accounts() {
-    const accounts = await ethers.provider.listAccounts();
-    console.log(accounts);
-}
-
 async function conv_type_id(id) {
     return web3.utils.soliditySha3(utils.str_to_w3uint256(id));
 }
 async function has_role(cobj, address, role) {
     let brole = web3.eth.abi.encodeParameter("bytes32", web3.utils.soliditySha3(role));
     let has = await cobj.hasRole(brole, address);
-    logger.info(address + " check role(" + role + ") state: " + has);
+    logger.debug(address + " check role(" + role + ") state: " + has);
 
     return has;
 }
@@ -52,58 +42,60 @@ async function new_token_id() {
 }
 
 async function run() {
-    logger.debug("start working...", "mint");
+    logger.debug("start working...", "mint gpu");
 
-    let gpu_token = tokens["SCPNSGpuList"];
-    let gpu_cobj = await get_contract(gpu_token.name, gpu_token.address);
-    let gpu_addr = gpu_token.address;
+    let gpu_cobj = await utils.contract("SCPNSGpuList");
+    let gpu_addr = gpu_cobj.address;
+    let cobj = await utils.contract("SCPNSTypeUnit");
 
+    const accounts = await web3.eth.getAccounts();
+    let role = "MINTER_ROLE";
+    let signer = ethers.provider.getSigner(0); 
+    let minter = await signer.getAddress(); 
+    logger.debug("minter = " + minter);
 
-    for (var token_name in tokens) {
-        if (!is_target_name(token_name)) continue;
+    let has_miter = await has_role(cobj, minter, role);
+    if (has_miter != true) {
+        logger.error(personal + " no minter role." );
+        return;
+    } 
 
-        logger.debug("#contract name: " + token_name);
-        token = tokens[token_name];
-        let cobj = await get_contract(token.name, token.address);
-
-        const accounts = await web3.eth.getAccounts();
-        let role = "MINTER_ROLE";
-        let signer = ethers.provider.getSigner(0); 
-        let minter = await signer.getAddress(); 
-        logger.debug("minter = " + minter);
-
-        let has_miter = await has_role(cobj, minter, role);
-        if (has_miter != true) {
-            logger.error(personal + " no minter role." );
-            return;
-        } 
-
-        //append unitType address to 
-        if (! await cobj.isValidUnitType(gpu_addr)) {
-            logger.warning("add unit type: " + gpu_addr);
-            await cobj.connect(signer).addUnitType(gpu_addr);
-            await cobj.isValidUnitType(gpu_addr);
-
-        }
-
-        let gpu_count = await gpu_cobj.totalSupply();
-
-        for (var i = 0; i < gpu_count; i++) {
-            let token_id = await gpu_cobj.tokenByIndex(i);
-            let token_name = await gpu_cobj.nameOf(token_id);
-
-            let existed = await cobj.exists(token_id);
-            if (existed) {
-                logger.warning("token is existed. id : " + token_id);
-                continue;
-            } else {
-                logger.info("new token. id : " + token_id);
-                let datas = utils.str_to_w3str(JSON.stringify({data:"test"}));
-                let tx = await mint(cobj, signer, token_id, token_name, gpu_addr, token_id, datas);
-                logger.debug(tx);
-            }
-        }
+    //append unitType address to 
+    
+    if (! await cobj.isValidUnitType(gpu_addr)) {
+        logger.info("add unit type: " + gpu_addr);
+        await cobj.connect(signer).addUnitType(gpu_addr);
+        await cobj.isValidUnitType(gpu_addr);
     }
+
+    let gpu_count = await gpu_cobj.totalSupply();
+
+    let gpus = [];
+    for (var i = 0; i < gpu_count; i++) {
+        let type_info = {};
+        let token_id = await gpu_cobj.tokenByIndex(i);
+        let token_name = await gpu_cobj.nameOf(token_id);
+        type_info = {
+            token_id: token_id.toString(),
+            token_name: utils.w3bytes32_to_str(token_name),
+            gpu_id: "=token_id",
+            new_token: false
+        }
+
+        let existed = await cobj.exists(token_id);
+        if (existed) {
+            logger.debug("token is existed. id : " + token_id);
+        } else {
+            logger.info("new token. id : " + token_id);
+            let datas = utils.str_to_w3str(JSON.stringify({data:"test"}));
+            let tx = await mint(cobj, signer, token_id, token_name, gpu_addr, token_id, datas);
+            logger.debug(tx);
+            type_info[new_token] = true;
+        }
+        gpus.push(type_info);
+
+    }
+    logger.table(gpus);
 }
 
 run()

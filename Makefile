@@ -139,20 +139,35 @@ make_md:
 export_java:
 	@~/.web3j/web3j generate solidity -a $output_path/contracts/"$n"_output/$c.abi -b $output_path/contracts/"$c"_output/$c.bin -o $output_java_path -p $class_path 
 
-mint:
-	$(call run_script, "mint")
-
 grantrole:
 	$(call run_script, "grantrole")
 
-append_type:
-	$(call run_script, "append_type")
-
-show_types:
-	$(call run_script, "show_types")
-
 show_tokens:
 	$(call run_script, "show_tokens")
+
+show_gpus:
+	$(call run_script, "show_gpus")
+
+show_types:
+	$(call run_script, "show_type_units")
+
+show_comp_units:
+	$(call run_script, "show_comp_units")
+
+show_comp_vms:
+	$(call run_script, "show_comp_vms")
+
+show_use_rights:
+	$(call run_script, "show_use_rights")
+
+show_proof_tasks:
+	$(call run_script, "show_proof_tasks")
+
+show_verify_tasks:
+	$(call run_script, "show_verify_tasks")
+
+show_comp_ranks:
+	$(call run_script, "show_comp_ranks")
 
 tests:
 	@npx hardhat run scripts/test.js

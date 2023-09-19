@@ -168,6 +168,10 @@ function w3uint256_to_str(data) {
     return data.toString();
 }
 
+function w3uint256_to_number(data) {
+    return Number(data.toString());
+}
+
 function str_to_w3bytes32(data) {
     return web3.eth.abi.encodeParameter("bytes32", web3.utils.toHex(data));
 }

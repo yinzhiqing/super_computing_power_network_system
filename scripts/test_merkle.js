@@ -6,8 +6,10 @@ const utils     = require("./utils");
 const logger    = require("./logger");
 const prj       = require("../prj.config.js");
 const merkle    = require("./merkle");
-const {hexToBtyes} = require('ethereum-cryptograpy/utils');
+const cryptojs  = require("crypto-js");
+const crypto    = require("crypto");
 const {defaultAbiCoder} = require('@ethersproject/abi');
+const {hexToBytes}= require('ethereum-cryptography/utils');
 
 const bak_path  = prj.caches_contracts;
 const tokens  = require(prj.contract_conf);
@@ -27,7 +29,7 @@ async function create_q(dynamicData, leaf_count, leaf_deep) {
  * 此函数描述了挑战者发起挑战的代码调用过程.
  *
  * 挑战者对可以接受挑战的算力节点发起挑战，
- * 挑战方式是给定算力节点一个叶子hash值，
+ * 挑战方式是给定算力节点一个叶子hashp值，
  * 在有限的时间内，
  * 被挑战（算力节点）者需要回答叶子hash对应的路径
  *
@@ -36,8 +38,48 @@ async function create_q(dynamicData, leaf_count, leaf_deep) {
 async function crate_merge_data() {
     var dynamicData = "0x0dd9fe0e2c33052886b7e30285180c63b44900f60f94f65c24bd29c6f40f377d";
     var leaf_index = 512;
-    var hex_data = defaultAbiCoder.encode(['unit256', 'unit256'], [dynamicData, leaf_index]);
+    var hex_data = defaultAbiCoder.encode(['bytes32', 'uint256'], [dynamicData, leaf_index]);
     console.log('hex_data: ', hex_data);
+}
+
+async function test_sha256() {
+    var dynamicData = "0x0dd9fe0e2c33052886b7e30285180c63b44900f60f94f65c24bd29c6f40f377d";
+    var leaf_count = 1024;
+    var leaf_deep  = 10;
+    var leaf_index = 512;
+
+    console.log("\n基础参数----->\n");
+    console.log("   dynamicData                    :", dynamicData);
+    console.log("   leaf_index                     :", leaf_index);
+    console.log("\n基础参数编码后-----> \n");
+    console.log("   dynamicData_encode_bytes32     :", web3.eth.abi.encodeParameter("bytes32", dynamicData));
+    console.log("   leaf_index_encode_uint32       :", web3.eth.abi.encodeParameter("uint256", leaf_index));
+
+    console.log("\n参数合并值----> \n");
+    var dynamicData_index_encode = web3.eth.abi.encodeParameters(["bytes32", "uint256"], [dynamicData, leaf_index]);
+    console.log("dynamicData_index_encode          :", dynamicData_index_encode);
+
+
+    console.log("\n参数合并后sha256值----> \n");
+
+    obj = crypto.createHash("sha256");
+
+    console.log("\nsha256输入hex----> \n");
+    console.log("dynamicData_index_encode_hex      :", dynamicData_index_encode);
+    dynamicData_index_encode_sha256 = obj.update(Buffer.from(dynamicData_index_encode)).digest("hex");
+    console.log("\ndynamicData_index_encode_bytes_sha256: 0x" + dynamicData_index_encode_sha256);
+
+
+
+    console.log("\nsha256输入bytes----> \n");
+    dynamicData_index_encode_bytes = web3.utils.hexToBytes(dynamicData_index_encode);
+    console.log("   dynamicData_index_encode_bytes :\n", dynamicData_index_encode_bytes);
+
+    obj = crypto.createHash("sha256");
+    dynamicData_index_encode_sha256 = obj.update(Buffer.from(dynamicData_index_encode_bytes)).digest("hex");
+    console.log("\dynamicData_index_encode_bytes_sha256: 0x" + dynamicData_index_encode_sha256);
+
+    console.log("\n");
 }
 
 async function test() {
@@ -106,13 +148,16 @@ async function proof() {
     return merkle.verify(root, leaf, proof);
 }
 
+
+
 async function run() {
     logger.debug("start working...", "mint");
 
     //await proof1();
     //await test();
     //logger.info("verify state: " + await proof());
-    await crate_merge_data();
+    //await crate_merge_data();
+    await test_sha256();
 
 }
 

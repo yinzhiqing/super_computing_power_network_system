@@ -9,25 +9,21 @@ const bak_path  = prj.caches_contracts;
 const tokens  = require(prj.contract_conf);
 const {ethers, upgrades}    = require("hardhat");
 
-async function get_contract(name, address) {
-    return await utils.get_contract(name, address);
-}
-
-function is_target_name(token_name) {
-    let target_token_name = "SCPNSVerifyTask";
-    return (target_token_name == "" || target_token_name == token_name) && token_name != "";
-}
-
-async function show_tokens(token) {
-    let cobj = await get_contract(token.name, token.address);
-    logger.debug("token address: " + token.address);
+async function show_tokens() {
+    let cobj = await utils.contract("SCPNSVerifyTask");
+    logger.debug("token address: " + cobj.address);
 
     let name = await cobj.name();
     logger.debug("name: " + name);
 
+    let data = "0x0dd9fe0e2c33052886b7e30285180c63b44900f60f94f65c24bd29c6f40f377d0000000000000000000000000000000000000000000000000000000000000200";
+    let hshData = await cobj.sha256Of(data);
+    logger.warning(hshData);
+
     let amounts = await cobj.totalSupply();
     logger.debug("totalSupply: " + amounts);
     let list = [];
+    let detail = {};
     for (let i = 0; i < amounts; i++) {
         let row = new Map();
         row["tokenId"] = utils.w3uint256_to_hex(await cobj.tokenByIndex(i));
@@ -45,21 +41,24 @@ async function show_tokens(token) {
 
         let verify_stat = await cobj.verifyStatOfUseRightId(row["use_right_id"]);
         logger.debug(">> verify stat: [t, s, f] " + verify_stat);
+
+        detail[row["use_right_id"]] = "verify [t, s, f]  " + verify_stat;
+        detail[row["use_right_id"]] = {
+            total: Number(verify_stat[0].toString()),
+            succees: Number(verify_stat[1].toString()),
+            failed: Number(verify_stat[2].toString())
+        };
+
         list.push(row);
 
     } 
+    logger.table(detail, "token verify");
     logger.table(list);
 }
 
 async function run() {
-    logger.debug("start working...", "show_tokens");
-    for (var token_name in tokens) {
-        if (!is_target_name(token_name)) continue;
-
-        logger.debug("#contract name: " + token_name);
-        token = tokens[token_name];
-        await show_tokens(token);
-    }
+        logger.debug("show verify tasks");
+        await show_tokens();
 }
 run()
   .then(() => process.exit(0))

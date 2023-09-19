@@ -233,6 +233,10 @@ contract SCPNSVerifyTask is
         failed      = vs.failed;
     }
 
+    function sha256Of(bytes memory data) public view virtual override returns(bytes32) {
+       return sha256(abi.encodePacked(data));
+    }
+
     function _updateVerifyState(uint256 useRightId) internal {
         uint256 tokenId = _useRightId2Id[useRightId];
     
