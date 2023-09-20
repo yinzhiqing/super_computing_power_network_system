@@ -63,6 +63,7 @@ module.exports = {
       },
       internal: {
           //url: `https://kovan.infura.io/v3/${key_infura}`,
+          //url: `http://124.251.110.238/rpc`,
           url: `http://106.14.38.214:6060`,
           accounts :{mnemonic : mnemonic}
       },
