@@ -26,7 +26,7 @@ function crate_values(dynamicData, leaf_count, leaf_deep) {
     let values = [];
     for (var i = 0; i < leaf_count; i++) {
         var leaf = create_leaf(dynamicData, i, leaf_deep);
-        logger.debug("(" + i +"):" + [leaf]);
+        logger.info("(" + i +"):" + [leaf]);
         values.push([leaf]);
     }
     return values;

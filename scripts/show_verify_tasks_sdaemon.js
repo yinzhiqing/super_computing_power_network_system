@@ -11,14 +11,10 @@ const {ethers, upgrades}    = require("hardhat");
 
 async function work() {
     let cobj = await utils.contract("SCPNSVerifyTask");
-    logger.debug("token address: " + cobj.address);
+    logger.warning("验证任务(挑战)信息");
 
     let name = await cobj.name();
     logger.debug("name: " + name);
-
-    let data = "0x0dd9fe0e2c33052886b7e30285180c63b44900f60f94f65c24bd29c6f40f377d0000000000000000000000000000000000000000000000000000000000000200";
-    let hshData = await cobj.sha256Of(data);
-    logger.warning(hshData);
 
     let amounts = await cobj.totalSupply();
     logger.debug("totalSupply: " + amounts);

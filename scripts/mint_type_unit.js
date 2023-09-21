@@ -42,7 +42,7 @@ async function new_token_id() {
 }
 
 async function run() {
-    logger.debug("start working...", "mint gpu");
+    logger.debug("start working...", "mint type unit");
 
     let gpu_cobj = await utils.contract("SCPNSGpuList");
     let gpu_addr = gpu_cobj.address;
@@ -94,6 +94,7 @@ async function run() {
         }
         gpus.push(type_info);
 
+        break;
     }
     logger.table(gpus);
 }

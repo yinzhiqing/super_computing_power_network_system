@@ -86,7 +86,7 @@ async function run() {
 
         let owner = await proof_task.ownerOf(taskId);
         if (owner != signer.getAddress()) {
-            logger.info("owner of proof task id(" + taskId +") is not signer, next...");
+            logger.info(" owner of proof task id(" + taskId +") is not signer, next...");
             continue;
         }
 

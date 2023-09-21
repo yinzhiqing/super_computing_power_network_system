@@ -139,11 +139,14 @@ make_md:
 export_java:
 	@~/.web3j/web3j generate solidity -a $output_path/contracts/"$n"_output/$c.abi -b $output_path/contracts/"$c"_output/$c.bin -o $output_java_path -p $class_path 
 
+init_dns:
+	$(call run_script, "init_dns")
+
 grantrole:
 	$(call run_script, "grantrole")
 
-show_tokens:
-	$(call run_script, "show_tokens")
+show_dns:
+	$(call run_script, "show_dnss")
 
 show_gpus:
 	$(call run_script, "show_gpus")
@@ -163,11 +166,36 @@ show_use_rights:
 show_proof_tasks:
 	$(call run_script, "show_proof_tasks")
 
+show_proof_parameters:
+	$(call run_script, "show_proof_parameters")
+
 show_verify_tasks:
 	$(call run_script, "show_verify_tasks")
 
 show_comp_ranks:
 	$(call run_script, "show_comp_ranks")
+
+
+mint_proof_parameter:
+	$(call run_script, "mint_proof_parameter")
+
+mint_type_unit:
+	$(call run_script, "mint_type_unit")
+
+mint_comp_unit:
+	$(call run_script, "mint_comp_unit")
+
+mint_comp_vm:
+	$(call run_script, "mint_comp_vm")
+
+mint_proof_task:
+	$(call run_script, "mint_proof_task")
+
+mint_verify_task:
+	$(call run_script, "mint_verify_task")
+
+mint_verify_task_target:
+	$(call run_script, "mint_verify_task_target")
 
 tests:
 	@npx hardhat run scripts/test.js

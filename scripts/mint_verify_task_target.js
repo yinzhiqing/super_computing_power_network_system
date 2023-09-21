@@ -20,35 +20,15 @@ async function contract(name) {
 }
 
 //选择一个使用权通证
-async function select_use_right_id(target_id) {
+async function select_use_right_id(user) {
     let use_right = await contract("SCPNSUseRightToken");
-    let use_right_count = await use_right.totalSupply();
-    let verify_task      = await contract("SCPNSVerifyTask");
 
-    if (target_id != null) {
-        return target_id;
+    let owner_count = await use_right.balanceOf(user);
+    if (owner_count == 0) {
+        throw "没有发现可用使用权通证";
     }
-
-    for (var i = 0; i < use_right_count; i++) {
-        let use_right_id = utils.w3uint256_to_hex(await use_right.tokenByIndex(i));
-        logger.debug("use_right_id: " + use_right_id);
-
-        let deadline = await use_right.deadLine(use_right_id);
-        //diff env
-
-        let now_utc_time = Math.floor((new Date()).getTime());
-
-        if (deadline < now_utc_time) {
-            logger.warning("deadLine: " + deadline + " now_utc_time ;" + now_utc_time);
-            continue;
-        }
-
-        let canVerify = await verify_task.canVerifyOfUseRightId(use_right_id);
-        if (canVerify) {
-            return use_right_id;
-        }
-    }
-    throw "没有发现可用使用权通证";
+    let use_right_id = await use_right.tokenOfOwnerByIndex(user, owner_count - 1);
+    return utils.w3uint256_to_hex(use_right_id);
 }
 
 // 随机选择一个叶子对应的数据值hash
@@ -82,7 +62,9 @@ async function run() {
     // 获取钱包中account, 此account是使用权通证(use_right_id)的拥有者
     let signer = ethers.provider.getSigner(0); 
     // 从配置文件中读取使用权通证(一个算力节点对应一个使用权通证)
-    let use_right_id = await select_use_right_id();
+
+    let user = "0xFbB84C3b36b61356425e8B916D81bB977071BbD0";
+    let use_right_id = await select_use_right_id(user);
 
     //2.
     /*确认当前使用权通证是否能够进行挑战,需要满足两个条件

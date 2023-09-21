@@ -86,6 +86,7 @@ async function run() {
             typeUnitCount: count,
             leaveCount: leaveCount - count,
         })
+
         break;
     }
     logger.table(rows, "new tokens");

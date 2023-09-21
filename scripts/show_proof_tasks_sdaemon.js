@@ -9,18 +9,9 @@ const bak_path  = prj.caches_contracts;
 const tokens  = require(prj.contract_conf);
 const {ethers, upgrades}    = require("hardhat");
 
-async function get_contract(name, address) {
-    return await utils.get_contract(name, address);
-}
-
-function is_target_name(token_name) {
-    let target_token_name = "SCPNSProofTask";
-    return (target_token_name == "" || target_token_name == token_name) && token_name != "";
-}
-
 async function work() {
     let cobj = await utils.contract("SCPNSProofTask");
-    logger.info("token address: " + cobj.address);
+    logger.warning("算力证明任务信息");
 
     let name = await cobj.name();
     logger.debug("name: " + name);

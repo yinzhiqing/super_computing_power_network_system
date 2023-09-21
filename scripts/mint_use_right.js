@@ -82,9 +82,10 @@ async function run() {
                     [computility_vm_id], datas);
 
         rows.push({
-            o: to,
+            to: to,
             token_id: token_id,
         })
+        break;
     }
     logger.table(rows, "new tokens");
 }
