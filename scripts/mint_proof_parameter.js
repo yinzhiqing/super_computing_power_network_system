@@ -58,7 +58,7 @@ async function run() {
     let rows = [];
     let token_ids = [];
     let def_id = "";
-    let def_key = "show";
+    let def_key = "show2";
 
     let tokens = {
         min: {leaf_count: 800    * 1024 * 1024,   leaf_deep: 100},

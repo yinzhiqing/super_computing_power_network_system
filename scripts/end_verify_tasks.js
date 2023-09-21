@@ -11,38 +11,6 @@ const bak_path  = prj.caches_contracts;
 const tokens  = require(prj.contract_conf);
 const {ethers, upgrades}    = require("hardhat");
 
-async function get_contract(name, address) {
-    return await utils.get_contract(name, address);
-}
-
-async function show_accounts() {
-    const accounts = await ethers.provider.listAccounts();
-    console.log(accounts);
-}
-
-async function has_role(cobj, address, role) {
-    let brole = web3.eth.abi.encodeParameter("bytes32", web3.utils.soliditySha3(role));
-    let has = await cobj.hasRole(brole, address);
-
-    return has;
-}
-
-async function count_of(client) {
-    let count = await client.totalSupply();
-    logger.debug(count);
-    return count;
-}
-
-async function new_token_id(pre) {
-    var date = new Date();
-    return web3.utils.sha3(pre + date.getTime().toString());
-}
-
-async function contract(name) {
-    let token = tokens[name];
-    return await get_contract(token.name, token.address);
-}
-
 async function get_leaf_index(leaf, dynamicData, leaf_count, leaf_deep) {
     let index = merkle.get_leaf_index_by_hash(leaf, dynamicData, leaf_count, leaf_deep);
     logger.info("leaf index: " + index);
@@ -67,14 +35,14 @@ async function get_proof(leaf, dynamicData, leaf_count, leaf_deep) {
 async function run() {
     logger.debug("start working...", "mint");
 
-    let use_right = await contract("SCPNSUseRightToken");
-    let verify_task      = await contract("SCPNSVerifyTask");
+    let use_right        = await utils.contract("SCPNSUseRightToken");
+    let verify_task      = await utils.contract("SCPNSVerifyTask");
+    let proof_task      = await utils.contract("SCPNSProofTask");
 
+    
     let signer = ethers.provider.getSigner(0); 
-
+    let signer_address  =  await signer.getAddress();
     let use_right_count = await use_right.totalSupply();
-
-    let to = await signer.getAddress();
 
     let rows = [];
 
@@ -98,15 +66,22 @@ async function run() {
          */
         let proof_parameters = await verify_task.proofParametersByUseRightId(use_right_id);
         let dynamicData = utils.w3uint256_to_hex(proof_parameters[0]);
-        logger.debug("dynamicData: " + dynamicData);
-
-        //测试生成Merkle树用
         let parameter   = JSON.parse(utils.w3str_to_str(proof_parameters[1]));
+        let proofId     = utils.w3uint256_to_hex(proof_parameters[2]); // 算力证明任务ID
         let leaf_count  = parameter["leaf_count"];
         let leaf_deep   = parameter["leaf_deep"];
 
-        let proofId      = utils.w3uint256_to_hex(proof_parameters[2]); // 算力证明任务ID
-        logger.debug("proofId: " + proofId);
+        logger.debug("dynamicData: " + dynamicData);
+        logger.debug("proofId    : " + proofId);
+
+        // 只对自己证明的挑战感兴趣
+        let owner = await proof_task.ownerOf(proofId);
+        if (owner != await signer_address) {
+            logger.debug("owner "+ owner +" of proof task id(" + proofId +") is not signer " + signer_address + ", next...");
+            continue;
+        }
+
+        //测试生成Merkle树用
 
         /*
          * 3. 获取当前挑战问题及信息
@@ -115,9 +90,10 @@ async function run() {
 
         let tokenId = parameters[0];
         let q = parameters[1];
-        logger.debug("tokenId: " + utils.w3uint256_to_hex(parameters[0])); // 挑战任务ID
-        logger.debug("q: " + parameters[1].toString()); //挑战问题
-        logger.debug("state: " + parameters[2]);
+
+        logger.debug("tokenId  : " + utils.w3uint256_to_hex(parameters[0])); // 挑战任务ID
+        logger.debug("q        : " + parameters[1].toString()); //挑战问题
+        logger.debug("state    : " + parameters[2]);
 
         /*
          * 4根据挑战问题q 选择对应的proof(路径)
@@ -130,7 +106,6 @@ async function run() {
             use_right_id: use_right_id,
             token_id: tokenId
         })
-
 
         /* 5. 
          * 回答挑战问题, 将根据回答问题有效性进行对错次数统计
