@@ -41,7 +41,7 @@ async function load_use_right_id(signer_address) {
 
         let owner = await proof_task.ownerOf(taskId);
         if (owner != await signer_address) {
-            logger.info("owner "+ owner +" of proof task id(" + taskId +") is not signer " + signer_address + ", next...");
+            logger.debug("owner "+ owner +" of proof task id(" + taskId +") is not signer " + signer_address + ", next...");
             continue;
         }
         return use_right_id;
