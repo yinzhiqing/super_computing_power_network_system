@@ -4,64 +4,54 @@ const program   = require('commander');
 const utils     = require("./utils");
 const logger    = require("./logger");
 const prj       = require("../prj.config.js");
+const merkle    = require("./merkle.js");
 
-const {StandardMerkleTree} = require("@openzeppelin/merkle-tree");
+const { defaultAbiCoder }    = require('@ethersproject/abi');
+const { hexToBytes }         = require('ethereum-cryptography/utils');
+const { keccak256  }         = require('ethereum-cryptography/keccak');
+const { StandardMerkleTree } = require("@openzeppelin/merkle-tree");
 
 
 async function crate_values(dynamicData, leaf_count, leaf_deep) {
-
     let values = [];
     for (var i = 0; i < leaf_count; i++) {
-        var leaf = utils.create_leaf_hash(dynamicData, i, leaf_deep);
-        //logger.debug("index(" + i +"): " + leaf);
+        var leaf = merkle.create_leaf(dynamicData, i, leaf_deep);
         values.push([leaf]);
     }
+
     return values;
 }
 async function create_merkel(dynamicData, leaf_count, leaf_deep) {
     let values = await crate_values(dynamicData, leaf_count, leaf_deep);
-
-    // (2)
     const tree = StandardMerkleTree.of(values, ["bytes32"]);
 
-    // (3)
-    console.log('Merkle Root:', tree.root);
-
-    // (4)
-    fs.writeFileSync("tree.json", JSON.stringify(tree.dump()));
+    fs.writeFileSync("./datas/merkle/test-tree.json", JSON.stringify(tree.dump()));
 
     return tree.root;
 
 }
 
 async function get_proof(leaf) {
-    const tree = StandardMerkleTree.load(JSON.parse(fs.readFileSync("tree.json", "utf8")));
-
-
-    let proof ;
-    // (2)
+    const tree = StandardMerkleTree.load(JSON.parse(fs.readFileSync("./datas/merkle/test-tree.json", "utf8")));
     for (const [i, v] of tree.entries()) {
         if (v[0] === leaf) {
-            // (3)
-            proof = tree.getProof(i);
-            return proof;
+            return tree.getProof(i);
         }
     }
     return "";
 }
 async function get_leaf(index) {
-    const tree = StandardMerkleTree.load(JSON.parse(fs.readFileSync("tree.json", "utf8")));
-
+    const tree = StandardMerkleTree.load(JSON.parse(fs.readFileSync("./datas/merkle/test-tree.json", "utf8")));
     for (const [i, v] of tree.entries()) {
         if (i === index) {
             return v ;
         }
     }
+
     throw "没有发现leaf";
 }
 
 async function verify(root, leaf, proof) {
-    console.log("leaf: " , leaf);
     console.log("proof: ",  proof);
 
     let isValid =  StandardMerkleTree.verify(root, ["bytes32"], leaf, proof);
@@ -79,7 +69,6 @@ async function run() {
     let leaf = await get_leaf(99);
     let proof = await get_proof(leaf[0]);
     await verify(root, leaf, proof);
-
 }
 
 run()

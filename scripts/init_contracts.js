@@ -75,7 +75,7 @@ async function run() {
 
     //
 
-    tx = await verify_task.connect(signer).updateWaitBlockNumber(10);
+    tx = await verify_task.connect(signer).updateWaitBlockNumber(100);
 }
 
 

@@ -50,7 +50,8 @@ async function create_merkle_datas(dynamicData, leaf_count, leaf_deep) {
     return merkle_root;
 }
 
-async function run() {
+async function work(buf) {
+
     logger.debug("start working...", "mint");
 
     let use_right = await contract("SCPNSUseRightToken");
@@ -69,10 +70,8 @@ async function run() {
         let isInProof = await proof_task.isInProofOfUseRightId(use_right_id);
 
         if (!isInProof) {
-            logger.info("useRight token(" + use_right_id +") is not in proof, next...");
+            logger.debug("useRight token(" + use_right_id +") is not in proof, next...");
             continue;
-        } else {
-            logger.info("update: " + use_right_id);
         }
 
         //[dynamicData, parameter, taskId, has]  
@@ -90,6 +89,11 @@ async function run() {
             continue;
         }
 
+        if(buf[taskId] == true) {
+            continue;
+        }
+        logger.info("update: " + use_right_id);
+
         logger.debug("dynamicData: " + dynamicData, "parameters of use_right_id(" + use_right_id + ")");
         logger.debug("parameter: " + utils.w3str_to_str(parameters[1]));
         logger.debug("taskId: " + taskId);
@@ -97,23 +101,28 @@ async function run() {
 
         let info = {
             use_right_id: use_right_id,
-            dynamicData : dynamicData,
-            taskId: parameters[2],
+            taskId: parameters[2].toString(),
         }
         rows.push(info)
 
         let merkle_root = await create_merkle_datas(dynamicData, leaf_count, leaf_deep);
-
-        let use_sha256 = false;
-        let tx = await proof_task.connect(signer).taskEnd(taskId, merkle_root, utils.str_to_w3bytes32(""), use_sha256);
+        let tx = await proof_task.connect(signer).taskEnd(taskId, merkle_root, utils.str_to_w3bytes32(""), false);
         
+        buf[taskId] = true;
         break;
     }
-
-    logger.table(rows, "new tokens");
+    if (rows.length > 0) {
+        logger.table(rows, "new tokens");
+    }
 }
 
-run()
+async function run(times) {
+    logger.info("start end proof tasks");
+    let buf = {};
+    await utils.scheduleJob(times, work, buf);
+}
+
+run(3)
   .then(() => process.exit(0))
   .catch(error => {
     console.error(error);

@@ -8,8 +8,9 @@ const prj       = require("../prj.config.js");
 const merkle    = require("./merkle");
 const cryptojs  = require("crypto-js");
 const crypto    = require("crypto");
-const {defaultAbiCoder} = require('@ethersproject/abi');
-const {hexToBytes}= require('ethereum-cryptography/utils');
+const { defaultAbiCoder } = require('@ethersproject/abi');
+const { hexToBytes }      = require('ethereum-cryptography/utils');
+const { keccak256  }      = require('ethereum-cryptography/keccak');
 
 const bak_path  = prj.caches_contracts;
 const tokens  = require(prj.contract_conf);

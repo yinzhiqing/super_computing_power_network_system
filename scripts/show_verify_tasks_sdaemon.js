@@ -9,7 +9,7 @@ const bak_path  = prj.caches_contracts;
 const tokens  = require(prj.contract_conf);
 const {ethers, upgrades}    = require("hardhat");
 
-async function show_tokens() {
+async function work() {
     let cobj = await utils.contract("SCPNSVerifyTask");
     logger.debug("token address: " + cobj.address);
 
@@ -24,7 +24,6 @@ async function show_tokens() {
     logger.debug("totalSupply: " + amounts);
     let list = [];
     let detail = {};
-
     let start = utils.min_from_right(amounts, 5);
     for (let i = start; i < amounts; i++) {
         let row = new Map();
@@ -58,11 +57,11 @@ async function show_tokens() {
     logger.table(list);
 }
 
-async function run() {
-        logger.debug("show verify tasks");
-        await show_tokens();
+async function run(times) {
+        logger.debug("start show verify tasks");
+        await utils.scheduleJob(times, work);
 }
-run()
+run(5)
   .then(() => process.exit(0))
   .catch(error => {
     console.error(error);

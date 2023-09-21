@@ -6,6 +6,7 @@ const prj       = require("../prj.config.js");
 const { ethers, upgrades } = require("hardhat");
 const crypto    = require("crypto");
 const tokens    = require(prj.contract_conf);
+const schedule  = require('node-schedule');
 
 const ARG_FLG_TXT = "!REF:";
 const ARG_VAL_SPLIT = ".";
@@ -60,12 +61,12 @@ function write_json(filename, data) {
 }
 function mkdirs_sync(dirname) {
     if (fs.existsSync(dirname)) {
-          return true;
+        return true;
     } else {
-          if (mkdirs_sync(path.dirname(dirname))) {
-                 fs.mkdirSync(dirname);
-                 return true;
-          }
+        if (mkdirs_sync(path.dirname(dirname))) {
+            fs.mkdirSync(dirname);
+            return true;
+        }
     }
 }
 
@@ -224,6 +225,38 @@ function hex_to_ascii(data) {
     return web3.utils.hexToAscii(data);
 }
 
+async function schedule_job(time, func) {
+    let times = '\/' + time + '* * * * *';
+    //const job = schedule.scheduleJob('/5 * * * * *', func);
+    const job = schedule.scheduleJob('/5 * * * *', function(fireDate){
+        console.log('This job was supposed to run at ' + fireDate + ', but actually ran at ' + new Date());
+    });
+}
+
+async function scheduleJob(times, func, parameter) {
+    while(1) {
+        try {
+            if (parameter == null) {
+                await func();
+            } else {
+                await func(parameter)
+            }
+            
+        } catch {
+        }
+
+        await new Promise((resolve, reject) => {
+            setTimeout(() => {
+                resolve({ data: 'Hello, World!' });
+            }, times * 1000);
+        });
+    }
+}
+
+function min_from_right(value, count) {
+    return value > count ? value - count : 0;
+}
+
 module.exports = {
     get_contract,
     contract,
@@ -251,4 +284,6 @@ module.exports = {
     json_to_str,
     hex_to_ascii,
     create_leaf_hash,
+    scheduleJob,
+    min_from_right 
 }

@@ -20,10 +20,14 @@ async function contract(name) {
 }
 
 //选择一个使用权通证
-async function select_use_right_id() {
+async function select_use_right_id(target_id) {
     let use_right = await contract("SCPNSUseRightToken");
     let use_right_count = await use_right.totalSupply();
     let verify_task      = await contract("SCPNSVerifyTask");
+
+    if (target_id.length > 0) {
+        return target_id;
+    }
 
     for (var i = 0; i < use_right_count; i++) {
         let use_right_id = utils.w3uint256_to_hex(await use_right.tokenByIndex(i));
@@ -48,13 +52,14 @@ async function select_use_right_id() {
 }
 
 // 随机选择一个叶子对应的数据值hash
-async function create_q(dynamicData, leaf_count, leaf_deep) {
-
-    logger.table({dynamicData: dynamicData, leaf_count: leaf_count, leaf_deep: leaf_deep}, "create merkle tree")
-    //create merkle
-    let leaf = merkle.get_leaf_hash(leaf_count/2, dynamicData, leaf_count, leaf_deep);
-    logger.info("leaf : " + leaf);
-    return leaf;
+async function create_q(dynamic_data, leaf_count, leaf_deep, use_sha256) {
+    logger.table({dynamic_data: dynamic_data, leaf_count: leaf_count, leaf_deep: leaf_deep}, "select leaf")
+    let leaf_index = 512;
+    if (use_sha256) {
+        return utils.create_leaf_hash(dynamic_data, leaf_index, leaf_deep);
+    } else {
+        return merkle.create_leaf_hash(dynamic_data, leaf_index, leaf_deep);
+    }
 }
 
 /*
@@ -71,6 +76,7 @@ async function run() {
 
     //获取合约SCPNSVerifyTask对象
     let verify_task      = await contract("SCPNSVerifyTask");
+    let proof_task       = await contract("SCPNSProofTask");
 
     //1. 挑战者
     // 获取钱包中account, 此account是使用权通证(use_right_id)的拥有者
@@ -94,7 +100,7 @@ async function run() {
     //3. 获取当前使用权通证对应的最新算力证明参数，根据算力证明参数随机选择叶子节点hash作为挑战参数
     let parameters = await verify_task.proofParametersByUseRightId(use_right_id);
     logger.debug(parameters);
-    let dynamicData = utils.w3uint256_to_hex(parameters[0]);
+    let dynamic_data = utils.w3uint256_to_hex(parameters[0]);
     let parameter   = JSON.parse(utils.w3str_to_str(parameters[1]));
     let leaf_count  = parameter["leaf_count"];
     let leaf_deep   = parameter["leaf_deep"];
@@ -103,19 +109,21 @@ async function run() {
     logger.debug("proofId;" + proofId);
 
     //4. 生成挑战问题(叶子hash)
-    let q = await create_q(dynamicData, leaf_count, leaf_deep);
+    let use_sha256 = await proof_task.useSha256Of(proofId);
+    let q = await create_q(dynamic_data, leaf_count, leaf_deep, use_sha256);
 
     // 附加数据 json 格式字符串形式
     let datas = web3.eth.abi.encodeParameter("string", JSON.stringify({data: "test"}));
 
     //5. 发起挑战（验证请求）
     //算力使用权用户signer发起一个任务给指定的算力节点（use_right_id）
+
     let tx = await verify_task.connect(signer).mint(use_right_id, proofId, q, datas);
 
     let info = {
         use_right_id: use_right_id,
-        proofId: proofId,
-        q: q
+        proofId: proofId.toString(),
+        q: q.toString(),
     };
     logger.table(info, "new verify task");
 }
