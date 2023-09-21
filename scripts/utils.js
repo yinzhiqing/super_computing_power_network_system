@@ -1,11 +1,12 @@
 // scripts/deploy_upgradeable_xxx.js
-const fs    = require('fs');
-const path  = require("path");
+const fs        = require('fs');
+const path      = require("path");
 const logger    = require("./logger");
 const prj       = require("../prj.config.js");
 const { ethers, upgrades } = require("hardhat");
+const crypto    = require("crypto");
+const tokens    = require(prj.contract_conf);
 
-const tokens  = require(prj.contract_conf);
 const ARG_FLG_TXT = "!REF:";
 const ARG_VAL_SPLIT = ".";
 
@@ -198,13 +199,25 @@ function lstr_to_lweb3bytes32(datas, size) {
     return web3.eth.abi.encodeParameter("bytes32[]", lbytes32);
 }
 
+/*
+ * sha256
+ *
+ * @parameter data hex string(0x start)
+ *
+ * @return hex string(0x start)
+ *
+ */
+function bytes_sha256(data) {
+    sha256 = crypto.createHash("sha256");
+    data = web3.utils.hexToBytes(data);
+    return "0x" + sha256.update(Buffer.from(data)).digest("hex");
+}
 function create_leaf_hash(dynamicData, index, deep) {
-    let hash = web3.utils.soliditySha3(dynamicData, index);
+    let hash = web3.eth.abi.encodeParameters(["bytes32", "uint256"], [dynamicData, index]);
     for (var i = 0; i < deep; i++) {
-       hash = web3.utils.soliditySha3(hash);
+        hash = bytes_sha256(hash);
     }
     return str_to_w3bytes32(hash);
-
 }
 
 function hex_to_ascii(data) {

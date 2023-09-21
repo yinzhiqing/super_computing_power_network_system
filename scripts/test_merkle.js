@@ -52,35 +52,43 @@ async function test_sha256() {
     console.log("   dynamicData                    :", dynamicData);
     console.log("   leaf_index                     :", leaf_index);
     console.log("\n基础参数编码后-----> \n");
-    console.log("   dynamicData_encode_bytes32     :", web3.eth.abi.encodeParameter("bytes32", dynamicData));
-    console.log("   leaf_index_encode_uint32       :", web3.eth.abi.encodeParameter("uint256", leaf_index));
+    console.log("   dynamicData:", web3.eth.abi.encodeParameter("bytes32", dynamicData));
+    console.log("   leaf_index:", web3.eth.abi.encodeParameter("uint256", leaf_index));
 
     console.log("\n参数合并值----> \n");
     var dynamicData_index_encode = web3.eth.abi.encodeParameters(["bytes32", "uint256"], [dynamicData, leaf_index]);
-    console.log("dynamicData_index_encode          :", dynamicData_index_encode);
+    console.log("合并后值hex:", dynamicData_index_encode);
 
 
-    console.log("\n参数合并后sha256值----> \n");
+    console.log("\n\n参数合并后生成sha256----> \n");
+
 
     obj = crypto.createHash("sha256");
 
     console.log("\nsha256输入hex----> \n");
-    console.log("dynamicData_index_encode_hex      :", dynamicData_index_encode);
+    console.log("输入:", dynamicData_index_encode);
     dynamicData_index_encode_sha256 = obj.update(Buffer.from(dynamicData_index_encode)).digest("hex");
-    console.log("\ndynamicData_index_encode_bytes_sha256: 0x" + dynamicData_index_encode_sha256);
+    console.log("\n输出: 0x" + dynamicData_index_encode_sha256);
 
 
 
-    console.log("\nsha256输入bytes----> \n");
+    console.log("\n\nsha256输入bytes----> \n");
     dynamicData_index_encode_bytes = web3.utils.hexToBytes(dynamicData_index_encode);
-    console.log("   dynamicData_index_encode_bytes :\n", dynamicData_index_encode_bytes);
+    console.log("输入:\n", dynamicData_index_encode_bytes);
 
     obj = crypto.createHash("sha256");
     dynamicData_index_encode_sha256 = obj.update(Buffer.from(dynamicData_index_encode_bytes)).digest("hex");
-    console.log("\dynamicData_index_encode_bytes_sha256: 0x" + dynamicData_index_encode_sha256);
+    console.log("\n输出: ", "0x" + dynamicData_index_encode_sha256);
 
+
+    console.log("\n\n调用utiles.create_leaf_hash生成----> \n");
+    console.log("   dynamicData                    :", dynamicData);
+    console.log("   leaf_index                     :", leaf_index);
+    console.log("   leaf_deep                      :", leaf_deep);
+    console.log("\n输出: ", utils.create_leaf_hash(dynamicData, leaf_index, leaf_deep));
     console.log("\n");
 }
+
 
 async function test() {
     console.log("start test");

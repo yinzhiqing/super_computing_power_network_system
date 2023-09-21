@@ -90,7 +90,7 @@ async function run() {
             let datas = utils.str_to_w3str(JSON.stringify({data:"test"}));
             let tx = await mint(cobj, signer, token_id, token_name, gpu_addr, token_id, datas);
             logger.debug(tx);
-            type_info[new_token] = true;
+            type_info["new_token"] = true;
         }
         gpus.push(type_info);
 
