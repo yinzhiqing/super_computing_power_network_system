@@ -235,15 +235,15 @@ async function schedule_job(time, func) {
 
 async function scheduleJob(times, func, parameter) {
     while(1) {
-        try {
+        //try {
             if (parameter == null) {
                 await func();
             } else {
                 await func(parameter)
             }
             
-        } catch {
-        }
+        //} catch {
+        //}
 
         await new Promise((resolve, reject) => {
             setTimeout(() => {

@@ -60,7 +60,7 @@ async function run() {
 
     let use_right_count = await use_right.totalSupply();
 
-    let to = await signer.getAddress();
+    let signer_address = await signer.getAddress();
 
     let rows = [];
 
@@ -85,7 +85,7 @@ async function run() {
         let taskId      = utils.w3uint256_to_hex(parameters[2]);
 
         let owner = await proof_task.ownerOf(taskId);
-        if (owner != signer.getAddress()) {
+        if (owner != signer_address {
             logger.info(" owner of proof task id(" + taskId +") is not signer, next...");
             continue;
         }

@@ -22,9 +22,10 @@ async function create_merkle_datas(dynamicData, leaf_count, leaf_deep) {
     logger.info("merkle_root: " + merkle_root);
     return merkle_root;
 }
-async function load_use_right_id() {
+async function load_use_right_id(signer_address) {
     //return use_right_id;
     let use_right = await utils.contract("SCPNSUseRightToken");
+    let proof_task      = await utils.contract("SCPNSProofTask");
     let use_right_count = await use_right.totalSupply();
 
     for (var i = 0; i < use_right_count; i++) {
@@ -35,30 +36,38 @@ async function load_use_right_id() {
             logger.debug("useRight token(" + use_right_id +") is not in proof, next...");
             continue;
         }
+        let parameters  = await proof_task.latestParametersByUseRightId(use_right_id); 
+        let taskId      = utils.w3uint256_to_hex(parameters[2]);
+
+        let owner = await proof_task.ownerOf(taskId);
+        if (owner != await signer_address) {
+            logger.info("owner "+ owner +" of proof task id(" + taskId +") is not signer " + signer_address + ", next...");
+            continue;
+        }
         return use_right_id;
     }
+    throw "没有找到可用使用权通证········";
 
 }
 
 async function work(buf) {
 
-    logger.warning("等待算力证明");
+    logger.warning("等待算力证明...");
 
     let use_right = await utils.contract("SCPNSUseRightToken");
     let proof_task      = await utils.contract("SCPNSProofTask");
 
     let signer = ethers.provider.getSigner(0); 
-
-    let to = await signer.getAddress();
+    let signer_address = await signer.getAddress();
 
     let rows = []
 
-    let use_right_id = await load_use_right_id();
-    logger.info("check use_right_id: " + use_right_id);
+    let use_right_id = await load_use_right_id(signer_address);
+    logger.warning("check use_right_id: " + use_right_id);
 
     let isInProof = await proof_task.isInProofOfUseRightId(use_right_id);
     if (!isInProof) {
-        logger.debug("useRight token(" + use_right_id +") is not in proof, next...");
+        logger.info("useRight token(" + use_right_id +") is not in proof, next...");
         return;
     }
 
@@ -72,7 +81,7 @@ async function work(buf) {
     let taskId      = utils.w3uint256_to_hex(parameters[2]);
 
     let owner = await proof_task.ownerOf(taskId);
-    if (owner != signer.getAddress()) {
+    if (owner != await signer.getAddress()) {
         logger.info("owner of proof task id(" + taskId +") is not signer, next...");
         return;
     }
