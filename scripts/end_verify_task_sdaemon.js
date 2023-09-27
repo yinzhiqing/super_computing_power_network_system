@@ -27,21 +27,23 @@ async function get_proof(leaf, dynamicData, leaf_count, leaf_deep) {
     return proof;
 }
 
-async function get_use_right_id() {
-    let use_right       = await contract("SCPNSUseRightToken");
-    let verify_task     = await contract("SCPNSVerifyTask");
+async function get_use_right_id(signer_address) {
+    let use_right       = await utils.contract("SCPNSUseRightToken");
+    let verify_task     = await utils.contract("SCPNSVerifyTask");
+    let proof_task     = await utils.contract("SCPNSProofTask");
 
     let use_right_count = await use_right.totalSupply();
 
     //随机选择一个， 此处可指定固定使用权通证(use_right_id) 
     for (var i = 0; i < use_right_count; i++) {
         let use_right_id = utils.w3uint256_to_hex(await use_right.tokenByIndex(i));
+        logger.debug("check useRight token(" + use_right_id +") is in verify?");
         /*
          * 1. 判断使用权通证对应的算力节点是否有挑战任务
          */
         let isInVerify   = await verify_task.isInVerifyOfUseRightId(use_right_id);
         if (!isInVerify) {
-            logger.info("useRight token(" + use_right_id +") is not in verify, next...");
+            logger.debug("useRight token(" + use_right_id +") is not in verify, next...");
             continue;
         }
 
@@ -50,17 +52,15 @@ async function get_use_right_id() {
          */
         let proof_parameters = await verify_task.proofParametersByUseRightId(use_right_id);
         let proofId     = utils.w3uint256_to_hex(proof_parameters[2]); // 算力证明任务ID
-
-        logger.debug("proofId: " + proofId);
-
         // 只对自己证明的挑战感兴趣
         let owner = await proof_task.ownerOf(proofId);
-        if (owner != await signer_address) {
+        if (owner !=  signer_address) {
             logger.debug("owner "+ owner +" of proof task id(" + proofId +") is not signer " + signer_address + ", next...");
             continue;
         }
         return use_right_id;
     }
+    throw "没有需要验证的任务";
 }
 /*
  * 此函数完成挑战
@@ -69,11 +69,11 @@ async function get_use_right_id() {
  * 问题正确与否会在自动计算
  *
  */
-async function work() {
-    logger.debug("开始回答挑战问题");
+async function work(buf) {
+    logger.warning("等待挑战");
 
-    let use_right       = await contract("SCPNSUseRightToken");
-    let verify_task     = await contract("SCPNSVerifyTask");
+    let use_right       = await utils.contract("SCPNSUseRightToken");
+    let verify_task     = await utils.contract("SCPNSVerifyTask");
 
     let signer          = ethers.provider.getSigner(0); 
     let signer_address  = await signer.getAddress();
@@ -81,14 +81,15 @@ async function work() {
     let rows = [];
 
     //这里可以指定一个特定的感兴趣的use_right_id
-    let use_right_id = get_use_right_id();
+    let use_right_id = await get_use_right_id(signer_address);
 
+    logger.debug("want verify useRight token(" + use_right_id +")");
     /*
      * 1. 判断使用权通证对应的算力节点是否有挑战任务
      */
     let isInVerify  = await verify_task.isInVerifyOfUseRightId(use_right_id);
     if (!isInVerify) {
-        logger.info("useRight token(" + use_right_id +") is not in verify, next...");
+        logger.debug("useRight token(" + use_right_id +") is not in verify, return");
         return;
     }
 
@@ -113,6 +114,11 @@ async function work() {
     let q           = parameters[1];
     let state       = parameters[2];
 
+    tokenId = utils.w3uint256_to_hex(tokenId);
+    if(buf[tokenId] == true) {
+        return;
+    }
+
     logger.debug("tokenId: " + utils.w3uint256_to_hex(parameters[0])); // 挑战任务ID
     logger.debug("q      : " + q.toString()); //挑战问题
     logger.debug("state  : " + state);
@@ -133,9 +139,11 @@ async function work() {
     /* 5. 
      * 回答挑战问题, 将根据回答问题有效性进行对错次数统计
      */
+    logger.info("verify task: " + tokenId);
     await verify_task.connect(signer).taskVerify(
-        parameters[0]/* 任务ID*/, a /* 叶节点序号*/, proof /*路径*/, [] /* 位置用openzepplin的树时候不用此值*/);
+        tokenId/* 任务ID*/, a /* 叶节点序号*/, proof /*路径*/, [] /* 位置用openzepplin的树时候不用此值*/);
 
+    buf[tokenId] = true;
     logger.table(rows, "new tokens");
 }
 

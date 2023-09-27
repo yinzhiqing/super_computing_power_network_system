@@ -42,8 +42,6 @@ async function run() {
         if (!isInProof) {
             logger.info("useRight token(" + use_right_id +") is not in proof, next...");
             continue;
-        } else {
-            logger.info("update: " + use_right_id);
         }
 
         //[dynamicData, parameter, taskId, has]  
@@ -73,11 +71,8 @@ async function run() {
         }
         rows.push(info)
 
-        let merkle_root = await create_merkle_datas(dynamicData, leaf_count, leaf_deep);
-
-        let tx = await proof_task.connect(signer).taskEnd(taskId, merkle_root, utils.str_to_w3bytes32(""), use_sha256);
-        
-        break;
+        logger.info("cancel proof task: " + taskId);
+        let tx = await proof_task.connect(signer).taskCancel(taskId);
     }
 
     logger.table(rows, "new tokens");

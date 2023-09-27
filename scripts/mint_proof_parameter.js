@@ -58,7 +58,7 @@ async function run() {
     let rows = [];
     let token_ids = [];
     let def_id = "";
-    let def_key = "show2";
+    let def_key = "test01";
 
     let tokens = {
         min: {leaf_count: 800    * 1024 * 1024,   leaf_deep: 100},
@@ -67,6 +67,7 @@ async function run() {
         test01: {leaf_count: 1 * 1024,   leaf_deep: 10},
         show: {leaf_count: 8388608,   leaf_deep: 10},
         show2: {leaf_count: 8388608,   leaf_deep: 100},
+        test02: {leaf_count: 2 *1024,   leaf_deep: 10},
     }
 
     for (var key in tokens) {

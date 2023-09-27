@@ -45,13 +45,15 @@ async function show_tokens(token) {
         logger.debug(">> parameter: "    + parameter);
 
         let datas = await cobj.taskDataOf(row["tokenId"]);
+        row["owner"] = await cobj.ownerOf(row["tokenId"]);
         let taskDetail = datas[1];
         logger.debug("tokenId:" + utils.w3uint256_to_str(taskDetail[0]));
         logger.debug("start: "+ utils.w3uint256_to_str(taskDetail[1]));
         logger.debug("end: "+ utils.w3uint256_to_str(taskDetail[2]));
         logger.debug("merkleRoot: "+ taskDetail[3]);
         logger.debug("state: "+ utils.w3uint256_to_str(taskDetail[3]));
-        logger.debug("owner: "+ await cobj.ownerOf(row["tokenId"]));
+        logger.debug("owner: "+ row["owner"]);
+        row["owner"] = row["owner"].substr(0, 6);
 
         list.push(row);
 

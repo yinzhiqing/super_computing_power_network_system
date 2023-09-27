@@ -55,6 +55,9 @@ else
 
 main: clean build 
 
+init_node:
+	nvm use v16.9.1
+
 build:
 	npx hardhat compile
 
@@ -196,6 +199,9 @@ mint_verify_task:
 
 mint_verify_task_target:
 	$(call run_script, "mint_verify_task_target")
+
+cancel_proof_tasks:
+	$(call run_script, "cancel_proof_tasks")
 
 tests:
 	@npx hardhat run scripts/test.js
