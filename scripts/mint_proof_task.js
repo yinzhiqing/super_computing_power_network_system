@@ -48,6 +48,7 @@ async function run() {
 
     let role   = "MINTER_ROLE";
     let signer = ethers.provider.getSigner(0); 
+    let receiver = ethers.provider.getSigner(1); 
     let minter = await signer.getAddress(); 
 
     let has_miter = await has_role(proof_task, minter, role);
@@ -58,7 +59,7 @@ async function run() {
 
     let use_right_count = await use_right.totalSupply();
 
-    let to = await signer.getAddress();
+    let to = await receiver.getAddress();
 
     let rows = [];
 
@@ -89,7 +90,7 @@ async function run() {
                                 utils.str_to_w3bytes32(""), datas);
 
         rows.push({
-            to: to,
+            to: to.substr(0, 6),
             use_right_id: use_right_id
         })
         break;

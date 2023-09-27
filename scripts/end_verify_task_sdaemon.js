@@ -20,14 +20,14 @@ async function get_leaf_index(leaf, dynamicData, leaf_count, leaf_deep) {
 
 // 获取证明值: 路径节点
 async function get_proof(leaf, dynamicData, leaf_count, leaf_deep) {
-    logger.table({dynamicData: dynamicData, leaf_count: leaf_count, leaf_deep: leaf_deep}, "create merkle tree")
+    logger.table({dynamicData: dynamicData, leaf_count: leaf_count, leaf_deep: leaf_deep}, "get proof")
     //create merkle
     let proof = merkle.get_proof_by_hash(leaf, dynamicData, leaf_count, leaf_deep);
     logger.info("proof: " + proof);
     return proof;
 }
 
-async function get_use_right_id(signer_address) {
+async function get_use_right_id(signer_address, buf) {
     let use_right       = await utils.contract("SCPNSUseRightToken");
     let verify_task     = await utils.contract("SCPNSVerifyTask");
     let proof_task     = await utils.contract("SCPNSProofTask");
@@ -75,13 +75,13 @@ async function work(buf) {
     let use_right       = await utils.contract("SCPNSUseRightToken");
     let verify_task     = await utils.contract("SCPNSVerifyTask");
 
-    let signer          = ethers.provider.getSigner(0); 
+    let signer          = ethers.provider.getSigner(1); 
     let signer_address  = await signer.getAddress();
 
     let rows = [];
 
     //这里可以指定一个特定的感兴趣的use_right_id
-    let use_right_id = await get_use_right_id(signer_address);
+    let use_right_id = await get_use_right_id(signer_address, buf);
 
     logger.debug("want verify useRight token(" + use_right_id +")");
     /*
@@ -152,7 +152,7 @@ async function run(times) {
     await utils.scheduleJob(times, work, buf);
 }
 
-run(5)
+run(8)
   .then(() => process.exit(0))
   .catch(error => {
     console.error(error);

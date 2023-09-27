@@ -22,7 +22,7 @@ async function create_merkle_datas(dynamicData, leaf_count, leaf_deep) {
     logger.info("merkle_root: " + merkle_root);
     return merkle_root;
 }
-async function load_use_right_id(signer_address) {
+async function load_use_right_id(signer_address, buf) {
     //return use_right_id;
     let use_right       = await utils.contract("SCPNSUseRightToken");
     let proof_task      = await utils.contract("SCPNSProofTask");
@@ -49,6 +49,12 @@ async function load_use_right_id(signer_address) {
             logger.debug("owner "+ owner +" of proof task id(" + taskId +") is not signer " + signer_address + ", next...");
             continue;
         }
+
+        if(buf[taskId] == true) {
+            logger.debug("task id(" + taskId +") was proof, next...");
+            continue;
+        }
+
         return use_right_id;
     }
     return "";
@@ -62,13 +68,13 @@ async function work(buf) {
     let use_right       = await utils.contract("SCPNSUseRightToken");
     let proof_task      = await utils.contract("SCPNSProofTask");
 
-    let signer = ethers.provider.getSigner(0); 
+    let signer = ethers.provider.getSigner(1); 
     let signer_address  = await signer.getAddress();
 
     let rows = []
 
-    let use_right_id = await load_use_right_id(signer_address);
-    if (use_right_id == "") {
+    let use_right_id = await load_use_right_id(signer_address, buf);
+    if (use_right_id == undefined || use_right_id == "") {
         return;
     }
     logger.debug("check use_right_id: " + use_right_id);
@@ -94,10 +100,6 @@ async function work(buf) {
         return;
     }
 
-    if(buf[taskId] == true) {
-        logger.debug("task id(" + taskId +") was proof, return...");
-        return;
-    }
     logger.info("update: " + use_right_id);
 
     logger.debug("dynamicData: " + dynamicData, "parameters of use_right_id(" + use_right_id + ")");
@@ -126,7 +128,7 @@ async function run(times) {
     await utils.scheduleJob(times, work, buf);
 }
 
-run(1)
+run(3)
   .then(() => process.exit(0))
   .catch(error => {
     console.error(error);

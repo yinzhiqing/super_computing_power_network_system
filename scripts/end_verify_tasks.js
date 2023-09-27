@@ -40,7 +40,7 @@ async function run() {
     let proof_task      = await utils.contract("SCPNSProofTask");
 
     
-    let signer = ethers.provider.getSigner(0); 
+    let signer = ethers.provider.getSigner(1); 
     let signer_address  =  await signer.getAddress();
     let use_right_count = await use_right.totalSupply();
 

@@ -46,6 +46,7 @@ async function work() {
             failed: Number(verify_stat[2].toString())
         };
 
+        row["owner"] = row["owner"].substr(0, 6);
         list.push(row);
 
     } 

@@ -38,6 +38,7 @@ async function show_tokens() {
     let list = {};
     for (let i = 0; i < parameters.length; i++) {
         logger.debug("parameter: " + parameters[i]);
+        let parameter_name = utils.w3bytes32_to_str(await proof_parameter.nameOf(parameters[i]));
         let scales = await cobj.scalesOf(parameters[i]);
         let s = {}
         for (let j = 0; j < scales.length; j++) {
@@ -54,7 +55,7 @@ async function show_tokens() {
                 logger.debug(datas[datas.length -1]);
             }
             s[scales[j]] = datas;
-            logger.table(datas, "parameter = " + parameters[i] + " scale = " + scales[j]);
+            logger.table(datas, "parameter = " + parameter_name + "(" + scales[j] + ")");
         }
         list[utils.w3uint256_to_hex(parameters[i])] = s;
     } 

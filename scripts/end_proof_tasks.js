@@ -24,7 +24,7 @@ async function run() {
     let use_right       = await utils.contract("SCPNSUseRightToken");
     let proof_task      = await utils.contract("SCPNSProofTask");
 
-    let signer = ethers.provider.getSigner(0); 
+    let signer = ethers.provider.getSigner(1); 
     let use_right_count = await use_right.totalSupply();
     let signer_address  = await signer.getAddress();
 
@@ -69,7 +69,7 @@ async function run() {
         let info = {
             use_right_id: use_right_id,
             dynamicData : dynamicData,
-            taskId: parameters[2],
+            taskId: parameters[2].toString(),
         }
         rows.push(info)
 
