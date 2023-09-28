@@ -55,7 +55,7 @@ async function work() {
 }
 async function run(times) {
     logger.debug("start show proof tasks");
-    await utils.scheduleJob(times, work);
+    await utils.scheduleJob(times, work, null, true);
 }
 
 run(5)

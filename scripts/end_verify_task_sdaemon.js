@@ -60,7 +60,7 @@ async function get_use_right_id(signer_address, buf) {
         }
         return use_right_id;
     }
-    throw "没有需要验证的任务";
+    return "";
 }
 /*
  * 此函数完成挑战
@@ -82,6 +82,10 @@ async function work(buf) {
 
     //这里可以指定一个特定的感兴趣的use_right_id
     let use_right_id = await get_use_right_id(signer_address, buf);
+    if (use_right_id == undefined || use_right_id == "") {
+        logger.debug("没有需要验证的任务");
+        return;
+    }
 
     logger.debug("want verify useRight token(" + use_right_id +")");
     /*
@@ -149,7 +153,7 @@ async function work(buf) {
 
 async function run(times) {
     let buf = {};
-    await utils.scheduleJob(times, work, buf);
+    await utils.scheduleJob(times, work, buf, false/* clear */);
 }
 
 run(8)

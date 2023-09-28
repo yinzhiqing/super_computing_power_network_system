@@ -18,11 +18,23 @@ async function work() {
     logger.debug("name: " + name);
 
     logger.debug("pricision: " + await cobj.pricision());
+    let def_param = await proof_parameter.defaultToken();
+    logger.debug("default_parameter_id: " + def_param);
+    
+
 
     let parameters = await cobj.parameters();
     let list = {};
     for (let i = 0; i < parameters.length; i++) {
         logger.debug("parameter: " + parameters[i]);
+        // only show default parameter
+        if (parameters[i].toString() != def_param.toString()) {
+            logger.debug("parameter: " + parameters[i]);
+            logger.debug("def parameter: " + def_param);
+            continue;
+        }
+        logger.debug("...");
+        let parameter_name = utils.w3bytes32_to_str(await proof_parameter.nameOf(parameters[i]));
         let scales = await cobj.scalesOf(parameters[i]);
         let s = {}
         for (let j = 0; j < scales.length; j++) {
@@ -39,7 +51,7 @@ async function work() {
                 logger.debug(datas[datas.length -1]);
             }
             s[scales[j]] = datas;
-            logger.table(datas, "parameter = " + parameters[i] + " scale = " + scales[j]);
+            logger.table(datas, "parameter = " + parameter_name + "(" + scales[j] + ")");
         }
         list[utils.w3uint256_to_hex(parameters[i])] = s;
     } 
@@ -47,7 +59,7 @@ async function work() {
 
 async function run(times) {
     logger.debug("show computility os");
-    await utils.scheduleJob(times, work);
+    await utils.scheduleJob(times, work, null, true);
 }
 
 run(4)

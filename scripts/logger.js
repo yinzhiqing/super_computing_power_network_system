@@ -21,6 +21,9 @@ function create_split_symbol(weight = 80, symbol = "-", end_symbol = ":") {
     return line;
 }
 
+function clear() {
+    console.clear();
+}
 function add_color(msg, color) {
     tcolor = styles[color];
     return tcolor[0] + msg + tcolor[1];
@@ -143,5 +146,6 @@ module.exports = {
     error,
     table,
     lines,
+    clear,
 
 }

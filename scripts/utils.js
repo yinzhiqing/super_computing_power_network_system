@@ -233,9 +233,12 @@ async function schedule_job(time, func) {
     });
 }
 
-async function scheduleJob(times, func, parameter) {
+async function scheduleJob(times, func, parameter, clear) {
     while(1) {
         try {
+            if (clear == true) {
+                console.clear();
+            }
             if (parameter == null) {
                 await func();
             } else {

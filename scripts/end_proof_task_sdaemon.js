@@ -125,7 +125,7 @@ async function work(buf) {
 
 async function run(times) {
     let buf = {};
-    await utils.scheduleJob(times, work, buf);
+    await utils.scheduleJob(times, work, buf, false);
 }
 
 run(3)
