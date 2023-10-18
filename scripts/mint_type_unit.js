@@ -76,7 +76,7 @@ async function run() {
         let token_id = await gpu_cobj.tokenByIndex(i);
         let token_name = await gpu_cobj.nameOf(token_id);
         type_info = {
-            token_id: token_id.toString(),
+            token_id: utils.w3uint256_to_hex(token_id.toString()),
             token_name: utils.w3bytes32_to_str(token_name),
             gpu_id: "=token_id",
             new_token: false
@@ -84,17 +84,17 @@ async function run() {
 
         let existed = await cobj.exists(token_id);
         if (existed) {
-            logger.debug("token is existed. id : " + token_id);
+            logger.debug("token (" + utils.w3bytes32_to_str(token_name ) + ") is existed. id : " + utils.w3uint256_to_hex(token_id));
+            gpus.push(type_info);
+            continue;
         } else {
             logger.info("new token. id : " + token_id);
             let datas = utils.str_to_w3str(JSON.stringify({data:"test"}));
             let tx = await mint(cobj, signer, token_id, token_name, gpu_addr, token_id, datas);
             logger.debug(tx);
             type_info["new_token"] = true;
+            gpus.push(type_info);
         }
-        gpus.push(type_info);
-
-        break;
     }
     logger.table(gpus);
 }

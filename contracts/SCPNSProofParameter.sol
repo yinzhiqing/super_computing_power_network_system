@@ -6,6 +6,7 @@ import "./SCPNSBase.sol";
 import "./interface/ISCPNSTypeUnit.sol";
 import "./interface/ISCPNSProofParameter.sol";
 import "./ContractProject.sol";
+import "./PairValues.sol";
 
 /**
  * @dev {SCPNSProofParameter} token, including:
@@ -28,13 +29,18 @@ contract SCPNSProofParameter is
     ISCPNSProofParameter
     {
     using CountersUpgradeable for CountersUpgradeable.Counter;
+    using PairValues for PairValues.PairUint256;
 
     // Mapping from id to parameter list
     mapping (uint256 => string) private _id2Parameters;
     // Mapping typeUnitId to rate of per
     mapping (uint256 => uint256) private _typeUnitRate;
-    // default id
-    uint256 private _defaultId;
+    // Mapping from id to min second of typeUnitId
+    mapping (uint256 => mapping(uint256 => uint256)) _id2MinOfTypeUnit;
+    // Mapping from id to max second of typeUnitId
+    mapping (uint256 => mapping(uint256 => uint256)) _id2MaxOfTypeUnit;
+    // Mapping from typeUnitId to id
+    PairValues.PairUint256 private _typeUnitId2defaultIds;
 
     function initialize(address dns) public virtual initializer {
         __SCPNSBase_init("SCPNSProofParameter", "SCPNSProofParameter", "");
@@ -69,35 +75,57 @@ contract SCPNSProofParameter is
 
         _mint(_msgSender(), tokenId, name_, datas);
 
-        if (_defaultId == uint256(0)) {
-            _defaultId = tokenId;
-        }
         _id2Parameters[tokenId] = parameter;
     }
 
-    function setDefaultToken(uint256 tokenId) public virtual override whenNotPaused {
-        require(hasRole(MINTER_ROLE, _msgSender()) || _msgSender() == super.ownerOf(tokenId), 
-                "SCPNSBase: must have minter role to set, or have manager role");
 
-        require(_exists(tokenId), "SCPNSProofParameter: token is nonexists.");
+    function setDefaultTokenOf(uint256 typeUnitId, uint256 tokenId) public virtual override whenNotPaused {
+        require(hasRole(MANAGER_ROLE, _msgSender()) || _msgSender() == super.ownerOf(tokenId), 
+                "SCPNSBase: must have manager role");
+        require(_exists(tokenId), "SCPNSProofParameter: token is nonexists");
+        require(_typeUnitIf().exists(typeUnitId), "SCPNSProofParameter: typeUnitId is nonexists");
 
-        _defaultId = tokenId;
+        _typeUnitId2defaultIds.set(typeUnitId, tokenId);
     }
 
+    function typeUnitIds() public view virtual override returns(uint256[] memory) {
+        return _typeUnitId2defaultIds.keysOf();
+    }
+
+    function setComputilityRange(uint256 tokenId, uint256 typeUnitId, uint256 min, uint256 max) public virtual override whenNotPaused {
+        require(hasRole(MANAGER_ROLE, _msgSender()) || _msgSender() == super.ownerOf(tokenId), 
+                "SCPNSBase: must have manager role");
+        require(_exists(tokenId), 
+                "SCPNSProofParameter: token is nonexists.");
+        require(_typeUnitIf().exists(typeUnitId), 
+                "SCPNSProofParameter: typeUnitId is nonexists");
+        require(min <= max, 
+                "SCPNSProofParameter:  min must be less than or equal to max");
+
+        _id2MinOfTypeUnit[tokenId][typeUnitId] = min;
+        _id2MaxOfTypeUnit[tokenId][typeUnitId] = max;
+
+    }
 
     function parameterOf(uint256 tokenId) public view override returns(string memory) {
         return _id2Parameters[tokenId];
     }
 
-    function defaultToken() public view virtual override returns(uint256) {
-        return _defaultId;
+    function parameterIdOfTypeUnitId(uint256 typeUnitId) public view virtual override returns(uint256) {
+        require(_typeUnitId2defaultIds.exists(typeUnitId), 
+                "SCPNSProofParameter: typeUnitId is nonexists");
+
+        return _typeUnitId2defaultIds.valueOf(typeUnitId);
     }
 
-    function selectParameterId(uint256 typeUnitId, uint256 typeUnitCount) public view virtual override returns(uint256) {
-        if (typeUnitId > 0 && typeUnitCount > 0) {
-            return _defaultId;
-        }
-        return _defaultId;
+    function computilityRangeOfTypeUnit(uint256 tokenId, uint256 typeUnitId) public view virtual override returns(uint256 min, uint256 max) {
+        require(_exists(tokenId), 
+                "SCPNSProofParameter: token is nonexists.");
+        require(_typeUnitIf().exists(typeUnitId), 
+                "SCPNSProofParameter: typeUnitId is nonexists");
+
+        min = _id2MinOfTypeUnit[tokenId][typeUnitId];
+        max = _id2MaxOfTypeUnit[tokenId][typeUnitId];
     }
 
     function _burn(uint256 tokenId) internal virtual override(SCPNSBase) {

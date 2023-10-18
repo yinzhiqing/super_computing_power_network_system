@@ -145,6 +145,12 @@ export_java:
 init_dns:
 	$(call run_script, "init_dns")
 
+init_contracts:
+	$(call run_script, "init_contracts")
+
+init_parameters:
+	$(call run_script, "init_parameters")
+
 grantrole:
 	$(call run_script, "grantrole")
 
@@ -178,6 +184,8 @@ show_verify_tasks:
 show_comp_ranks:
 	$(call run_script, "show_comp_ranks")
 
+mint_gpu:
+	$(call run_script, "mint_gpu")
 
 mint_proof_parameter:
 	$(call run_script, "mint_proof_parameter")
@@ -191,11 +199,20 @@ mint_comp_unit:
 mint_comp_vm:
 	$(call run_script, "mint_comp_vm")
 
+mint_use_right:
+	$(call run_script, "mint_use_right")
+
 mint_proof_task:
 	$(call run_script, "mint_proof_task")
 
+end_proof_task:
+	$(call run_script, "end_proof_tasks")
+
 mint_verify_task:
 	$(call run_script, "mint_verify_task")
+
+end_verify_task:
+	$(call run_script, "end_verify_tasks")
 
 mint_verify_task_target:
 	$(call run_script, "mint_verify_task_target")

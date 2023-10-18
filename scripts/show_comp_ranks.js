@@ -25,8 +25,9 @@ async function contract(name) {
 }
 
 async function show_tokens() {
-    let cobj = await contract("SCPNSComputilityRanking");
+    let cobj            = await contract("SCPNSComputilityRanking");
     let proof_parameter = await contract("SCPNSProofParameter");
+    let type_unit       = await contract("SCPNSTypeUnit");
     logger.debug("token address: " + cobj.address);
 
     let name = await cobj.name();
@@ -35,29 +36,41 @@ async function show_tokens() {
     logger.debug("pricision: " + await cobj.pricision());
 
     let parameters = await cobj.parameters();
+    /**
+     * [ parameterId : 
+     *   {typeUnitId : 
+     *     {scale => datas}
+     *   }
+     * ]
+     */
     let list = {};
     for (let i = 0; i < parameters.length; i++) {
         logger.debug("parameter: " + parameters[i]);
         let parameter_name = utils.w3bytes32_to_str(await proof_parameter.nameOf(parameters[i]));
         let scales = await cobj.scalesOf(parameters[i]);
-        let s = {}
-        for (let j = 0; j < scales.length; j++) {
-            logger.debug("scale: " + scales[j]);
-            let datas = [];
-            let count = await cobj.countOf(parameters[i], scales[j]);
-            logger.debug("count: " + count);
-            for (var k = 0; k < count; k++) {
-                let xy = await cobj.excTimeByIndex(parameters[i], scales[j], k);
-                datas.push({
-                    x: xy[0].toString(),
-                    y: xy[1].toString(),
-                });
-                logger.debug(datas[datas.length -1]);
+        let type_unit_ids = await cobj.typeUnitIdsOf(parameters[i]);
+        let t = {};
+        for (let l = 0; l < type_unit_ids.length; l++) {
+            let s = {}
+            for (let j = 0; j < scales.length; j++) {
+                logger.debug("scale: " + scales[j]);
+                let datas = [];
+                let count = await cobj.countOf(parameters[i], scales[j], type_unit_ids[l]);
+                logger.debug("count: " + count);
+                for (var k = 0; k < count; k++) {
+                    let xy = await cobj.excTimeByIndex(parameters[i], scales[j], type_unit_ids[l], k);
+                    datas.push({
+                        x: xy[0].toString(),
+                        y: xy[1].toString(),
+                    });
+                    logger.debug(datas[datas.length -1]);
+                }
+                s[scales[j]] = datas;
+                logger.table(datas, "parameter = " + parameter_name + "(" + scales[j] + ")" + " typeUnitName( " + utils.w3bytes32_to_str(await type_unit.nameOf(type_unit_ids[l])) + ")");
             }
-            s[scales[j]] = datas;
-            logger.table(datas, "parameter = " + parameter_name + "(" + scales[j] + ")");
+            t[utils.w3uint256_to_hex(type_unit_ids[l])] = s;
         }
-        list[utils.w3uint256_to_hex(parameters[i])] = s;
+        list[utils.w3uint256_to_hex(parameters[i])] = t;
     } 
 }
 

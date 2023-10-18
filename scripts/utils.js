@@ -281,6 +281,7 @@ module.exports = {
     strs_to_w3uint256s,
     w3uint256_to_hex,
     w3uint256_to_str,
+    w3uint256_to_number,
     w3bytes32_to_str,
     str_to_w3str,
     w3str_to_str,

@@ -1,4 +1,3 @@
-
 const prj           = require("../prj.config.js");
 const debug_model   = prj.debug;
 function date_format(dash = "-", colon = ":", space = " ") {

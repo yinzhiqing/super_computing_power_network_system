@@ -48,10 +48,14 @@ contract SCPNSComputilityRanking is
     mapping (uint256 => PairValues.PairUint256) private _id2ExcTime;
     // Mapping (parameterId => scales))
     mapping (uint256 => ArrayUnit256.Uint256s) private _scales ;
-    // Mapping (parameterId => (scale => (excTimeOfScale => count)))
-    mapping (uint256 => mapping(uint256 => PairValues.PairUint256)) private _excTimeDistTables;
+    // Mapping (parameterId => typeUnitIds))
+    mapping (uint256 => ArrayUnit256.Uint256s) private _typeUnitIdsOfParameterId;
+    // Mapping (parameterId => (typeUnitId => (scale => (excTimeOfScale => count))))
+    mapping (uint256 => mapping(uint256 => mapping(uint256 => PairValues.PairUint256))) private _excTimeDistTables;
     // parameter list
     ArrayUnit256.Uint256s private _parameters;
+    // typeUnitId list
+    ArrayUnit256.Uint256s private _typeUnitIds;
 
     uint256 private _preBlockNumber;
     uint256 private __pricision;
@@ -64,6 +68,7 @@ contract SCPNSComputilityRanking is
         __SCPNSComputilityRanking_init(name_, symbol_);
 
     }
+
     function __SCPNSComputilityRanking_init(string memory name_, string memory symbol_)
     internal 
     initializer 
@@ -141,7 +146,6 @@ contract SCPNSComputilityRanking is
         uint256 __execTime  = (end - start) / _pricision();
         _updateExcTimeDistTables(parameterId, tokenId, __execTime);
 
-        _id2ParameterIds[parameterId] = taskId;
         _id2ParameterIds[tokenId]     = parameterId;
         _parameters.add(parameterId);
         _id2ExcTime[parameterId].set(tokenId, __execTime);
@@ -154,13 +158,13 @@ contract SCPNSComputilityRanking is
 
     }
     
-    function excTimeDistTableOf(uint256 parameterId, uint256 scale) public view virtual override 
+    function excTimeDistTableOf(uint256 parameterId, uint256 scale, uint256 typeUnitId) public view virtual override 
         returns(uint256[] memory keys, uint256[] memory values) {
 
         require(_scales[parameterId].exists(scale ), 
                 "SCPNSComputilityRanking: the scale is nonexists");
 
-        PairValues.PairUint256 storage _excTimeDistTable = _excTimeDistTables[parameterId][scale];
+        PairValues.PairUint256 storage _excTimeDistTable = _excTimeDistTables[parameterId][scale][typeUnitId];
         keys   = _excTimeDistTable.keysOf();
         values = _excTimeDistTable.valuesOf();
 
@@ -222,21 +226,29 @@ contract SCPNSComputilityRanking is
         return _eventIndex.current();
     }
 
-    function countOf(uint256 parameterId, uint256 scale) public view virtual override returns(uint256) {
-        return _excTimeDistTables[parameterId][scale].length();
+    function countOf(uint256 parameterId, uint256 scale, uint256 typeUnitId) public view virtual override returns(uint256) {
+        return _excTimeDistTables[parameterId][scale][typeUnitId].length();
     }
 
-    function excTimeByIndex(uint256 parameterId, uint256 scale, uint256 index) public view virtual override returns(uint256 x, uint256 y) {
-        require(SCPNSComputilityRanking.countOf(parameterId, scale) > index, 
+    function excTimeByIndex(uint256 parameterId, uint256 scale, uint256 typeUnitId, uint256 index) public view virtual override returns(uint256 x, uint256 y) {
+        require(SCPNSComputilityRanking.countOf(parameterId, scale, typeUnitId) > index, 
                 "SCPNSComputilityRanking: excTime index is out of bounds");
 
-        x = _excTimeDistTables[parameterId][scale].keyOfByIndex(index);
-        y = _excTimeDistTables[parameterId][scale].valueOf(x);
+        x = _excTimeDistTables[parameterId][scale][typeUnitId].keyOfByIndex(index);
+        y = _excTimeDistTables[parameterId][scale][typeUnitId].valueOf(x);
 
     }
 
     function parameters() public view virtual override returns(uint256[] memory) {
         return _parameters.valuesOf();
+    }
+
+    function typeUnitIds() public view virtual override returns(uint256[] memory) {
+        return _typeUnitIds.valuesOf();
+    }
+
+    function typeUnitIdsOf(uint256 parameterId) public view virtual override returns(uint256[] memory) {
+        return _typeUnitIdsOfParameterId[parameterId].valuesOf();
     }
 
     function pricision() public view virtual override returns(uint256) {
@@ -252,15 +264,16 @@ contract SCPNSComputilityRanking is
 
     function _updateExcTimeDistTables(uint256 parameterId, uint256 tokenId, uint256 _execTime) private {
         // decrement old time dist table of tokenId
+        uint256 __typeUnitId = _useRightTokenIf().typeUnitIdOf(tokenId);
         if (_id2Times[parameterId].exists(tokenId) && _id2Times[parameterId].valueOf(tokenId) > 0) {
             uint256 __preExecTime = _id2ExcTime[parameterId].valueOf(tokenId);
             for(uint256 i = 0; i < _scales[parameterId].length(); i++) {
                 uint256 __scale            = _scales[parameterId].valueOf(i);
                 uint256 __scalePreExecTime = __preExecTime / __scale;
 
-                if (_excTimeDistTables[parameterId][__scale].exists(__scalePreExecTime)) {
-                    _excTimeDistTables[parameterId][__scale].decrement(__scalePreExecTime, 1);
-                    _excTimeDistTables[parameterId][__scale].removeMatched(__scalePreExecTime, 0);
+                if (_excTimeDistTables[parameterId][__scale][__typeUnitId].exists(__scalePreExecTime)) {
+                    _excTimeDistTables[parameterId][__scale][__typeUnitId].decrement(__scalePreExecTime, 1);
+                    _excTimeDistTables[parameterId][__scale][__typeUnitId].removeMatched(__scalePreExecTime, 0);
                 }
             }
         }
@@ -271,10 +284,18 @@ contract SCPNSComputilityRanking is
             _scales[parameterId].add(600);
         }
 
+        //add typeUnitId
+        _typeUnitIdsOfParameterId[parameterId].add(__typeUnitId);
+        _typeUnitIds.add(__typeUnitId);
+
         // increment times of scales
         for(uint256 i = 0; i < _scales[parameterId].length(); i++) {
             uint256 __scale = _scales[parameterId].valueOf(i);
-            _excTimeDistTables[parameterId][__scale].increment(_execTime / __scale, 1);
+            for (uint256 j = 0; j < _typeUnitIdsOfParameterId[parameterId].length(); j++) {
+                uint256 __typeUnitIdOf = _typeUnitIdsOfParameterId[parameterId].valueOf(j);
+                _excTimeDistTables[parameterId][__scale][__typeUnitIdOf].increment(_execTime / __scale, 1);
+
+            }
         }
 
         _id2Times[parameterId].increment(tokenId, 1);

@@ -4,9 +4,10 @@ const program   = require('commander');
 const utils     = require("./utils");
 const logger    = require("./logger");
 const prj       = require("../prj.config.js");
+const units_cfg = require("./datas/units.config.js");
 
-const bak_path  = prj.caches_contracts;
-const tokens  = require(prj.contract_conf);
+const units      = units_cfg.units;
+const parameters    = units.parameters;
 const {ethers, upgrades}    = require("hardhat");
 
 async function get_contract(name, address) {
@@ -35,14 +36,10 @@ async function create_token_id(data) {
     return web3.utils.sha3(data.toString());
 }
 
-async function contract(name) {
-    let token = tokens[name];
-    return await get_contract(token.name, token.address);
-}
 async function run() {
     logger.debug("start working...", "mint");
 
-    let proof_parameter = await contract("SCPNSProofParameter");
+    let proof_parameter = await utils.contract("SCPNSProofParameter");
 
     let role   = "MINTER_ROLE";
     let signer = ethers.provider.getSigner(0); 
@@ -57,33 +54,17 @@ async function run() {
 
     let rows = [];
     let token_ids = [];
-    let def_id = "";
-    let def_key = "test01";
 
-    let tokens = {
-        min: {leaf_count: 800    * 1024 * 1024,   leaf_deep: 100},
-        mid: {leaf_count: 8000   * 1024 * 1024,   leaf_deep: 2000},
-        max: {leaf_count: 800000 * 1024 * 1024,   leaf_deep: 30000000000},
-        test01: {leaf_count: 1 * 1024,   leaf_deep: 10},
-        show: {leaf_count: 8388608,   leaf_deep: 10},
-        show2: {leaf_count: 8388608,   leaf_deep: 100},
-        test02: {leaf_count: 2 *1024,   leaf_deep: 10},
-    }
-
-    for (var key in tokens) {
-        let token = tokens[key];
+    for (var key in parameters) {
+        let token = parameters[key].parameter;
         let token_id = await create_token_id(key);
         let token_name = key;
 
         token_ids.push(token_id);
 
-        if(key == def_key) {
-            def_id = token_id;
-        }
-
         let isExists = await proof_parameter.exists(token_id); 
         if (isExists == true) {
-            logger.debug(tokens[key]);
+            logger.debug(token);
             logger.debug("token(id = " + token_id +" name =" + token_name + ") is exists, key=" + key);
             continue;
         }
@@ -91,7 +72,7 @@ async function run() {
         token_name = utils.str_to_w3bytes32(token_name);
         let parameter = utils.json_to_w3str(token);
         let datas = utils.json_to_w3str({data: key});
-        logger.debug("new token: " + token_id);
+        logger.info("new token: " + token_id);
   
         let tx = await proof_parameter.connect(signer).mint(token_id, token_name, parameter, datas);
 
@@ -101,9 +82,8 @@ async function run() {
             parameter: utils.json_to_str(token)
         });
     }
-    //let def_id = await create_token_id(tokens["test"]);
-    logger.info("set default token: " + def_id);
-    let tx = await proof_parameter.connect(signer).setDefaultToken(def_id);
+    logger.table(rows);
+    //let tx = await proof_parameter.connect(signer).setDefaultToken(def_id);
 
 }
 

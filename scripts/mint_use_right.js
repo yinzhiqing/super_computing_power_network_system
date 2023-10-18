@@ -67,7 +67,7 @@ async function run() {
 
         let free = await computility_vm.isFree(computility_vm_id);
         if (false == free) {
-            logger.warning(computility_vm_id + " is locked. next..");
+            logger.debug(computility_vm_id + " is locked. next..");
             continue;
         }
 

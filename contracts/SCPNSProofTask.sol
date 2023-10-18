@@ -258,7 +258,6 @@ ISCPNSProofTask
 
     function taskDataOf(uint256 tokenId) public view virtual override 
         returns(TaskParameter memory parameter, TaskDetail memory result) {
-
         require(_exists(tokenId), 
                 "SCPNSProofTask: token is nonexists");
 
@@ -290,8 +289,7 @@ ISCPNSProofTask
 
     function __selectParameterId(uint256 useRightId) internal view returns(uint256) {
         uint256 typeUnitId    = _useRightTokenIf().typeUnitIdOf(useRightId);
-        uint256 typeUnitCount = _useRightTokenIf().typeUnitCountOf(useRightId);
-        uint256 parameterId   = _proofParameterIf().selectParameterId(typeUnitId, typeUnitCount);
+        uint256 parameterId   = _proofParameterIf().parameterIdOfTypeUnitId(typeUnitId);
 
         return parameterId;
     }

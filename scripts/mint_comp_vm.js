@@ -69,7 +69,7 @@ async function run() {
 
         let leaveCount = await computility_unit.leaveCountOf(computility_unit_id);
         if (leaveCount < count) {
-            logger.error("resources(" + computility_unit_id +")  cannot meet demand in SCPNSComputilityUnit");
+            logger.debug("resources(" + computility_unit_id +")  cannot meet demand in SCPNSComputilityUnit");
             continue;
         }
 

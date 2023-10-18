@@ -14,11 +14,13 @@ interface ISCPNSComputilityRanking
     function scalesOf(uint256 parameterId) external view returns(uint256[] memory);
     function lastBlockNumberOf(uint256 parameterId, uint256 tokenId) external view returns(uint256);
     function lastBlockNumber() external view returns(uint256);
-    function excTimeDistTableOf(uint256 parameterId, uint256 scale) external view returns(uint256[] memory keys, uint256[] memory values);
+    function excTimeDistTableOf(uint256 parameterId, uint256 scale, uint256 typeUnitId) external view returns(uint256[] memory keys, uint256[] memory values);
     function lastEventIndex() external view returns(uint256);
 
-    function countOf(uint256 parameterId, uint256 scale) external view returns(uint256);
-    function excTimeByIndex(uint256 parameterId, uint256 scale, uint256 index) external view returns(uint256 x, uint256 y);
+    function countOf(uint256 parameterId, uint256 scale, uint256 typeUnitId) external view returns(uint256);
+    function excTimeByIndex(uint256 parameterId, uint256 scale, uint256 typeUnitId, uint256 index) external view returns(uint256 x, uint256 y);
     function parameters() external view returns(uint256[] memory);
+    function typeUnitIds() external view returns(uint256[] memory);
+    function typeUnitIdsOf(uint256 parameterId) external view returns(uint256[] memory);
     function pricision() external view returns(uint256);
 }
