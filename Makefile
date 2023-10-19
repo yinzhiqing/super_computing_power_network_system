@@ -184,6 +184,9 @@ show_verify_tasks:
 show_comp_ranks:
 	$(call run_script, "show_comp_ranks")
 
+show_comp_ranks_history:
+	$(call run_script, "show_comp_ranks_history")
+
 mint_gpu:
 	$(call run_script, "mint_gpu")
 

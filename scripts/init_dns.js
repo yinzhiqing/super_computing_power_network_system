@@ -54,7 +54,9 @@ async function run() {
     for(let token_name in tokens) {
         token = tokens[token_name];
         await set(cobj, signer, token.name, token.address);
+        extends_token.push({"name": token.name, "address":token.address});
     }
+    logger.table(extends_token);
 }
 
 

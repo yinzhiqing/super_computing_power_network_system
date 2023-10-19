@@ -52,6 +52,8 @@ contract SCPNSComputilityRanking is
     mapping (uint256 => ArrayUnit256.Uint256s) private _typeUnitIdsOfParameterId;
     // Mapping (parameterId => (typeUnitId => (scale => (excTimeOfScale => count))))
     mapping (uint256 => mapping(uint256 => mapping(uint256 => PairValues.PairUint256))) private _excTimeDistTables;
+    // Mapping (parameterId => (typeUnitId => (scale => (excTimeOfScale => count))))
+    mapping (uint256 => mapping(uint256 => mapping(uint256 => PairValues.PairUint256))) private _excTimeHistorys;
     // parameter list
     ArrayUnit256.Uint256s private _parameters;
     // typeUnitId list
@@ -195,6 +197,42 @@ contract SCPNSComputilityRanking is
         }
     }
 
+    function excTimeHistoryOf(uint256 parameterId, uint256 scale, uint256 typeUnitId) public view virtual override 
+        returns(uint256[] memory keys, uint256[] memory values) {
+
+        require(_scales[parameterId].exists(scale ), 
+                "SCPNSComputilityRanking: the scale is nonexists");
+
+        PairValues.PairUint256 storage _excTimeHistory= _excTimeHistorys[parameterId][scale][typeUnitId];
+        keys   = _excTimeHistory.keysOf();
+        values = _excTimeHistory.valuesOf();
+
+        uint256 __swap = 0;
+        for(uint256 i = 0; i < keys.length; i++) {
+            // select min key index
+            uint256 __minKeyIndex = i;
+            uint256 __minKey = keys[__minKeyIndex];
+            for(uint256 j = i + 1; j < keys.length; j++) {
+                if (__minKey > keys[j]) {
+                    __minKey = keys[j];
+                    __minKeyIndex = j;
+                }
+            }
+
+            // swap minValue to order end
+            if (__minKeyIndex != i) {
+                //save
+                __swap  = keys[i];
+                keys[i] = __minKey;
+                keys[__minKeyIndex] = __swap;
+
+                //change
+                __swap    = values[i];
+                values[i] = values[__minKeyIndex];
+                values[__minKeyIndex] = __swap;
+            }
+        }
+    }
     function postionOf(uint256 parameterId, uint256 tokenId, uint256 scale) public view virtual override returns(uint256) {
         require(_scales[parameterId].exists(scale), 
                 "SCPNSComputilityRanking: the scale is invalied");
@@ -226,7 +264,7 @@ contract SCPNSComputilityRanking is
         return _eventIndex.current();
     }
 
-    function countOf(uint256 parameterId, uint256 scale, uint256 typeUnitId) public view virtual override returns(uint256) {
+    function countOf(uint256 parameterId, uint256 scale, uint256 typeUnitId) public view virtual override returns(uint256)    {
         return _excTimeDistTables[parameterId][scale][typeUnitId].length();
     }
 
@@ -236,6 +274,19 @@ contract SCPNSComputilityRanking is
 
         x = _excTimeDistTables[parameterId][scale][typeUnitId].keyOfByIndex(index);
         y = _excTimeDistTables[parameterId][scale][typeUnitId].valueOf(x);
+
+    }
+
+    function countOfHistory(uint256 parameterId, uint256 scale, uint256 typeUnitId) public view virtual override returns(uint256)    {
+        return _excTimeHistorys[parameterId][scale][typeUnitId].length();
+    }
+
+    function excTimeHistoryByIndex(uint256 parameterId, uint256 scale, uint256 typeUnitId, uint256 index) public view virtual override returns(uint256 x, uint256 y) {
+        require(SCPNSComputilityRanking.countOfHistory(parameterId, scale, typeUnitId) > index, 
+                "SCPNSComputilityRanking: excTime index is out of bounds");
+
+        x = _excTimeHistorys[parameterId][scale][typeUnitId].keyOfByIndex(index);
+        y = _excTimeHistorys[parameterId][scale][typeUnitId].valueOf(x);
 
     }
 
@@ -294,6 +345,7 @@ contract SCPNSComputilityRanking is
             for (uint256 j = 0; j < _typeUnitIdsOfParameterId[parameterId].length(); j++) {
                 uint256 __typeUnitIdOf = _typeUnitIdsOfParameterId[parameterId].valueOf(j);
                 _excTimeDistTables[parameterId][__scale][__typeUnitIdOf].increment(_execTime / __scale, 1);
+                _excTimeHistorys[parameterId][__scale][__typeUnitIdOf].increment(_execTime / __scale, 1);
 
             }
         }
