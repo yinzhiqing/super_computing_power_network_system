@@ -42,7 +42,7 @@
 	},
 	"SCPNSUseRightToken": {
 		"name": "SCPNSUseRightToken",
-		"address": "0xE3011A37A904aB90C8881a99BD1F6E21401f1522",
+		"address": "0xb4e9A5BC64DC07f890367F72941403EEd7faDCbB",
 		"deploy": false,
 		"upgrade": false,
 		"fixed": false,

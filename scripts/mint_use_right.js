@@ -45,6 +45,7 @@ async function run() {
 
     let computility_vm = await contract("SCPNSComputilityVM");
     let use_right      = await contract("SCPNSUseRightToken");
+    let typeUnit       = await contract("SCPNSTypeUnit");
 
     let role   = "MINTER_ROLE";
     let signer = ethers.provider.getSigner(0); 
@@ -68,6 +69,13 @@ async function run() {
         let free = await computility_vm.isFree(computility_vm_id);
         if (false == free) {
             logger.debug(computility_vm_id + " is locked. next..");
+            continue;
+        }
+
+        let typeUnitId = await computility_vm.typeUnitIdOf(computility_vm_id);
+        let typeUnitName  = utils.w3bytes32_to_str(await typeUnit.nameOf(typeUnitId));
+        if (typeUnitName != "CPU") {
+            logger.debug("only use CPU");
             continue;
         }
 

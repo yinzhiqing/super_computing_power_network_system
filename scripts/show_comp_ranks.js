@@ -45,12 +45,18 @@ async function show_tokens() {
      */
     let list = {};
     for (let i = 0; i < parameters.length; i++) {
-        logger.debug("parameter: " + parameters[i]);
+        logger.debug("parameter: " + utils.w3uint256_to_hex(parameters[i]));
         let parameter_name = utils.w3bytes32_to_str(await proof_parameter.nameOf(parameters[i]));
         let scales = await cobj.scalesOf(parameters[i]);
         let type_unit_ids = await cobj.typeUnitIdsOf(parameters[i]);
         let t = {};
         for (let l = 0; l < type_unit_ids.length; l++) {
+            let range  = await proof_parameter.computilityRangeOfTypeUnit(parameters[i], type_unit_ids[i]);
+            logger.debug(range);
+            let min = range[0].toString();
+            let max = range[1].toString();
+            logger.table({"min(s)": min, "max(s)": max}, "parameter = " + parameter_name + " typeUnitName( " + utils.w3bytes32_to_str(await type_unit.nameOf(type_unit_ids[l])) + ")");
+
             let s = {}
             for (let j = 0; j < scales.length; j++) {
                 logger.debug("scale: " + scales[j]);
