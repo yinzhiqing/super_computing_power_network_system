@@ -65,13 +65,36 @@ async function show_tokens() {
                 for (var k = 0; k < count; k++) {
                     let xy = await cobj.excTimeHistoryByIndex(parameters[i], scales[j], type_unit_ids[l], k);
                     datas.push({
-                        x: xy[0].toString(),
-                        y: xy[1].toString(),
+                        x: xy[0].toNumber(),
+                        y: xy[1].toNumber(),
                     });
                     logger.debug(datas[datas.length -1]);
                 }
-                s[scales[j]] = datas;
-                logger.table(datas, "parameter = " + parameter_name + "(" + scales[j] + ")" + " typeUnitName( " + utils.w3bytes32_to_str(await type_unit.nameOf(type_unit_ids[l])) + ")");
+
+                /*
+                 * sort datas 
+                 *
+                 */
+                let datas_sort = [];
+                let key_sort = [];
+                let temp = {};
+                for(var idx in datas) {
+                    key_sort.push(datas[idx]["x"]);
+                    temp[datas[idx]["x"]] = datas[idx]["y"];
+                }
+
+                key_sort = key_sort.sort(function (a, b) { return a - b; });
+
+                for (var idx in key_sort) {
+                    datas_sort.push({
+                        x: key_sort[idx],
+                        y: temp[key_sort[idx]],
+                    })
+                }
+                
+                // sotrage datas_sort
+                s[scales[j]] = datas_sort;
+                logger.table(datas_sort, "parameter = " + parameter_name + "(" + scales[j] + ")" + " typeUnitName( " + utils.w3bytes32_to_str(await type_unit.nameOf(type_unit_ids[l])) + ")");
             }
             t[utils.w3uint256_to_hex(type_unit_ids[l])] = s;
         }
