@@ -186,6 +186,9 @@ function strs_to_w3uint256s(data) {
     return web3.eth.abi.encodeParameter("uint256[]", data);
 }
 
+function strs_to_w3strs(data) {
+    return web3.eth.abi.encodeParameter("string[]", data);
+}
 function lstr_to_lweb3bytes32(datas, size) {
     lbytes32 = [];
     start = datas.length;
@@ -278,6 +281,7 @@ module.exports = {
     str_to_w3bytes,
     lstr_to_lweb3bytes32,
     str_to_w3uint256,
+    strs_to_w3strs,
     strs_to_w3uint256s,
     w3uint256_to_hex,
     w3uint256_to_str,

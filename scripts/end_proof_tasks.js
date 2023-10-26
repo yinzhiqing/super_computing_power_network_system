@@ -4,10 +4,10 @@ const program   = require('commander');
 const utils     = require("./utils");
 const logger    = require("./logger");
 const prj       = require("../prj.config.js");
-const merkle  = require('./merkle');
+const merkle    = require('./merkle');
 
 const bak_path  = prj.caches_contracts;
-const tokens  = require(prj.contract_conf);
+const tokens    = require(prj.contract_conf);
 const {ethers, upgrades}    = require("hardhat");
 
 async function create_merkle_datas(dynamicData, leaf_count, leaf_deep) {
@@ -53,6 +53,7 @@ async function run() {
         let parameter   = JSON.parse(utils.w3str_to_str(parameters[1]));
         let leaf_count  = parameter["leaf_count"];
         let leaf_deep   = parameter["leaf_deep"];
+        let sample      = parameter["sample"];
         let taskId      = utils.w3uint256_to_hex(parameters[2]);
 
         let owner = await proof_task.ownerOf(taskId);

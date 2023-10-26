@@ -33,7 +33,7 @@ async function get_proof(leaf, dynamicData, leaf_count, leaf_deep) {
  *
  */
 async function run() {
-    logger.debug("start working...", "mint");
+    logger.debug("start working...", "end_verify_tasks");
 
     let use_right        = await utils.contract("SCPNSUseRightToken");
     let verify_task      = await utils.contract("SCPNSVerifyTask");
@@ -92,15 +92,16 @@ async function run() {
         let q = parameters[1];
 
         logger.debug("tokenId  : " + utils.w3uint256_to_hex(parameters[0])); // 挑战任务ID
-        logger.debug("q        : " + parameters[1].toString()); //挑战问题
+        logger.debug("q        : " + parameters[1]); //挑战问题
         logger.debug("state    : " + parameters[2]);
 
         /*
          * 4根据挑战问题q 选择对应的proof(路径)
          */
-        let proof = await get_proof(q, dynamicData, leaf_count, leaf_deep);
         //获取对应的叶子节点序号
         let a = await get_leaf_index(q, dynamicData, leaf_count, leaf_deep);
+        logger.debug("a        : ",  a);
+        let proof = await get_proof(q, dynamicData, leaf_count, leaf_deep);
 
         rows.push({
             use_right_id: use_right_id,

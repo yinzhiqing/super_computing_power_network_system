@@ -69,22 +69,16 @@ contract SCPNSVerifyTask is
     internal initializer 
     {
         _unitType("verifytask");
-        _waitBlockNumber = 5;
+        _waitBlockNumber = 300; //10 minute
     }
 
-    function mint(uint256 useRightId, uint256 proofId, bytes32 q, string memory datas) public virtual override {
+    function mint(uint256 useRightId, uint256 proofId, string memory datas) public virtual override {
         require(_proofTaskIf().exists(proofId), 
                 "SCPNSVerifyTask: proof task token is nonexists");
         require(!_proofTaskIf().isInProofOfUseRightId(useRightId), 
                 "SCPNSVerifyTask: useRight token is in proof");
         require(!SCPNSVerifyTask.isInVerifyOfUseRightId(useRightId), 
                 "SCPNSVerifyTask: useRight token is in verify");
-
-        (, , uint256 curProofId, bool has) = _proofTaskIf().latestParametersByUseRightId(useRightId);
-        require(has, 
-                "SCPNSVerifyTask: useRight token none data to verify");
-        require(proofId == curProofId, 
-                "SCPNSVerifyTask: proof task token is too old");
 
         //update old
         _updateVerifyState(useRightId);
@@ -95,15 +89,19 @@ contract SCPNSVerifyTask is
         _id2UseRightId[tokenId]     = useRightId;
         _useRightId2Id[useRightId]  = tokenId;
 
-        VerifyStat      storage vs  = _useRightId2VerifyStat[useRightId];
+        uint256 parameterId = _useRightTokenIf().parameterIdOf(useRightId);
+        uint256 sample      = _proofParameterIf().sampleOf(parameterId);
         VerifyParameter storage vp  = _id2VerifyParameter[tokenId];
         vp.startBlockNumber = block.number;
         vp.state            = VerifyState.Start;
         vp.proofId          = proofId;
         vp.tokenId          = tokenId;
-        vp.q                = q;
-        vs.total            += 1;
+        vp.stat.total       = sample;
+        vp.q                = _create_q(useRightId, proofId);
 
+        VerifyStat      storage vs  = _useRightId2VerifyStat[useRightId];
+        vs.total            += sample;
+    
         emit TaskData(_eventIndex.current(), useRightId, _preBlockNumber, _msgSender(), vp, datas);
 
         // next mint use 
@@ -127,23 +125,16 @@ contract SCPNSVerifyTask is
         vp.verifyBlockNumber       = block.number;
         vp.a                       = a;
 
-        for (uint256 i = 0; i < proof.length; i++) {
-            vp.proof.push(proof[i]);
-        }
-
         bool __valid = _is_valid_proof(tokenId, proof, pos);
         if (!__valid) {
             vs.failed  += 1;
+            vp.stat.failed += 1;
         } else {
             vs.succees += 1;
+            vp.stat.succees += 1;
         }
-        vp.state = VerifyState.End;
 
-        emit TaskData(_eventIndex.current(), _id2UseRightId[tokenId], _preBlockNumber, _msgSender(), vp, "{}");
-
-        // next mint use 
-        _preBlockNumber = block.number;
-        _eventIndex.increment();
+        _next_verify(tokenId, _id2UseRightId[tokenId]);
     }
 
     function updateWaitBlockNumber(uint256 newBlockNumber) public virtual override {
@@ -159,10 +150,10 @@ contract SCPNSVerifyTask is
         bytes32 merkleRoot  = _proofTaskIf().merkleRootOf(proofId);
         bool useSha256      = _proofTaskIf().useSha256Of(proofId);
 
-        return _merkeyProof(proof, pos, merkleRoot, q, useSha256);
+        return _merkleProof(proof, pos, merkleRoot, q, useSha256);
     }
 
-    function _merkeyProof(bytes32[] memory proof, bool[] memory pos, bytes32 merkleRoot, bytes32 q, bool useSha256) internal pure returns(bool) {
+    function _merkleProof(bytes32[] memory proof, bool[] memory pos, bytes32 merkleRoot, bytes32 q, bool useSha256) internal pure returns(bool) {
 
         if (useSha256) {
             return MerkleProofUpgradeableSha256.verify(proof, pos, merkleRoot, q);
@@ -200,7 +191,13 @@ contract SCPNSVerifyTask is
         require(_useRightTokenIf().exists(useRightId), 
                 "SCPNSVerifyTask: useRight is nonexist");
 
-        return VerifyState.Start ==_id2VerifyParameter[_useRightId2Id[useRightId]].state;
+        return VerifyState.Start ==_id2VerifyParameter[_useRightId2Id[useRightId]].state || 
+            VerifyState.Verify ==_id2VerifyParameter[_useRightId2Id[useRightId]].state ;
+    }
+
+    function residueVerifyOf(uint256 tokenId) public view virtual override returns(uint256) {
+        VerifyParameter storage vp = _id2VerifyParameter[tokenId];
+        return vp.stat.total - vp.stat.failed - vp.stat.succees;
     }
 
     function verifyParameterOf(uint256 tokenId) public view virtual override returns(
@@ -253,7 +250,7 @@ contract SCPNSVerifyTask is
 
     function _isInVerifyOf(uint256 tokenId)  internal view returns(bool) {
         VerifyParameter storage vp = _id2VerifyParameter[tokenId];
-        return vp.state == VerifyState.Start && block.number < vp.startBlockNumber + _waitBlockNumber;
+        return (vp.state == VerifyState.Start || vp.state == VerifyState.Verify) && block.number < vp.startBlockNumber + _waitBlockNumber;
     }
 
     function _burn(uint256 tokenId) internal virtual override(SCPNSBase) {
@@ -264,6 +261,62 @@ contract SCPNSVerifyTask is
         delete _id2VerifyParameter[tokenId];
 
     }
+
+    function _create_q(uint256 useRightId, uint256 proofId) internal view returns(bytes32) {
+        (bytes32 dynamicData, ) = _proofTaskIf().parameterOf(proofId);
+        bool useSha256      = _proofTaskIf().useSha256Of(proofId);
+        uint256 parameterId = _useRightTokenIf().parameterIdOf(useRightId);
+        uint256 leaf_count  = _proofParameterIf().leafCountOf(parameterId);
+        uint256 leaf_deep   = _proofParameterIf().leafDeepOf(parameterId);
+
+        uint256 index  = SCPNSVerifyTask.randIndex(leaf_count);
+
+        return SCPNSVerifyTask.createLeaf(dynamicData, index, leaf_deep, useSha256);
+    }
+
+    function _next_verify(uint256 tokenId, uint256 useRightId) internal {
+        VerifyParameter storage vp  = _id2VerifyParameter[tokenId];
+        if (vp.stat.total <= (vp.stat.failed + vp.stat.succees)) {
+            vp.state = VerifyState.End;
+            return ;
+        }
+
+        vp.state            = VerifyState.Verify;
+        vp.q                = _create_q(useRightId, vp.proofId);
+
+        emit TaskData(_eventIndex.current(), useRightId, _preBlockNumber, _msgSender(), vp, "{}");
+
+        // next mint use 
+        _preBlockNumber = block.number;
+        _eventIndex.increment();
+    }
+
+    function randIndex(uint256 leafCount) public view virtual override returns(uint256) {
+        return uint256(sha256(abi.encodePacked(block.timestamp, block.difficulty, msg.sender))) % leafCount;
+    }
+
+    function createLeaf(bytes32 dynamicData, uint256 index, uint256 leaf_deep, bool useSha256) public view virtual override returns(bytes32) {
+        bytes32 leaf = bytes32("");
+        if (useSha256) {
+            for(uint256 i = 0; i < leaf_deep; i++) {
+                leaf = i == 0 ? sha256(abi.encodePacked(dynamicData, index)): sha256(abi.encodePacked(leaf));
+            }
+
+        } else {
+            for(uint256 i = 0; i < leaf_deep; i++) {
+                leaf = i == 0 ? keccak256(abi.encodePacked(dynamicData, index)): keccak256(abi.encodePacked(leaf));
+            }
+        }
+        if (useSha256) {
+            leaf = leaf_deep == 0 ? sha256(abi.encodePacked(sha256(abi.encodePacked(dynamicData, index)))) : 
+                sha256(abi.encodePacked(sha256(abi.encodePacked(leaf))));
+        } else {
+            leaf = leaf_deep == 0 ? keccak256(abi.encodePacked(keccak256(abi.encodePacked(dynamicData, index)))) : 
+                keccak256(abi.encodePacked(keccak256(abi.encodePacked(leaf))));
+        }
+        return leaf;
+    }
+
     //must be at end
     uint256[48] private __gap;
 }

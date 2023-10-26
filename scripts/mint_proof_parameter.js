@@ -62,6 +62,7 @@ async function run() {
 
         token_ids.push(token_id);
 
+
         let isExists = await proof_parameter.exists(token_id); 
         if (isExists == true) {
             logger.debug(token);
@@ -73,8 +74,15 @@ async function run() {
         let parameter = utils.json_to_w3str(token);
         let datas = utils.json_to_w3str({data: key});
         logger.info("new token: " + token_id);
+
+        let pnames  = [];
+        let pvalues = [];
+        for (let name in token) {
+            pnames.push(name);
+            pvalues.push(token[name]);
+        }
   
-        let tx = await proof_parameter.connect(signer).mint(token_id, token_name, parameter, datas);
+        let tx = await proof_parameter.connect(signer).mint(token_id, token_name, parameter, pnames, pvalues, datas);
 
         rows.push({
             token_id: token_id,
@@ -83,8 +91,6 @@ async function run() {
         });
     }
     logger.table(rows);
-    //let tx = await proof_parameter.connect(signer).setDefaultToken(def_id);
-
 }
 
 run()

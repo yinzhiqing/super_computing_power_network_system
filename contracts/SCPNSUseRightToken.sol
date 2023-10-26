@@ -99,6 +99,12 @@ contract SCPNSUseRightToken is
         return _deadlines[tokenId] > block.timestamp;
     }
 
+    function parameterIdOf(uint256 tokenId) external view virtual override returns(uint256) {
+        uint256 typeUnitId    = SCPNSUseRightToken.typeUnitIdOf(tokenId);
+        uint256 parameterId   = _proofParameterIf().parameterIdOfTypeUnitId(typeUnitId);
+
+        return parameterId;
+    }
      uint256[48] private __gap;
    }
 

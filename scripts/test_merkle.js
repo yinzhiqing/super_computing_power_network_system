@@ -157,7 +157,26 @@ async function proof() {
     return merkle.verify(root, leaf, proof);
 }
 
+async function test_contract_leaf() {
+    let dynamicData      = "0xf6362a96106fb8023875559ab03163db1cc8ba84f5bf3f74eaf4d0d6d31cbb72";
+    let leaf_count       = 1024;
+    let leaf_deep        = 10;
+    let index            = 101;
+    let use_sha256       = false;
 
+    //let leaf_js  = merkle.get_leaf_hash(index, dynamicData, leaf_count, leaf_deep, use_sha256);
+    let leaf_js  = merkle.create_leaf_hash(dynamicData, index, leaf_deep);
+    let verify_task      = await utils.contract("SCPNSVerifyTask");
+    let leaf_con = await verify_task.createLeaf(dynamicData, 
+             index, leaf_deep, use_sha256);
+
+    let proof = merkle.get_proof_by_hash(leaf_js, dynamicData, leaf_count, leaf_deep);
+    logger.table(proof);
+    logger.table({
+        leaf_js: leaf_js,
+        leaf_con: leaf_con
+    });
+}
 
 async function run() {
     logger.debug("start working...", "mint");
@@ -166,7 +185,8 @@ async function run() {
     //await test();
     //logger.info("verify state: " + await proof());
     //await crate_merge_data();
-    await test_sha256();
+    //await test_sha256();
+    await test_contract_leaf();
 
 }
 

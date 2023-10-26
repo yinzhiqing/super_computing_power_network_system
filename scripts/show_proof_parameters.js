@@ -33,6 +33,7 @@ async function show_tokens(token) {
         let use = new Map();
         row["tokenId"] = utils.w3uint256_to_hex(await cobj.tokenByIndex(i));
         row["name"] = utils.w3bytes32_to_str(await cobj.nameOf(row["tokenId"]));
+        row["verify_sample"] = Number(await cobj.sampleOf(row["tokenId"]));
 
         let parameter = utils.w3str_to_str(await cobj.parameterOf(row["tokenId"]));
         let datas = utils.w3str_to_str(await cobj.datasOf(row["tokenId"]));

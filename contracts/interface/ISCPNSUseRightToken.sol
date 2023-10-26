@@ -15,4 +15,5 @@ interface ISCPNSUseRightToken is
     function ownerOf(uint256 tokenId) external view returns(address);
     function deadLine(uint256 tokenId) external view returns(uint256);
     function isValid(uint256 tokenId) external view returns(bool);
+    function parameterIdOf(uint256 tokenId) external view returns(uint256);
 }

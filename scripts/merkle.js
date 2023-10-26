@@ -12,8 +12,8 @@ const { defaultAbiCoder }    = require('@ethersproject/abi');
 
 function create_leaf(dynamicData, index, leaf_deep) {
     let leaf = web3.utils.soliditySha3(dynamicData, index);
-    for (var j = 1; j < leaf_deep - 1; j++) {
-        leaf = web3.utils.soliditySha3(dynamicData, j);
+    for (var j = 1; j < leaf_deep; j++) {
+        leaf = web3.utils.soliditySha3(leaf);
     }
     return leaf;
 }
@@ -31,7 +31,7 @@ function crate_values(dynamicData, leaf_count, leaf_deep) {
     }
     return values;
 }
-function create_merkel(filename, dynamicData, leaf_count, leaf_deep) {
+function create_merkle(filename, dynamicData, leaf_count, leaf_deep) {
     let values = crate_values(dynamicData, leaf_count, leaf_deep);
 
     const tree = StandardMerkleTree.of(values, ["bytes32"]);
@@ -47,7 +47,7 @@ function get_tree(dynamicData, leaf_count, leaf_deep) {
     if(fs.existsSync(filename)) {
             return StandardMerkleTree.load(JSON.parse(fs.readFileSync(filename, "utf8")));
     } else {
-            return create_merkel(filename, dynamicData, leaf_count, leaf_deep);
+            return create_merkle(filename, dynamicData, leaf_count, leaf_deep);
     }
 }
 
@@ -118,7 +118,7 @@ function get_leaf_index_by_hash(leaf, dynamicData, leaf_count, leaf_deep) {
             return i ;
         }
     }
-    throw "没有发现leaf by index";
+    throw "没有发现leaf index by hash";
 }
 
 function verify(root, leaf, proof) {

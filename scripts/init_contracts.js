@@ -69,9 +69,11 @@ async function run() {
     let signer = ethers.provider.getSigner(0); 
 
     // grant manager role to SCPNSComputilityVM
+    //               contract           roler                   role
     await grant_role(computility_unit,  computility_vm.address, "MANAGER_ROLE");
     await grant_role(computility_vm,    use_right.address,      "CONTROLLER_ROLE");
     await grant_role(computility_rank,  proof_task.address,     "CONTROLLER_ROLE");
+    await grant_role(verify_task,       proof_task.address,     "CONTROLLER_ROLE");
 
     //
 

@@ -131,6 +131,7 @@ ISCPNSProofTask
         _preBlockNumber = block.number;
         _eventIndex.increment();
 
+        _verifyTaskIf().mint(useRightId, tokenId, "");
     }
 
     function _updateComputilityRanking(uint256 tokenId, TaskParameter storage parameter, TaskDetail storage detail) internal {

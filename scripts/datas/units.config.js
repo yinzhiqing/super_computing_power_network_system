@@ -81,6 +81,7 @@ units = {
             parameter: {
                 leaf_count: 838860800,
                 leaf_deep : 100,
+                sample    : 10,
             },
             computility: {
                 GTX_1060: {
@@ -93,6 +94,7 @@ units = {
             parameter: {
                 leaf_count: 8388608000,
                 leaf_deep : 2000,
+                sample    : 10,
             },
             computility: {
                 H800: {
@@ -105,6 +107,7 @@ units = {
             parameter: {
                 leaf_count: 838860800000,
                 leaf_deep : 30000000000,
+                sample    : 10,
             },
             computility: {
                 A800_80G_SXM: {
@@ -145,6 +148,8 @@ units = {
             parameter: {
                 leaf_count: 1024,
                 leaf_deep : 10, 
+                sample    : 10,
+
             },
             computility: {
                 CPU: {
@@ -157,6 +162,7 @@ units = {
             parameter: {
                 leaf_count: 8388608,
                 leaf_deep : 10,
+                sample    : 10,
             },
             computility: {
                 GTX_1050: {

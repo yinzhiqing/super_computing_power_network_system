@@ -94,8 +94,8 @@ contract SCPNSBase is Initializable, ContextUpgradeable, AccessControlEnumerable
      * - the caller must have the `MINTER_ROLE`.
      */
     function _mint(address to, uint256 tokenId, bytes32 name_, string memory datas) internal virtual {
-        require(hasRole(MINTER_ROLE, _msgSender()), 
-                "SCPNSBase: must have minter role to mint");
+        require(hasRole(MINTER_ROLE, _msgSender()) || hasRole(CONTROLLER_ROLE, _msgSender()), 
+                "SCPNSBase: must have minter(controller) role to mint");
         require(name_ == NO_NAME || !_exists(_name2IDs[name_]), 
                 "SCPNSBase: token name is exists.");
 

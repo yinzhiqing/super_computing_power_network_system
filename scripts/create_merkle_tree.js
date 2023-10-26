@@ -12,6 +12,7 @@ const { keccak256  }         = require('ethereum-cryptography/keccak');
 const { StandardMerkleTree } = require("@openzeppelin/merkle-tree");
 
 
+const file_name = "./test-tree.json";
 async function crate_values(dynamicData, leaf_count, leaf_deep) {
     let values = [];
     for (var i = 0; i < leaf_count; i++) {
@@ -25,14 +26,14 @@ async function create_merkel(dynamicData, leaf_count, leaf_deep) {
     let values = await crate_values(dynamicData, leaf_count, leaf_deep);
     const tree = StandardMerkleTree.of(values, ["bytes32"]);
 
-    fs.writeFileSync("./datas/merkle/test-tree.json", JSON.stringify(tree.dump()));
+    fs.writeFileSync(file_name, JSON.stringify(tree.dump()));
 
     return tree.root;
 
 }
 
 async function get_proof(leaf) {
-    const tree = StandardMerkleTree.load(JSON.parse(fs.readFileSync("./datas/merkle/test-tree.json", "utf8")));
+    const tree = StandardMerkleTree.load(JSON.parse(fs.readFileSync(file_name, "utf8")));
     for (const [i, v] of tree.entries()) {
         if (v[0] === leaf) {
             return tree.getProof(i);
@@ -41,7 +42,7 @@ async function get_proof(leaf) {
     return "";
 }
 async function get_leaf(index) {
-    const tree = StandardMerkleTree.load(JSON.parse(fs.readFileSync("./datas/merkle/test-tree.json", "utf8")));
+    const tree = StandardMerkleTree.load(JSON.parse(fs.readFileSync(file_name, "utf8")));
     for (const [i, v] of tree.entries()) {
         if (i === index) {
             return v ;

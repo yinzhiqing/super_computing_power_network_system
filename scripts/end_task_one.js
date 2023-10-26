@@ -43,13 +43,13 @@ async function contract(name) {
     return await get_contract(token.name, token.address);
 }
 
-async function create_merkel_datas(dynamicData, leaf_count, leaf_deep) {
-    logger.table({dynamicData: dynamicData, leaf_count: leaf_count, leaf_deep: leaf_deep}, "create merkel tree")
-    //create merkel
+async function create_merkle_datas(dynamicData, leaf_count, leaf_deep) {
+    logger.table({dynamicData: dynamicData, leaf_count: leaf_count, leaf_deep: leaf_deep}, "create merkle tree")
+    //create merkle
     //test root 
-    let merkel_root = merkle.get_root(dynamicData, leaf_count, leaf_deep);
-    logger.info("merkel_root: " + merkel_root);
-    return merkel_root;
+    let merkle_root = merkle.get_root(dynamicData, leaf_count, leaf_deep);
+    logger.info("merkle_root: " + merkle_root);
+    return merkle_root;
 }
 
 async function select_use_right_id() {
@@ -99,13 +99,13 @@ async function run() {
     let leaf_deep   = parameter["leaf_deep"];
     let taskId      = parameters[2];
 
-    //生成Merkel树, 并获取树根
-    let merkel_root = await create_merkel_datas(dynamicData, leaf_count, leaf_deep);
+    //生成Merkle树, 并获取树根
+    let merkle_root = await create_merkle_datas(dynamicData, leaf_count, leaf_deep);
 
 
 
     //结果上链,更新目标任务(taskId)对应的状态
-    let tx = await proof_task.connect(signer).taskEnd(taskId, merkel_root, utils.str_to_w3bytes32(""));
+    let tx = await proof_task.connect(signer).taskEnd(taskId, merkle_root, utils.str_to_w3bytes32(""));
     logger.debug(tx);
 }
 

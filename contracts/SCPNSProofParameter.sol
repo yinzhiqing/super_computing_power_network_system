@@ -33,6 +33,8 @@ contract SCPNSProofParameter is
 
     // Mapping from id to parameter list
     mapping (uint256 => string) private _id2Parameters;
+    // Mapping from id to parameter parse(name : value)
+    mapping (uint256 => mapping(string => uint256)) private _id2ParametersParse;
     // Mapping typeUnitId to rate of per
     mapping (uint256 => uint256) private _typeUnitRate;
     // Mapping from id to min second of typeUnitId
@@ -69,13 +71,19 @@ contract SCPNSProofParameter is
      *
      * - the caller must have the `MINTER_ROLE`.
      */
-    function mint(uint256 tokenId, bytes32 name_, string memory parameter, string memory datas) public virtual override whenNotPaused {
+    function mint(uint256 tokenId, bytes32 name_, string memory parameter, string[] memory pnames, uint256[] memory pvalues, string memory datas) public virtual override whenNotPaused {
         require(bytes(parameter).length > 0,  
                 "SCPNSProofParameter: parameter is empty");
+
+        require(pnames.length == pvalues.length,
+               "SCPNSProofParameter: panmes and pvalue is non-match");
 
         _mint(_msgSender(), tokenId, name_, datas);
 
         _id2Parameters[tokenId] = parameter;
+        for(uint256 i = 0; i < pnames.length; i++) {
+            _id2ParametersParse[tokenId][pnames[i]] = pvalues[i];
+        }
     }
 
 
@@ -111,6 +119,11 @@ contract SCPNSProofParameter is
         return _id2Parameters[tokenId];
     }
 
+    function valueOf(uint256 tokenId, string memory name) public view virtual override returns(uint256)
+    {
+        return _id2ParametersParse[tokenId][name];
+    }
+
     function parameterIdOfTypeUnitId(uint256 typeUnitId) public view virtual override returns(uint256) {
         require(_typeUnitId2defaultIds.exists(typeUnitId), 
                 "SCPNSProofParameter: typeUnitId is nonexists");
@@ -128,6 +141,17 @@ contract SCPNSProofParameter is
         max = _id2MaxOfTypeUnit[tokenId][typeUnitId];
     }
 
+    function sampleOf(uint256 tokenId) public view virtual override returns(uint256) {
+        return _id2ParametersParse[tokenId]["sample"];
+    }
+
+    function leafCountOf(uint256 tokenId) public view virtual override returns(uint256) {
+        return _id2ParametersParse[tokenId]["leaf_count"];
+    }
+
+    function leafDeepOf(uint256 tokenId) public view virtual override returns(uint256) {
+        return _id2ParametersParse[tokenId]["leaf_deep"];
+    }
     function _burn(uint256 tokenId) internal virtual override(SCPNSBase) {
         require(false, 
                 "SCPNSProofParameter: can't burn anyone token");
