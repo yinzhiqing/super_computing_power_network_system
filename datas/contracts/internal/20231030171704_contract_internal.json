@@ -34,7 +34,7 @@
 		"name": "SCPNSProofTask",
 		"address": "0x32E25FD7740C9464B86B0fFdD78666D994a78DB8",
 		"deploy": false,
-		"upgrade": false,
+		"upgrade": true,
 		"fixed": false,
 		"params": [
 			"!REF:SCPNSDns.address"

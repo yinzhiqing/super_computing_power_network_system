@@ -23,14 +23,14 @@ interface ISCPNSVerifyTask is
         address sender;
         VerifyState state;
         bytes32 q;
-        uint256 a;
+        bytes32 a;
         VerifyStat stat;
     }
     event TaskData(uint256 indexed index, uint256 indexed useRightId, 
                    uint256 preBlockNumber,  address sender, VerifyParameter vp, string datas);
 
     function mint(uint256 useRightId, uint256 proofId, string memory datas) external;
-    function taskVerify(uint256 tokenId, uint256 a, bytes32[] memory proof, bool[] memory pos) external;
+    function taskVerify(uint256 tokenId, bytes32 a, bytes32[] memory proof, bool[] memory pos) external;
     function updateWaitBlockNumber(uint256 newBlockNumber) external;
 
     function canVerifyOfUseRightId(uint256 tokenId) external view returns(bool);

@@ -60,10 +60,7 @@ async function run() {
     let computility_vm_count = await computility_vm.totalSupply();
 
     let to = "0xFbB84C3b36b61356425e8B916D81bB977071BbD0";
-    let type = "CPU";
-    
-
-
+    let types = ["CPU"];
 
     let rows = [];
 
@@ -78,7 +75,10 @@ async function run() {
 
         let typeUnitId = await computility_vm.typeUnitIdOf(computility_vm_id);
         let typeUnitName  = utils.w3bytes32_to_str(await typeUnit.nameOf(typeUnitId));
-
+        if (!types.includes(typeUnitName)) {
+            logger.debug("only use " + types);
+            continue;
+        }
 
         let deadline = await computility_vm.deadLine(computility_vm_id);
         let token_id = await new_token_id(computility_vm_id);

@@ -111,7 +111,7 @@ contract SCPNSVerifyTask is
         _tokensSender[_msgSender()].add(tokenId);
     }
 
-    function taskVerify(uint256 tokenId, uint256 a, bytes32[] memory proof, bool[] memory pos) public virtual override whenNotPaused {
+    function taskVerify(uint256 tokenId, bytes32 a, bytes32[] memory proof, bool[] memory pos) public virtual override whenNotPaused {
 
         require(_useRightTokenIf().exists(_id2UseRightId[tokenId]), 
                 "SCPNSVerifyTask: useRight token is nonexists");
@@ -122,6 +122,10 @@ contract SCPNSVerifyTask is
 
         VerifyStat      storage vs = _useRightId2VerifyStat[_id2UseRightId[tokenId]];
         VerifyParameter storage vp = _id2VerifyParameter[tokenId];
+
+        require(vp.q == a, 
+                "SCPNSVerifyTask: the answer does not match  question question");
+
         vp.verifyBlockNumber       = block.number;
         vp.a                       = a;
 

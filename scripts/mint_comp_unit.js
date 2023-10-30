@@ -75,7 +75,7 @@ async function run() {
         let type_unit_id = await type_unit.tokenByIndex(i);
         let type_unit_name = utils.w3bytes32_to_str(await type_unit.nameOf(type_unit_id));
         let token_id = await new_token_id(type_unit_name);
-        let count = i + 1;
+        let count = 1;
 
         let datas = utils.json_to_w3str({data: type_unit_name});
         logger.debug("new token: " + token_id);

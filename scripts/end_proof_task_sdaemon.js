@@ -44,12 +44,11 @@ async function load_use_right_id(signer_address, buf) {
         let parameters  = await proof_task.latestParametersByUseRightId(use_right_id); 
         let taskId      = utils.w3uint256_to_hex(parameters[2]);
 
-        let owner = await proof_task.ownerOf(taskId);
-        if (owner != signer_address) {
-            logger.debug("owner "+ owner +" of proof task id(" + taskId +") is not signer " + signer_address + ", next...");
+        let is_owner = await proof_task.isOwner(taskId, signer_address);
+        if (!is_owner) {
+            logger.info(" owner of proof task id(" + taskId +") is not signer, next...");
             continue;
         }
-
         if(buf[taskId] == true) {
             logger.debug("task id(" + taskId +") was proof, next...");
             continue;
@@ -79,6 +78,7 @@ async function work(buf) {
     }
     logger.debug("check use_right_id: " + use_right_id);
 
+
     let isInProof = await proof_task.isInProofOfUseRightId(use_right_id);
     if (!isInProof) {
         logger.debug("useRight token(" + use_right_id +") is not in proof, next...");
@@ -94,9 +94,9 @@ async function work(buf) {
     let leaf_deep   = parameter["leaf_deep"];
     let taskId      = utils.w3uint256_to_hex(parameters[2]);
 
-    let owner = await proof_task.ownerOf(taskId);
-    if (owner != signer_address) {
-        logger.debug("owner of proof task id(" + taskId +") is not signer, return...");
+    let is_owner = await proof_task.isOwner(taskId, signer_address);
+    if (!is_owner) {
+        logger.info(" owner of proof task id(" + taskId +") is not signer, next...");
         return;
     }
 

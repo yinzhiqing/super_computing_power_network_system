@@ -53,9 +53,9 @@ async function get_use_right_id(signer_address, buf) {
         let proof_parameters = await verify_task.proofParametersByUseRightId(use_right_id);
         let proofId     = utils.w3uint256_to_hex(proof_parameters[2]); // 算力证明任务ID
         // 只对自己证明的挑战感兴趣
-        let owner = await proof_task.ownerOf(proofId);
-        if (owner !=  signer_address) {
-            logger.debug("owner "+ owner +" of proof task id(" + proofId +") is not signer " + signer_address + ", next...");
+        let is_owner = await proof_task.isOwner(proofId, signer_address);
+        if (!is_owner) {
+            logger.info(" owner of proof task id(" + proofId +") is not signer, next...");
             continue;
         }
         return use_right_id;
@@ -134,8 +134,6 @@ async function work(buf) {
      * 4根据挑战问题q 选择对应的proof(路径)
      */
     let proof       = await get_proof(q, dynamicData, leaf_count, leaf_deep);
-    //获取对应的叶子节点序号
-    let a           = await get_leaf_index(q, dynamicData, leaf_count, leaf_deep);
 
     rows.push({
         use_right_id: use_right_id,
@@ -149,7 +147,7 @@ async function work(buf) {
      */
     logger.info("verify task: " + tokenId);
     await verify_task.connect(signer).taskVerify(
-        tokenId/* 任务ID*/, a /* 叶节点序号*/, proof /*路径*/, [] /* 位置用openzepplin的树时候不用此值*/);
+        tokenId/* 任务ID*/, q /* 路径对应的问题 */, proof /*路径*/, [] /* 位置用openzepplin的树时候不用此值*/);
 
     buf[q] = true;
     logger.table(rows, "new tokens");

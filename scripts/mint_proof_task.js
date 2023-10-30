@@ -51,20 +51,23 @@ async function run() {
     let receiver = ethers.provider.getSigner(1); 
     let minter = await signer.getAddress(); 
 
+
     let has_miter = await has_role(proof_task, minter, role);
     if (has_miter != true) {
         logger.error(personal + " no minter role." );
         return;
     } 
 
-    let use_right_count = await use_right.totalSupply();
 
+    let from_address = await signer.getAddress();
     let to = await receiver.getAddress();
+    let use_right_count = await use_right.balanceOf(from_address);
 
     let rows = [];
 
     for (var i = 0; i < use_right_count; i++) {
-        let use_right_id = utils.w3uint256_to_hex(await use_right.tokenByIndex(i));
+        let use_right_id = utils.w3uint256_to_hex(await use_right.tokenOfOwnerByIndex(from_address, i));
+
         let isInProof = await proof_task.isInProofOfUseRightId(use_right_id);
 
         if (isInProof) {

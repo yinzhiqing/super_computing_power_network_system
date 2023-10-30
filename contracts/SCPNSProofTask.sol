@@ -75,6 +75,9 @@ ISCPNSProofTask
         require(!SCPNSProofTask.isInProofOfUseRightId(useRightId), 
                 "SCPNSProofTask: useRight token is in proof");
 
+        require(!_verifyTaskIf().isInVerifyOfUseRightId(useRightId), 
+                "SCPNSProofTask: useRight token is in Verify");
+
         uint256 tokenId = _idGenerator.current();
         _mint(to, tokenId, NO_NAME, datas);
 

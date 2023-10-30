@@ -27,6 +27,7 @@ async function run() {
     let signer = ethers.provider.getSigner(1); 
     let use_right_count = await use_right.totalSupply();
     let signer_address  = await signer.getAddress();
+    logger.debug("signer_address: " + signer_address);
 
     let rows = [];
     let use_sha256 = false;
@@ -56,8 +57,8 @@ async function run() {
         let sample      = parameter["sample"];
         let taskId      = utils.w3uint256_to_hex(parameters[2]);
 
-        let owner = await proof_task.ownerOf(taskId);
-        if (owner != signer_address) {
+        let is_owner = await proof_task.isOwner(taskId, signer_address);
+        if (!is_owner) {
             logger.info(" owner of proof task id(" + taskId +") is not signer, next...");
             continue;
         }

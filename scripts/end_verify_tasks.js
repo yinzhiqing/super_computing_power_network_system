@@ -75,9 +75,9 @@ async function run() {
         logger.debug("proofId    : " + proofId);
 
         // 只对自己证明的挑战感兴趣
-        let owner = await proof_task.ownerOf(proofId);
-        if (owner != await signer_address) {
-            logger.debug("owner "+ owner +" of proof task id(" + proofId +") is not signer " + signer_address + ", next...");
+        let is_owner = await proof_task.isOwner(taskId, signer_address);
+        if (!is_owner) {
+            logger.info(" owner of proof task id(" + taskId +") is not signer, next...");
             continue;
         }
 
@@ -98,9 +98,6 @@ async function run() {
         /*
          * 4根据挑战问题q 选择对应的proof(路径)
          */
-        //获取对应的叶子节点序号
-        let a = await get_leaf_index(q, dynamicData, leaf_count, leaf_deep);
-        logger.debug("a        : ",  a);
         let proof = await get_proof(q, dynamicData, leaf_count, leaf_deep);
 
         rows.push({
@@ -111,7 +108,7 @@ async function run() {
         /* 5. 
          * 回答挑战问题, 将根据回答问题有效性进行对错次数统计
          */
-        let tx = await verify_task.connect(signer).taskVerify(parameters[0]/* 任务ID*/, a /* 叶节点序号*/, proof /*路径*/, [] /* 位置*/);
+        let tx = await verify_task.connect(signer).taskVerify(parameters[0]/* 任务ID*/, q /* 问题*/, proof /*路径*/, [] /* 位置*/);
         
         break;
     }

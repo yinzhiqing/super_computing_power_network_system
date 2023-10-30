@@ -32,11 +32,30 @@ async function init_def_parameters(type_unit, proof_parameter, gpu_list, signer)
 
         row["type_unit_name"]   = key;
         row["para_name"]        = def_parameters[key];
-        row["type_unit_id"]     = await type_unit.tokenIdOf(utils.str_to_w3bytes32(row["type_unit_name"]));
+        row["type_unit_id"]     = utils.w3uint256_to_hex(await type_unit.tokenIdOf(utils.str_to_w3bytes32(row["type_unit_name"])));
         row["gpu_id"]           = await type_unit.unitIdOf(row["type_unit_id"]);
         row["gpu_name"]         = utils.w3bytes32_to_str(await gpu_list.nameOf(row["gpu_id"]));
 
-        let parameter_id        = await proof_parameter.tokenIdOf(utils.str_to_w3bytes32(row["para_name"]));
+        let parameter_id        = utils.w3uint256_to_hex(await proof_parameter.tokenIdOf(utils.str_to_w3bytes32(row["para_name"])));
+
+        let exists = await type_unit.exists(row["type_unit_id"]);
+        if (!exists) {
+            logger.debug("type unit id(" + row["type_unit_id"].toString() + ") is nonexists.");
+            continue;
+        }
+
+        exists = await proof_parameter.exists(parameter_id);
+        if (!exists) {
+            logger.debug("parameter(" + parameter_id.toString() + ") is nonexists.");
+            continue;
+        }
+
+        let cur_parameter_id = utils.w3uint256_to_hex(await proof_parameter.parameterIdOfTypeUnitId(row["type_unit_id"]));
+        if (cur_parameter_id == parameter_id) {
+            logger.debug("parameter(" + parameter_id.toString() + ") was setted, next...");
+            continue;
+        }
+        logger.debug("set default parameter(" + parameter_id. toString() + ") of type unit(" + row["type_unit_id"] + ").");
 
         rows.push({
             gpu_name: row["gpu_name"],
@@ -45,11 +64,6 @@ async function init_def_parameters(type_unit, proof_parameter, gpu_list, signer)
             parameterName: row["para_name"],
 
         })
-
-        let exists = await proof_parameter.exists(parameter_id);
-        if (!exists) {
-            continue;
-        }
 
         await proof_parameter.setDefaultTokenOf(row["type_unit_id"], parameter_id);
     }
@@ -76,6 +90,20 @@ async function init_computility_range(type_unit, proof_parameter, gpu_list, sign
             let parameter_id        = await proof_parameter.tokenIdOf(utils.str_to_w3bytes32(row["para_name"]));
             let min = computility[ukey]["min"];
             let max = computility[ukey]["max"];
+
+            let exists = await type_unit.exists(row["type_unit_id"]);
+            if (!exists) {
+                logger.debug("type unit id(" + row["type_unit_id"].toString() + ") is nonexists.");
+                continue;
+            }
+
+            let range = await proof_parameter.computilityRangeOfTypeUnit(parameter_id, row["type_unit_id"]);
+            let cur_min = range[0];
+            let cur_max = range[1];
+            if (cur_min == min && cur_max == max) {
+                logger.debug("type unit id(" + row["type_unit_id"].toString() + ") the same range was setted, next...");
+                continue;
+            }
             rows.push({
                 gpu_name: row["gpu_name"],
                 typeUnitId: utils.w3uint256_to_hex(row["type_unit_id"]).substr(0, 6),
@@ -84,7 +112,8 @@ async function init_computility_range(type_unit, proof_parameter, gpu_list, sign
                 min: min,
                 max: max
             });
-            logger.debug(rows)
+            //logger.debug(rows)
+            logger.debug("set range of type unit id(" + parameter_id. toString() + ") of type unit(" + row["type_unit_id"] + ").");
             await proof_parameter.setComputilityRange(parameter_id, row["type_unit_id"], min, max);
         }
 
