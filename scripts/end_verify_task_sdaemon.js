@@ -119,13 +119,16 @@ async function work(buf) {
     let state       = parameters[2];
 
     tokenId = utils.w3uint256_to_hex(tokenId);
-    if(buf[tokenId] == true) {
+    if(buf[q] == true) {
         return;
     }
 
     logger.debug("tokenId: " + utils.w3uint256_to_hex(parameters[0])); // 挑战任务ID
     logger.debug("q      : " + q.toString()); //挑战问题
     logger.debug("state  : " + state);
+
+    let residue_verify = Number(await verify_task.residueVerifyOf(parameters[0]));
+    logger.debug(">> residue Verify: " + residue_verify);
 
     /*
      * 4根据挑战问题q 选择对应的proof(路径)
@@ -136,7 +139,8 @@ async function work(buf) {
 
     rows.push({
         use_right_id: use_right_id,
-        token_id: tokenId
+        token_id: tokenId,
+        residue_verify: residue_verify
     })
 
 
@@ -147,7 +151,7 @@ async function work(buf) {
     await verify_task.connect(signer).taskVerify(
         tokenId/* 任务ID*/, a /* 叶节点序号*/, proof /*路径*/, [] /* 位置用openzepplin的树时候不用此值*/);
 
-    buf[tokenId] = true;
+    buf[q] = true;
     logger.table(rows, "new tokens");
 }
 

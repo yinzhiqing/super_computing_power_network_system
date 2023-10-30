@@ -36,6 +36,9 @@ async function work() {
         logger.debug(">> q: "    + parameters[1]);
         logger.debug(">> state :" + parameters[2].toString());
 
+        let residue_verify = Number(await cobj.residueVerifyOf(row["tokenId"]));
+        logger.debug(">> residue Verify: " + residue_verify);
+
         let verify_stat = await cobj.verifyStatOfUseRightId(row["use_right_id"]);
         logger.debug(">> verify stat: [t, s, f] " + verify_stat);
 
@@ -43,7 +46,8 @@ async function work() {
         detail[row["use_right_id"]] = {
             total: Number(verify_stat[0].toString()),
             succees: Number(verify_stat[1].toString()),
-            failed: Number(verify_stat[2].toString())
+            failed: Number(verify_stat[2].toString()),
+            residue_verify: residue_verify
         };
 
         row["owner"] = row["owner"].substr(0, 6);
