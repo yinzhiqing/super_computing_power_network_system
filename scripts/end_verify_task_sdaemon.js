@@ -119,7 +119,7 @@ async function work(buf) {
     let state       = parameters[2];
 
     tokenId = utils.w3uint256_to_hex(tokenId);
-    if(buf[q] == true) {
+    if(buf[tokenId + q] == true) {
         return;
     }
 
@@ -145,12 +145,15 @@ async function work(buf) {
     /* 5. 
      * 回答挑战问题, 将根据回答问题有效性进行对错次数统计
      */
+    let index = await get_leaf_index(q, dynamicData, leaf_count, leaf_deep);
+    logger.debug("q_index: " + index);
+
     logger.info("verify task: " + tokenId);
     await verify_task.connect(signer).taskVerify(
         tokenId/* 任务ID*/, q /* 路径对应的问题 */, proof /*路径*/, [] /* 位置用openzepplin的树时候不用此值*/);
 
     buf[q] = true;
-    logger.table(rows, "new tokens");
+    logger.table(rows, "verify info");
 }
 
 async function run(times) {

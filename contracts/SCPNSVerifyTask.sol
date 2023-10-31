@@ -181,6 +181,14 @@ contract SCPNSVerifyTask is
         return _exists(_useRightId2Id[tokenId]) && SCPNSVerifyTask.isInVerifyOf(_useRightId2Id[tokenId]);
     }
 
+    function _isInVerifyOf(uint256 tokenId)  internal view returns(bool) {
+        VerifyParameter storage vp = _id2VerifyParameter[tokenId];
+        // we think verify task is verifing if state is Start Verify and residue verify > 0 and in verify times
+        return (vp.state == VerifyState.Start || vp.state == VerifyState.Verify) 
+            && SCPNSVerifyTask.residueVerifyOf(tokenId) > 0 
+            && block.number < vp.startBlockNumber + _waitBlockNumber;
+    }
+
     function proofParametersByUseRightId(uint256 tokenId) public view virtual override returns(
         bytes32 dynamicData, string memory parameter, uint256 proofId, bool has) {
         (dynamicData, parameter, proofId, has) = _proofTaskIf().latestParametersByUseRightId(tokenId);
@@ -234,6 +242,15 @@ contract SCPNSVerifyTask is
         failed      = vs.failed;
     }
 
+    function verifyStatOf(uint256 tokenId) public view virtual override returns(
+        uint256 total, uint256 succees, uint256 failed) {
+
+        VerifyParameter storage vp = _id2VerifyParameter[tokenId];
+        total       = vp.stat.total;
+        succees     = vp.stat.succees;
+        failed      = vp.stat.failed;
+    }
+
     function sha256Of(bytes memory data) public view virtual override returns(bytes32) {
        return sha256(abi.encodePacked(data));
     }
@@ -243,18 +260,13 @@ contract SCPNSVerifyTask is
     
         VerifyParameter storage vp = _id2VerifyParameter[tokenId];
         VerifyStat storage vs = _useRightId2VerifyStat[useRightId];
-        if (vp.state == VerifyState.Start && block.number < vp.startBlockNumber + _waitBlockNumber) {
+        if (vp.state == VerifyState.Start && block.number > vp.startBlockNumber + _waitBlockNumber) {
             vp.state = VerifyState.Error;
             vs.failed += 1;
         }
-        if (vp.state == VerifyState.Verify && block.number < vp.endBlockNumber + _waitBlockNumber) {
+        if (vp.state == VerifyState.Verify && block.number > vp.startBlockNumber + _waitBlockNumber) {
             vp.state = VerifyState.Error;
         }
-    }
-
-    function _isInVerifyOf(uint256 tokenId)  internal view returns(bool) {
-        VerifyParameter storage vp = _id2VerifyParameter[tokenId];
-        return (vp.state == VerifyState.Start || vp.state == VerifyState.Verify) && block.number < vp.startBlockNumber + _waitBlockNumber;
     }
 
     function _burn(uint256 tokenId) internal virtual override(SCPNSBase) {
@@ -272,21 +284,24 @@ contract SCPNSVerifyTask is
         uint256 parameterId = _useRightTokenIf().parameterIdOf(useRightId);
         uint256 leaf_count  = _proofParameterIf().leafCountOf(parameterId);
         uint256 leaf_deep   = _proofParameterIf().leafDeepOf(parameterId);
+        uint256 sample      = _proofParameterIf().sampleOf(parameterId);
 
-        uint256 index  = SCPNSVerifyTask.randIndex(leaf_count);
+        uint256 sample_index = SCPNSVerifyTask.residueVerifyOf(_useRightId2Id[useRightId]) - 1;
+        uint256 index  = SCPNSVerifyTask.randIndex(leaf_count, sample, sample_index);
 
         return SCPNSVerifyTask.createLeaf(dynamicData, index, leaf_deep, useSha256);
     }
 
     function _next_verify(uint256 tokenId, uint256 useRightId) internal {
         VerifyParameter storage vp  = _id2VerifyParameter[tokenId];
-        if (vp.stat.total <= (vp.stat.failed + vp.stat.succees)) {
+        if (vp.stat.total == vp.stat.succees) {
             vp.state = VerifyState.End;
-            return ;
+        }  else if (vp.stat.total <= (vp.stat.failed + vp.stat.succees)) {
+            vp.state = VerifyState.Error;
+        } else if(vp.stat.total > (vp.stat.failed + vp.stat.succees)) {
+            vp.state            = VerifyState.Verify;
+            vp.q                = _create_q(useRightId, vp.proofId);
         }
-
-        vp.state            = VerifyState.Verify;
-        vp.q                = _create_q(useRightId, vp.proofId);
 
         emit TaskData(_eventIndex.current(), useRightId, _preBlockNumber, _msgSender(), vp, "{}");
 
@@ -295,30 +310,33 @@ contract SCPNSVerifyTask is
         _eventIndex.increment();
     }
 
-    function randIndex(uint256 leafCount) public view virtual override returns(uint256) {
-        return uint256(sha256(abi.encodePacked(block.timestamp, block.difficulty, msg.sender))) % leafCount;
+    function randIndex(uint256 leafCount, uint256 sample, uint256 index) public view virtual override returns(uint256) {
+        require(leafCount > sample, "SCPNSVerifyTask: sample value too large");
+        require(sample > index, "SCPNSVerifyTask: index value too large");
+        uint256 mod_value = (leafCount) / sample;
+        uint256 base_value = mod_value * index;
+        uint256 value =  base_value + (uint256(sha256(abi.encodePacked(block.timestamp * (index + 1), block.difficulty, msg.sender, blockhash(block.number), gasleft()))) % mod_value);
+        return value >= leafCount ? leafCount -1 : value;
     }
 
     function createLeaf(bytes32 dynamicData, uint256 index, uint256 leaf_deep, bool useSha256) public view virtual override returns(bytes32) {
         bytes32 leaf = bytes32("");
+        uint leaf_hash_count = 2;
         if (useSha256) {
-            for(uint256 i = 0; i < leaf_deep; i++) {
+            for(uint256 i = 0; i < leaf_deep + leaf_hash_count; i++) {
                 leaf = i == 0 ? sha256(abi.encodePacked(dynamicData, index)): sha256(abi.encodePacked(leaf));
             }
-
         } else {
-            for(uint256 i = 0; i < leaf_deep; i++) {
+            for(uint256 i = 0; i < leaf_deep + leaf_hash_count; i++) {
                 leaf = i == 0 ? keccak256(abi.encodePacked(dynamicData, index)): keccak256(abi.encodePacked(leaf));
             }
         }
-        if (useSha256) {
-            leaf = leaf_deep == 0 ? sha256(abi.encodePacked(sha256(abi.encodePacked(dynamicData, index)))) : 
-                sha256(abi.encodePacked(sha256(abi.encodePacked(leaf))));
-        } else {
-            leaf = leaf_deep == 0 ? keccak256(abi.encodePacked(keccak256(abi.encodePacked(dynamicData, index)))) : 
-                keccak256(abi.encodePacked(keccak256(abi.encodePacked(leaf))));
-        }
         return leaf;
+    }
+
+    function isVerified(uint256 tokenId) public view virtual override returns(bool) {
+        VerifyParameter storage vp  = _id2VerifyParameter[tokenId];
+        return vp.state == VerifyState.End;
     }
 
     //must be at end

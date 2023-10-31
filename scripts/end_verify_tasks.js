@@ -108,6 +108,8 @@ async function run() {
         /* 5. 
          * 回答挑战问题, 将根据回答问题有效性进行对错次数统计
          */
+        let index = await get_leaf_index(q, dynamicData, leaf_count, leaf_deep);
+        logger.debug("q_index: " + index);
         let tx = await verify_task.connect(signer).taskVerify(parameters[0]/* 任务ID*/, q /* 问题*/, proof /*路径*/, [] /* 位置*/);
         
         break;
