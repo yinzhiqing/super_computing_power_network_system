@@ -38,7 +38,7 @@ contract SCPNSComputilityRanking is
     // tokenId is useRightId
     // Mapping (tokenId => (parameterId => taskId))
     mapping (uint256 => PairValues.PairUint256) private _id2PidTid;
-    // Mapping (tokenId => parameterId)
+    // Mapping (tokenId => parameterId) 最后一次 
     mapping (uint256 => uint256) private _id2ParameterIds;
     // Mapping (parameterId => (tokenId => Times))
     mapping (uint256 => PairValues.PairUint256) private _id2Times;

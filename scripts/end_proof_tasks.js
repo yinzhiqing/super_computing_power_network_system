@@ -78,6 +78,7 @@ async function run() {
         let merkle_root = await create_merkle_datas(dynamicData, leaf_count, leaf_deep);
 
         let tx = await proof_task.connect(signer).taskEnd(taskId, merkle_root, utils.str_to_w3bytes32(""), use_sha256);
+        logger.debug(tx);
         
         break;
     }

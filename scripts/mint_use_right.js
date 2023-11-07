@@ -89,6 +89,7 @@ async function run() {
         let tx = await use_right.connect(signer).mint(to, token_id,  deadline, 
                     [computility_vm_id], datas);
 
+        logger.debug(tx);
         rows.push({
             to: to,
             token_id: token_id,
