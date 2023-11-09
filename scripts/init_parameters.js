@@ -38,11 +38,13 @@ async function init_def_parameters(type_unit, proof_parameter, gpu_list, signer)
 
         let parameter_id        = utils.w3uint256_to_hex(await proof_parameter.tokenIdOf(utils.str_to_w3bytes32(row["para_name"])));
 
+
         let exists = await type_unit.exists(row["type_unit_id"]);
         if (!exists) {
             logger.debug("type unit id(" + row["type_unit_id"].toString() + ") is nonexists.");
             continue;
         }
+
 
         exists = await proof_parameter.exists(parameter_id);
         if (!exists) {
@@ -50,11 +52,15 @@ async function init_def_parameters(type_unit, proof_parameter, gpu_list, signer)
             continue;
         }
 
+
+        logger.debug("start set");
+        /*
         let cur_parameter_id = utils.w3uint256_to_hex(await proof_parameter.parameterIdOfTypeUnitId(row["type_unit_id"]));
         if (cur_parameter_id == parameter_id) {
             logger.debug("parameter(" + parameter_id.toString() + ") was setted, next...");
             continue;
         }
+        */
         logger.debug("set default parameter(" + parameter_id. toString() + ") of type unit(" + row["type_unit_id"] + ").");
 
         rows.push({
@@ -122,7 +128,7 @@ async function init_computility_range(type_unit, proof_parameter, gpu_list, sign
 }
 
 async function run() {
-    logger.debug("start working...", "mint");
+    logger.debug("start working...", "init parameters");
 
     let proof_parameter = await utils.contract("SCPNSProofParameter");
     let type_unit       = await utils.contract("SCPNSTypeUnit");

@@ -86,4 +86,11 @@ interface ISCPNSBase {
     */
     function isOwner(uint256 tokenId, address owner) external view returns(bool);
 
+    /**
+    * @notice 链中时戳精度，秒为1,且为最大精度值
+    * @dev 不同链中时戳精度不同，秒为1 毫秒为1000
+    * @return 精度值
+    */
+    function pricision() external view returns(uint256);
+
 }

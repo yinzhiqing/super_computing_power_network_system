@@ -226,6 +226,8 @@ cancel_proof_tasks:
 tests:
 	@npx hardhat run scripts/test.js
 
+init_all: init_dns init_contracts mint_gpu mint_type_unit mint_proof_parameter init_parameters
+
 help:
 	@npx hardhat run scripts/helps.js
 

@@ -134,8 +134,8 @@ contract SCPNSVerifyTask is
             vs.failed  += 1;
             vp.stat.failed += 1;
         } else {
-            vs.succees += 1;
-            vp.stat.succees += 1;
+            vs.success += 1;
+            vp.stat.success += 1;
         }
 
         _next_verify(tokenId, _id2UseRightId[tokenId]);
@@ -209,7 +209,7 @@ contract SCPNSVerifyTask is
 
     function residueVerifyOf(uint256 tokenId) public view virtual override returns(uint256) {
         VerifyParameter storage vp = _id2VerifyParameter[tokenId];
-        return vp.stat.total - vp.stat.failed - vp.stat.succees;
+        return vp.stat.total - vp.stat.failed - vp.stat.success;
     }
 
     function verifyParameterOf(uint256 tokenId) public view virtual override returns(
@@ -234,20 +234,20 @@ contract SCPNSVerifyTask is
     }
 
     function verifyStatOfUseRightId(uint256 useRightId) public view virtual override returns(
-        uint256 total, uint256 succees, uint256 failed) {
+        uint256 total, uint256 success, uint256 failed) {
 
         VerifyStat storage vs = _useRightId2VerifyStat[useRightId];
         total       = vs.total;
-        succees     = vs.succees;
+        success     = vs.success;
         failed      = vs.failed;
     }
 
     function verifyStatOf(uint256 tokenId) public view virtual override returns(
-        uint256 total, uint256 succees, uint256 failed) {
+        uint256 total, uint256 success, uint256 failed) {
 
         VerifyParameter storage vp = _id2VerifyParameter[tokenId];
         total       = vp.stat.total;
-        succees     = vp.stat.succees;
+        success     = vp.stat.success;
         failed      = vp.stat.failed;
     }
 
@@ -294,11 +294,11 @@ contract SCPNSVerifyTask is
 
     function _next_verify(uint256 tokenId, uint256 useRightId) internal {
         VerifyParameter storage vp  = _id2VerifyParameter[tokenId];
-        if (vp.stat.total == vp.stat.succees) {
+        if (vp.stat.total == vp.stat.success) {
             vp.state = VerifyState.End;
-        }  else if (vp.stat.total <= (vp.stat.failed + vp.stat.succees)) {
+        }  else if (vp.stat.total <= (vp.stat.failed + vp.stat.success)) {
             vp.state = VerifyState.Error;
-        } else if(vp.stat.total > (vp.stat.failed + vp.stat.succees)) {
+        } else if(vp.stat.total > (vp.stat.failed + vp.stat.success)) {
             vp.state            = VerifyState.Verify;
             vp.q                = _create_q(useRightId, vp.proofId);
         }

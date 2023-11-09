@@ -54,6 +54,7 @@ contract SCPNSBase is Initializable, ContextUpgradeable, AccessControlEnumerable
     // Auto controller
     ArrayAddresses.PairAddress internal  _autoControllers;
 
+    uint256 private __pricision;
     /**
      * @dev Grants `DEFAULT_ADMIN_ROLE`, `MINTER_ROLE` and `PAUSER_ROLE` to the
      * account that deploys the contract.
@@ -75,6 +76,7 @@ contract SCPNSBase is Initializable, ContextUpgradeable, AccessControlEnumerable
 
     function __SCPNSBase_init_unchained(string memory baseTokenURI) internal initializer {
 
+        __pricision = _pricision();
         _baseTokenURI = baseTokenURI;
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _setupRole(MINTER_ROLE, _msgSender());
@@ -223,5 +225,15 @@ contract SCPNSBase is Initializable, ContextUpgradeable, AccessControlEnumerable
         return super.ownerOf(tokenId) == owner && owner != address(0);
     }
 
+    function pricision() public view virtual override returns(uint256) {
+        return __pricision;
+    }
+
+    function _pricision() internal view returns(uint256) {
+        if (__pricision > 0) {
+            return __pricision;
+        }
+        return (block.timestamp > 1000000000000) ? 1000 : 1;
+    }
     uint256[48] private __gap;
 }

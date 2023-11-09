@@ -52,7 +52,7 @@ contract SCPNSComputilityVM is
 
         require(computilityUnits.length == typeUnitCounts.length, 
                 "SCPNSComputilityVM: computilityUnits and typeUnitCounts length is differ");
-        require(deadline > block.timestamp, 
+        require(deadline * _pricision() > block.timestamp, 
                 "SCPNSComputilityVM: deadline is too small.");
 
         _mint(to, tokenId, NO_NAME, datas);
@@ -84,8 +84,8 @@ contract SCPNSComputilityVM is
                 "SCPNSComputilityVM: token is nonexists.");
         require(lockline <= _deadlines[tokenId], 
                 "SCPNSComputilityVM: locked time > deadline");
-        require(_lockLines[tokenId] < block.timestamp, 
-                "SCPNSComputilityVM: token is locked");
+        require(_lockLines[tokenId] * _pricision() < block.timestamp, 
+                "SCPNSComputilityVM: token had locked");
 
         _lockLines[tokenId] = lockline;
     }
@@ -114,7 +114,7 @@ contract SCPNSComputilityVM is
         require(_exists(tokenId), 
                 "SCPNSComputilityVM: token is nonexists.");
 
-        return _lockLines[tokenId] < block.timestamp && _deadlines[tokenId] > block.timestamp;
+        return _lockLines[tokenId] < block.timestamp && _deadlines[tokenId] * _pricision() > block.timestamp;
     }
 
     function deadLine(uint256 tokenId) public view virtual override returns(uint256) {

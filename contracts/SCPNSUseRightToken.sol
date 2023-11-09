@@ -48,7 +48,7 @@ contract SCPNSUseRightToken is
 
         require(computilityVMs.length > 0, 
                 "SCPNSUseRightToken: computilityVMs length is 0");
-        require(deadline > block.timestamp, 
+        require(deadline * _pricision() > block.timestamp, 
                 "SCPNSUseRightToken: deadline is too small.");
 
         _mint(to, tokenId, NO_NAME, datas);
@@ -96,7 +96,7 @@ contract SCPNSUseRightToken is
     }
 
     function isValid(uint256 tokenId) public view virtual override returns(bool) {
-        return _deadlines[tokenId] > block.timestamp;
+        return _deadlines[tokenId] * _pricision() > block.timestamp;
     }
 
     function parameterIdOf(uint256 tokenId) external view virtual override returns(uint256) {

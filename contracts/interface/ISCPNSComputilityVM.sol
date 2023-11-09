@@ -5,6 +5,12 @@ pragma solidity ^0.8.2;
 
 import  "./ISCPNSBase.sol";
 
+/**
+* @title 算力管理
+* @author yinzhiqing
+* @notice 算力管理即管理算力资源
+* @dev 算力管理合约是算力使用权通证的基础，依赖算力单元合约
+*/
 interface ISCPNSComputilityVM is 
     ISCPNSBase
 {

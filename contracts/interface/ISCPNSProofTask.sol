@@ -156,14 +156,73 @@ interface ISCPNSProofTask is
     */
     function latestTaskDataByUseRightId(uint256 tokenId) external view returns(
         TaskParameter memory parameter, TaskDetail memory result);
+
+    /**
+    * @notice 获取使用权通证对应的指定任务信息
+    * @dev 获取使用权通证对应的指定任务信息, 参照结构
+    * @param tokenId 使用权通证ID
+    * @param index 任务序号
+    * @return parameter 任务参数
+    * @return result 任务结果信息
+    */
     function taskDataOfUseRightId(uint256 tokenId, uint256 index) external view returns(
         TaskParameter memory parameter, TaskDetail memory result);
+
+    /**
+    * @notice 获取使用权证明任务数量
+    * @dev 获取使用权任务数量可通过taskDataOfUseRightId获取所有任务信息
+    * @param tokenId 使用权通证ID
+    * @return 数量
+    */
     function taskDataCountOfUseRightId(uint256 tokenId) external view returns(uint256);
+
+    /**
+    * @notice 获取指定任务信息
+    * @dev 获取指定任务信息, 任务ID必须有效
+    * @param tokenId 使用权通证ID
+    * @return parameter 任务参数
+    * @return result 任务结果信息
+    */
     function taskDataOf(uint256 tokenId) external view returns(
         TaskParameter memory parameter, TaskDetail memory result);
+
+    /**
+    * @notice 获取任务ID对应的使用权通证
+    * @dev 一个任务对应一个使用权通证，一个使用权通证对应多个任务，可通过任务确定使用权通证
+    * @param tokenId 任务ID
+    * @return 使用权通证ID
+    */
     function useRightIdOf(uint256 tokenId) external view returns(uint256);
+
+    /** 
+    * @notice 判定指定的任务ID是否在证明状态中
+    * @dev 任务处于证明状态中指发起证明任务(mint)到结束任务（taskEnd)
+    * @param tokenId 任务ID
+    * @return 证明状态
+    */
     function isInProofOf(uint256 tokenId) external view returns(bool);
+
+    /** 
+    * @notice 判定指定的使用权通证是否在证明状态中
+    * @dev 任务处于证明状态中指发起证明任务(mint)到结束任务（taskEnd)
+    * @param tokenId 任务ID
+    * @return 证明状态
+    */
     function isInProofOfUseRightId(uint256 tokenId) external view returns(bool);
+
+    /**
+    * @notice 获取证明任务的结果的Merkle树根
+    * @dev 获取Merkle根和证明参数可链外验证证明数据
+    * @param tokenId 任务ID
+    * @return Merkle根
+    */
     function merkleRootOf(uint256 tokenId) external view returns(bytes32);
+
+    /**
+    * @notice 获取指定任务证明数据Merkle树生成所用hash是否是sha256
+    * @dev 生成hash用函数sha256 或keccak256(链默认)
+    * @param tokenId 任务ID
+    * @return 是否用sha256
+    */
     function useSha256Of(uint256 tokenId) external view returns(bool);
 }
