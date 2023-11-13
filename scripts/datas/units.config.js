@@ -74,7 +74,7 @@ units = {
         H800: "mid",
         GTX_1060: "min",
         GTX_1050: "test02",
-        CPU: "test01",
+        CPU: "test03",
     },
     parameters: {
         min: {
@@ -170,7 +170,21 @@ units = {
                     max: 500,
                 }
             }
-        }
+        },
+        test03: {
+            parameter: {
+                leaf_count: 1024,
+                leaf_deep : 100, 
+                sample    : 10,
+
+            },
+            computility: {
+                CPU: {
+                    min: 80,
+                    max: 130,
+                }
+            }
+        },
     }
 };
 

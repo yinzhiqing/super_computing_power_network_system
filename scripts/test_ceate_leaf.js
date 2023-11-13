@@ -1,6 +1,3 @@
-
-
-
 const fs        = require('fs');
 const path      = require("path");
 const program   = require('commander');
@@ -27,6 +24,11 @@ async function work(buf) {
     let signer          = ethers.provider.getSigner(1); 
     let signer_address  = await signer.getAddress();
 
+    let dynamicData = "0x58c8e3399859d95303da28857cdddff61ad7dcfa7bb9bcbe04f5f01e14972140";
+    let index     = 100;
+    let leaf_count = 1024;
+    let leaf_deep = 10;
+    let useSha256 = true;
     let sample = 10;
     for(let i = 0; i < sample; i++) {
         let rand = await verify_task.connect(signer).randIndex(1000, sample, i);
