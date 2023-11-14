@@ -60,7 +60,7 @@ async function run() {
     let computility_vm_count = await computility_vm.totalSupply();
 
     let to = "0xFbB84C3b36b61356425e8B916D81bB977071BbD0";
-    let types = ["CPU"];
+    let types = ["CPU","GTX_1050"];
 
     let rows = [];
 
@@ -94,7 +94,6 @@ async function run() {
             to: to,
             token_id: token_id,
         })
-        break;
     }
     logger.table(rows, "new tokens");
 }

@@ -24,11 +24,12 @@ async function works() {
     for (let i = 0; i < amounts; i++) {
         let row = new Map();
         row["tokenId"] = utils.w3uint256_to_hex(await cobj.tokenByIndex(i));
-        row["算力单元数量"] = utils.w3uint256_to_str(await cobj.computilityUnitCountOf(row["tokenId"]));
+        row["算力单元数量"] = Number(utils.w3uint256_to_str(await cobj.computilityUnitCountOf(row["tokenId"])));
         let typeUnitId = await cobj.typeUnitIdOf(row["tokenId"])
         let typeUnitName  = utils.w3bytes32_to_str(await typeUnit.nameOf(typeUnitId));
         row["型号"] = typeUnitName;
-        row["数量"] = utils.w3uint256_to_str(await cobj.typeUnitCountOf(row["tokenId"]));
+        row["数量"] = Number(utils.w3uint256_to_str(await cobj.typeUnitCountOf(row["tokenId"])));
+        row["自由状态"] = utils.w3uint256_to_str(await cobj.isFree(row["tokenId"]));
 
 
         let datas = utils.w3str_to_str(await cobj.datasOf(row["tokenId"]));
