@@ -38,7 +38,7 @@ async function load_use_right_id(signer_address, buf) {
         }
 
         if (!isInProof) {
-            //logger.debug("useRight token(" + use_right_id +") is not in proof, next...");
+            logger.debug("useRight token(" + use_right_id +") is not in proof, next...");
             continue;
         }
         let parameters  = await proof_task.latestParametersByUseRightId(use_right_id); 
@@ -125,7 +125,7 @@ async function work(buf) {
 
 async function run(times) {
     let buf = {};
-    await utils.scheduleJob(times, work, buf, false);
+    await utils.scheduleJob(times, work, buf, false, 30);
 }
 
 run(3)

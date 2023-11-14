@@ -208,6 +208,9 @@ mint_use_right:
 mint_proof_task:
 	$(call run_script, "mint_proof_task")
 
+mint_proof_task_sdaemon:
+	$(call run_script, "mint_proof_task_sdaemon")
+
 end_proof_task:
 	$(call run_script, "end_proof_tasks")
 

@@ -236,9 +236,14 @@ async function schedule_job(time, func) {
     });
 }
 
-async function scheduleJob(times, func, parameter, clear) {
+async function scheduleJob(times, func, parameter, clear, reset_buf) {
+    let starttime = Date.now();
     while(1) {
         try {
+            if (reset_buf != undefined && reset_buf > 0 && Date.now() - starttime > reset_buf * 1000) {
+                parameter = [];
+                starttime = Date.now();
+            }
             if (clear == true) {
                 console.clear();
             }
