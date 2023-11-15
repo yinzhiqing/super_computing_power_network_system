@@ -34,19 +34,23 @@ def show_plot_std(data):
 def show_plot_matplotx(data):
 
   fdata = json.loads(data);
-  title = fdata.get("title", "plot")
-  x = fdata.get("x", [])
-  y = fdata.get("y", [])
+  rows = fdata.get("rows", 1)
+  cols = fdata.get("cols", 1)
+  xlabel = fdata.get("xlabel", "x")
+  ylabel = fdata.get("ylabel", "y")
+  plots = fdata.get("plots", [{}]);
   plt.style.use(matplotx.styles.pitaya_smoothie['light'])
   #plt.figure(figsize=(8, 8))
 
-  #plt.subplot(1,1,1)
-  plt.plot(x, y, marker = 'o')
+  for i, plot in enumerate(plots, start=1):
+      plt.subplot(rows, cols, i)
+      plt.plot(plot["x"], plot["y"])
+      title = plot.get("title", "plot")
+      plt.title(title)
+      # 坐标轴名称
+      plt.xlabel(xlabel)
+      plt.ylabel(ylabel)
 
-  # 坐标轴名称
-  plt.xlabel('X-Axis')
-  plt.ylabel('Y-Axis')
-  plt.title(title)
 
   plt.show()
 
