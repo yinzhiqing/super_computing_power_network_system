@@ -150,7 +150,7 @@ async function convert_to_config(list) {
     }
 
     let config = {
-        libname: "cyberpunk-no",// matplotx cyberpunk
+        libname: "cyberpunk",// matplotx cyberpunk
         rows: datas.length,
         cols: 1,
         xlabel: "time",

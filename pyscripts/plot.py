@@ -80,7 +80,7 @@ def show_plot_cyberpunk(data):
 
   for i, plot in enumerate(plots, start=1):
       plt.subplot(rows, cols, i)
-      plt.plot(plot["x"], plot["y"])
+      plt.plot(plot["x"], plot["y"],  marker = '.')
       title = plot.get("title", "plot")
       mplcyberpunk.make_lines_glow()
       plt.title(title)
