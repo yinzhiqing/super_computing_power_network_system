@@ -4,7 +4,7 @@ const hardhat_conf= require("./hardhat.config.js");
 configs = {
     defaultNetwork : hardhat_conf.defaultNetwork,
     datas_path : "./datas",
-    debug: false,
+    debug: true,
     networks : {
         localhost: {
             contracts:"./jsons/contracts/contract_localhost.json",

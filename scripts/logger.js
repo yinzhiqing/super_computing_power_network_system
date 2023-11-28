@@ -83,6 +83,11 @@ function lines(msg, title = "", kwargs = {}) {
     kwargs = __merge_kwargs(kwargs, {"format":false, "type":"lines"});
     show_msg(msg, title, kwargs);
 }
+
+function log(msg) {
+    console.log(msg);
+}
+
 function show_msg(msg, title = "", kwargs = {}) {
     type        = get_kwargs(kwargs, "type", "log");
     title_color = get_kwargs(kwargs, "title_color", "red");
@@ -146,5 +151,5 @@ module.exports = {
     table,
     lines,
     clear,
-
+    log,
 }

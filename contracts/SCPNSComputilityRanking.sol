@@ -151,6 +151,7 @@ contract SCPNSComputilityRanking is
         _id2ParameterIds[tokenId]     = parameterId;
         _parameters.add(parameterId);
         _id2ExcTime[parameterId].set(tokenId, __execTime);
+        _id2PidTid[tokenId].set(parameterId, taskId);
         
         emit Set(_eventIndex.current(), parameterId, tokenId, _preBlockNumber, _id2PreBlockNumber[parameterId].valueOfWithDefault(tokenId, 0), __execTime, taskId);
 
