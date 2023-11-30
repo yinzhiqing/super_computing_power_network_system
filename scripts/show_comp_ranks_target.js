@@ -43,10 +43,10 @@ async function run() {
         logger.log("采样次数(次)\t\t\t" + verify_sample);
         logger.log("证明难度:" );
         logger.log("\t叶子数量(个)\t\t" + parameter["leaf_count"]);
-        logger.log("\t叶子hash深度(次)\t\t" + parameter["leaf_deep"]);
+        logger.log("\t叶子hash深度(次)\t" + parameter["leaf_deep"]);
 
         //统计排行表
-        logger.log("排行表:");
+        //logger.log("排行表:");
         let count = await cobj.countOf(para_id, scale, type_unit_id);
         let xs = [];
         let ys = [];
@@ -60,8 +60,8 @@ async function run() {
         }
         xs = xs.sort(function (a, b) { return a - b;});
         xs.forEach(e => {ys.push(xyt[e]); });
-        logger.log("\ty(count)\t" + ys.toString().replaceAll(",", "\t"));
-        logger.log("\tx(times)\t" + xs.toString().replaceAll(",", "\t"));
+        //logger.log("\ty(count)\t" + ys.toString().replaceAll(",", "\t"));
+        //logger.log("\tx(times)\t" + xs.toString().replaceAll(",", "\t"));
         logger.log("");
         logger.log("----------------------------------------------------------------------------------------------------------");
         let state = "异常";
