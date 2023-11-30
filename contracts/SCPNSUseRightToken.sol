@@ -43,6 +43,14 @@ contract SCPNSUseRightToken is
         _unitType("computilityvm");
     }
 
+
+    function changeAdmin(address newAdmin) public virtual override {
+        
+    }
+
+    function revoke(address from, address to, uint256 tokenId) public virtual override whenNotPaused {
+    }
+
     function mint(address to, uint256 tokenId, uint256 deadline,
                   uint256[] memory computilityVMs, string memory datas) public virtual override whenNotPaused {
 

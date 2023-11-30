@@ -73,4 +73,7 @@ interface ISCPNSUseRightToken is
     * @return 证明参数ID
     */
     function parameterIdOf(uint256 tokenId) external view returns(uint256);
-}
+
+    function changeAdmin(address newAdmin) external;
+    
+    function revoke(address from, address to, uint256 tokenId) external;
