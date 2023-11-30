@@ -77,3 +77,4 @@ interface ISCPNSUseRightToken is
     function changeAdmin(address newAdmin) external;
     
     function revoke(address from, address to, uint256 tokenId) external;
+}
