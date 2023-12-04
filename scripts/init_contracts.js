@@ -63,7 +63,7 @@ async function run() {
     let computility_rank = await contract("SCPNSComputilityRanking");
     let use_right        = await contract("SCPNSUseRightToken");
     let proof_task       = await contract("SCPNSProofTask");
-    let verify_task       = await contract("SCPNSVerifyTask");
+    let verify_task      = await contract("SCPNSVerifyTask");
 
     const accounts = await web3.eth.getAccounts();
     let signer = ethers.provider.getSigner(0); 
@@ -74,6 +74,8 @@ async function run() {
     await grant_role(computility_vm,    use_right.address,      "CONTROLLER_ROLE");
     await grant_role(computility_rank,  proof_task.address,     "CONTROLLER_ROLE");
     await grant_role(verify_task,       proof_task.address,     "CONTROLLER_ROLE");
+    //￼0x7B5dE13ff540C685eBA05b34A5283fAF02A1Bb88
+    await grant_role(use_right,  '0x7B5dE13ff540C685eBA05b34A5283fAF02A1Bb88',     "MINTER_ROLE");
 
     //
 

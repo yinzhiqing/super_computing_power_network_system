@@ -17,7 +17,7 @@ async function get_contract(name, address) {
 }
 
 function is_target_name(token_name) {
-    let target_token_name = ['SCPNSProofTask', 'SCPNSVerifyTask'];
+    let target_token_name = ['SCPNSProofTask', 'SCPNSVerifyTask', 'SCPNSUseRightToken'];
     return target_token_name.length == 0 || target_token_name.includes(token_name) === true;
 }
 
