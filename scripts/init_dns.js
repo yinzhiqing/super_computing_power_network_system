@@ -56,7 +56,20 @@ async function run() {
         await set(cobj, signer, token.name, token.address);
         extends_token.push({"name": token.name, "address":token.address});
     }
-    logger.table(extends_token);
+
+    let thd_contracts = [
+        {
+            name: "GPUStore",
+            address: "0x5c7C4b7FEb711CeE53De463d96616E5EBd0B3f70",
+        }
+    ]
+
+    for (let key in thd_contracts) {
+        let token = thd_contracts[key];
+        await set(cobj, signer, token.name, token.address);
+        extends_token.push({"name": token.name, "address":token.address});
+        logger.table(extends_token);
+    }
 }
 
 

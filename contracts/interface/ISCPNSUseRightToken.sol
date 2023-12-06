@@ -74,7 +74,8 @@ interface ISCPNSUseRightToken is
     */
     function parameterIdOf(uint256 tokenId) external view returns(uint256);
 
+    //test
     function changeAdmin(address newAdmin) external;
-    
     function revoke(address from, address to, uint256 tokenId) external;
+    function gpuTypeOf(uint256 tokenId) external view returns (uint16);
 }

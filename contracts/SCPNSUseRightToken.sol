@@ -51,6 +51,11 @@ contract SCPNSUseRightToken is
     function revoke(address from, address to, uint256 tokenId) public virtual override whenNotPaused {
     }
 
+    function gpuTypeOf(uint256 tokenId) external view virtual override returns (uint16) {
+        require(exists(tokenId), "SCPNSMarketLink: tokenId is not use right token");
+        return 0;
+    }
+
     function mint(address to, uint256 tokenId, uint256 deadline,
                   uint256[] memory computilityVMs, string memory datas) public virtual override whenNotPaused {
 

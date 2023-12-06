@@ -113,8 +113,8 @@
 	},
 	"SCPNSMarketLink": {
 		"name": "SCPNSMarketLink",
-		"address": "0x4589c31410894893782F7E6Db325a0827ADEB233",
-		"deploy": false,
+		"address": "",
+		"deploy": true,
 		"upgrade": false,
 		"fixed": false,
 		"params": [

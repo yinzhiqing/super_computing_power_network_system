@@ -15,6 +15,7 @@ import "./interface/ISCPNSTypeUnit.sol";
 import "./interface/ISCPNSUseRightToken.sol";
 import "./interface/ISCPNSGpuList.sol";
 import "./interface/ISCPNSVerifyTask.sol";
+import "./refs/IGPUStore.sol";
 
 abstract contract ContractProject is Initializable {
 
@@ -27,6 +28,7 @@ abstract contract ContractProject is Initializable {
     string public constant DNS_NAME_TYPEUNIT            = "SCPNSTypeUnit";
     string public constant DNS_NAME_USERIGHTTOKEN       = "SCPNSUseRightToken";
     string public constant DNS_NAME_CHALLENGE           = "SCPNSVerifyTask";
+    string public constant DNS_NAME_GPUSTORE            = "GPUStore";
 
     address private __dnsAddress;
     ISCPNSDns private _dnsIf;
@@ -51,6 +53,10 @@ abstract contract ContractProject is Initializable {
 
     function _stdIf(string memory name_) internal view virtual returns(IERC721Upgradeable) {
         return IERC721Upgradeable(_addressOf(name_));
+    }
+
+    function _stdOfIf(address addr) internal view virtual returns(IERC721Upgradeable) {
+        return IERC721Upgradeable(addr);
     }
 
     function _baseIf(string memory name_) internal view virtual returns(ISCPNSBase) {
@@ -90,5 +96,9 @@ abstract contract ContractProject is Initializable {
 
     function _verifyTaskIf() internal view virtual returns(ISCPNSVerifyTask) {
         return ISCPNSVerifyTask(_addressOf(DNS_NAME_CHALLENGE));
+    }
+
+    function _gpuStoreIf() internal view virtual returns(IGPUStore) {
+        return IGPUStore(_addressOf(DNS_NAME_GPUSTORE));
     }
 }

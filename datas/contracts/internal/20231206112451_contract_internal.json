@@ -44,7 +44,7 @@
 		"name": "SCPNSUseRightToken",
 		"address": "0xC10FC9d29DA002d1FC98BCa1Ee0369D4E0F90112",
 		"deploy": false,
-		"upgrade": false,
+		"upgrade": true,
 		"fixed": false,
 		"params": [
 			"!REF:SCPNSDns.address"
