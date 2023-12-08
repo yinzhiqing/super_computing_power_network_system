@@ -22,6 +22,10 @@ async function contract(name) {
     return await get_contract(token.name, token.address);
 }
 
+async function contract_ext(abi, address) {
+    return await ethers.getContractAt(abi, address);
+}
+
 function get_files(pathname, ext) {
     let file_names = new Array();
     let files = fs.readdirSync(pathname)
@@ -272,6 +276,7 @@ function min_from_right(value, count) {
 module.exports = {
     get_contract,
     contract,
+    contract_ext,
     file_exists,
     write_json,
     write_datas,

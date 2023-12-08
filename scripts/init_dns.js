@@ -60,7 +60,7 @@ async function run() {
     let thd_contracts = [
         {
             name: "GPUStore",
-            address: "0x5c7C4b7FEb711CeE53De463d96616E5EBd0B3f70",
+            address: "0x2ec074921f4a522a8780307873a22266D24BaA37",
         }
     ]
 

@@ -74,6 +74,7 @@ async function run() {
 
         let typeUnitId = await computility_vm.typeUnitIdOf(computility_vm_id);
         let typeUnitName  = utils.w3bytes32_to_str(await typeUnit.nameOf(typeUnitId));
+        
         if (typeUnitName != "CPU") {
             logger.debug("only use CPU");
             continue;

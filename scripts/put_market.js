@@ -5,6 +5,7 @@ const program   = require('commander');
 const utils     = require("./utils");
 const logger    = require("./logger");
 const prj       = require("../prj.config.js");
+const gs_abi    = require("./datas/abis/GPUStore.json");
 
 const bak_path  = prj.caches_contracts;
 const tokens  = require(prj.contract_conf);
@@ -20,30 +21,19 @@ async function has_role(cobj, address, role) {
 async function select_use_right_id(signer_address) {
     //return use_right_id;
     let use_right       = await utils.contract("SCPNSUseRightToken");
-    let proof_task      = await utils.contract("SCPNSProofTask");
-    let use_right_count = await use_right.totalSupply();
+    let use_right_count = await use_right.balanceOf(signer_address);
     let skeep = [''];
 
     for (var i = 0; i < use_right_count; i++) {
-        let use_right_id = utils.w3uint256_to_hex(await use_right.tokenByIndex(i));
-        let isInProof = await proof_task.isInProofOfUseRightId(use_right_id);
+        let use_right_id = utils.w3uint256_to_hex(await use_right.tokenOfOwnerByIndex(signer_address, i));
 
         if (skeep.includes(use_right_id)) {
             continue;
         }
 
-        let parameters  = await proof_task.latestParametersByUseRightId(use_right_id); 
-        let taskId      = utils.w3uint256_to_hex(parameters[2]);
-
-        let is_owner = await proof_task.isOwner(taskId, signer_address);
-        if (!is_owner) {
-            logger.info(" owner of proof task id(" + taskId +") is not signer, next...");
-            continue;
-        }
-
         return use_right_id;
     }
-    return "";
+    throw("没有 use_right_id");
 
 }
 
@@ -51,9 +41,10 @@ async function run() {
     logger.debug("start working...", "put mark");
 
     //获取合约SCPNSProofTask对象
-    let use_right       = await utils.contract("SCPNSUseRightToken");
-    let market_link      = await utils.contract("SCPNSMarketLink");
+    let use_right        = await utils.contract("SCPNSUseRightToken");
     let dns              = await utils.contract("SCPNSDns");
+    let to               = await dns.addressOf("GPUStore");
+    let gpu_store        = await utils.contract_ext(gs_abi, to);
 
     //1.
     // 获取钱包中account, 此account是使用权通证(use_right_id)的拥有者
@@ -62,22 +53,33 @@ async function run() {
     // 从配置文件中读取使用权通证(一个算力节点对应一个使用权通证)
     let use_right_id = await select_use_right_id(owner);
 
-    //3.
-    //设置上传证明结果(merkly-tree 根)时操作的账号地址
-    //（只有to账号和算力使用权所有者能够上传证明结果）
-    let to    = await dns.addressOf("SCPNSMarketLink");
+    logger.debug("to: " + to);
+    logger.debug("use_right_id: " + use_right_id);
 
     //算力使用权用户signer发起一个证明任务给指定的算力节点（use_right_id）
-    await use_right.connect(signer).approve(to, use_right_id);
-    logger.debug(use_right_id);
 
-    let isApproved = await use_right.connect(signer).isApproved(owner, to);
-    while(isApproved == false) {
-        isApproved = await use_right.connect(signer).isApproved(owner, to);
+
+    let addr0 = "0x0000000000000000000000000000000000000000";
+    let approved = await use_right.connect(signer).getApproved(use_right_id);
+    logger.debug("pre call approved: " + approved);
+
+    if (approved != to) {
+        //set to addr0
+        /*
+        await use_right.connect(signer).approve(addr0, use_right_id);
+        while(approved != addr0) {
+            approved = await use_right.connect(signer).getApproved(use_right_id);
+        }
+        */
+
+        await use_right.connect(signer).approve(to, use_right_id);
+        while(approved != to) {
+            approved = await use_right.connect(signer).getApproved(use_right_id);
+        }
     }
 
     //算力使用权用户signer发起一个证明任务给指定的算力节点（use_right_id）
-    await market_link.connect(signer).putToMarket(use_right_id, 10);
+    await gpu_store.connect(signer).addGpuTokenToStore(use_right_id, 20);
 
     let info = {
         owner: to,

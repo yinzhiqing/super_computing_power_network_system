@@ -122,8 +122,9 @@ contract SCPNSMarketLink is
 
     function putToMarket(uint256 tokenId, uint256 price) public virtual override {
         require(_useRightTokenIf().exists(tokenId), "SCPNSMarketLink: tokenId is not use right token");
+        require(price > 0);
 
-        _stdOfIf(address(_useRightTokenIf())).approve(address(this), tokenId);
+        _stdOfIf(address(_useRightTokenIf())).approve(address(_gpuStoreIf()), tokenId);
 
         _gpuStoreIf().addGpuTokenToStore(tokenId, price);
     }
