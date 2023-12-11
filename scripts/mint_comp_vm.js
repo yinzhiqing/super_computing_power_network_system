@@ -76,9 +76,9 @@ async function run() {
         let token_id = await new_token_id(computility_unit_id);
         let datas = utils.json_to_w3str({data: "test"});
         logger.debug("new token: " + token_id + " deadline: " + deadline);
-  
+
         let tx = await computility_vm.connect(signer).mint(to, token_id,  deadline, 
-                    [computility_unit_id], [count], datas);
+            [computility_unit_id], [count], datas);
 
         rows.push({
             to: to,
@@ -90,7 +90,7 @@ async function run() {
     logger.table(rows, "new tokens");
 }
 
-run()
+run(["CPU", "GTX_1050"])
   .then(() => process.exit(0))
   .catch(error => {
     console.error(error);

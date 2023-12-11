@@ -8,7 +8,7 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgrad
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
-import "./interface/ISCPNSMarketLink.sol";
+import "./interfaces/ISCPNSMarketLink.sol";
 import "./PairValues.sol";
 import "./ArraryUint256.sol";
 import "./ContractProject.sol";

@@ -7,7 +7,7 @@ import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
-import "./interface/ISCPNSComputilityRanking.sol";
+import "./interfaces/ISCPNSComputilityRanking.sol";
 import "./PairValues.sol";
 import "./ArraryUint256.sol";
 import "./ContractProject.sol";

@@ -79,7 +79,7 @@ async function run() {
     }
 
     //算力使用权用户signer发起一个证明任务给指定的算力节点（use_right_id）
-    await gpu_store.connect(signer).addGpuTokenToStore(use_right_id, 20);
+    await gpu_store.connect(signer).addGpuTokenToStore(use_right_id, 10000);
 
     let info = {
         owner: to,

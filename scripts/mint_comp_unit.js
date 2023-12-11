@@ -49,7 +49,7 @@ async function contract(name) {
     let token = tokens[name];
     return await get_contract(token.name, token.address);
 }
-async function run() {
+async function run(types) {
     logger.debug("start working...", "mint");
 
 
@@ -77,22 +77,25 @@ async function run() {
         let token_id = await new_token_id(type_unit_name);
         let count = 1;
 
-        let datas = utils.json_to_w3str({data: type_unit_name});
-        logger.debug("new token: " + token_id);
-  
-        let tx = await computility_unit.connect(signer).mint(to, token_id,  type_unit_id, count, datas);
+        if (types.includes(type_unit_name)) {
+            let datas = utils.json_to_w3str({data: type_unit_name});
+            logger.debug("new token: " + token_id);
 
-        rows.push({
-            to: to,
-            token_id: token_id,
-            type_unit_id: utils.w3uint256_to_hex(type_unit_id),
-            type_unit_count: utils.w3uint256_to_str(count),
-        })
+            let tx = await computility_unit.connect(signer).mint(to, token_id,  type_unit_id, count, datas);
+
+            rows.push({
+                to: to,
+                token_id: token_id,
+                type_name: type_unit_name,
+                type_unit_id: utils.w3uint256_to_hex(type_unit_id),
+                type_unit_count: utils.w3uint256_to_str(count),
+            })
+        }
     }
     logger.table(rows, "new tokens");
 }
 
-run()
+run(["CPU", "GTX_1050"])
   .then(() => process.exit(0))
   .catch(error => {
     console.error(error);

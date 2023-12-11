@@ -55,9 +55,12 @@ async function run() {
             buyer: buyer
         });
 
-        let approved = await vnet_token.connect(signer).allowance(buyer, gpu_store.address);
-        logger.debug("allowance token: " + approved);
         await vnet_token.connect(signer).approve(gpu_store.address, price);
+
+        let amount = await vnet_token.connect(signer).allowance(buyer, gpu_store.address);
+        while(amount < price) {
+            amount = await vnet_token.connect(signer).allowance(buyer, gpu_store.address);
+        }
         await gpu_store.connect(signer).tradeGPUToken(use_right_id);
 
         //only remove first

@@ -40,7 +40,7 @@ async function contract(name) {
     let token = tokens[name];
     return await get_contract(token.name, token.address);
 }
-async function run() {
+async function run(types) {
     logger.debug("start working...", "mint");
 
     let computility_vm = await contract("SCPNSComputilityVM");
@@ -68,39 +68,36 @@ async function run() {
 
         let free = await computility_vm.isFree(computility_vm_id);
         if (false == free) {
-            logger.debug(computility_vm_id + " is locked. next..");
+            //logger.debug(computility_vm_id + " is locked. next..");
             continue;
         }
 
         let typeUnitId = await computility_vm.typeUnitIdOf(computility_vm_id);
         let typeUnitName  = utils.w3bytes32_to_str(await typeUnit.nameOf(typeUnitId));
         
-        if (typeUnitName != "CPU") {
-            logger.debug("only use CPU");
-            continue;
+        if (types.includes(typeUnitName)) {
+            let deadline = await computility_vm.deadLine(computility_vm_id);
+            let token_id = await new_token_id(computility_vm_id);
+            let datas = utils.json_to_w3str({data: "test"});
+            logger.debug("new token: " + token_id + " deadline: " + deadline);
+            logger.debug("vm id: " + computility_vm_id);
+
+            let tx = await use_right.connect(signer).mint(to, token_id,  deadline, 
+                [computility_vm_id], datas);
+
+            logger.debug(tx);
+            rows.push({
+                to: to,
+                token_id: token_id,
+            })
+
+            break;
         }
-
-        let deadline = await computility_vm.deadLine(computility_vm_id);
-        let token_id = await new_token_id(computility_vm_id);
-        let datas = utils.json_to_w3str({data: "test"});
-        logger.debug("new token: " + token_id + " deadline: " + deadline);
-        logger.debug("vm id: " + computility_vm_id);
-
-  
-        let tx = await use_right.connect(signer).mint(to, token_id,  deadline, 
-                    [computility_vm_id], datas);
-
-        logger.debug(tx);
-        rows.push({
-            to: to,
-            token_id: token_id,
-        })
-        break;
     }
     logger.table(rows, "new tokens");
 }
 
-run()
+run(["CPU"])
   .then(() => process.exit(0))
   .catch(error => {
     console.error(error);

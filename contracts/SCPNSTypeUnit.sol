@@ -7,8 +7,8 @@ import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "./SCPNSBase.sol";
-import "./interface/ISCPNSTypeUnit.sol";
-import "./interface/ISCPNSBase.sol";
+import "./interfaces/ISCPNSTypeUnit.sol";
+import "./interfaces/ISCPNSBase.sol";
 import "./ContractProject.sol";
 
 /**

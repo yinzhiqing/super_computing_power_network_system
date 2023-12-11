@@ -75,9 +75,9 @@ async function run() {
         logger.debug("proofId    : " + proofId);
 
         // 只对自己证明的挑战感兴趣
-        let is_owner = await proof_task.isOwner(taskId, signer_address);
+        let is_owner = await proof_task.isOwner(proofId, signer_address);
         if (!is_owner) {
-            logger.info(" owner of proof task id(" + taskId +") is not signer, next...");
+            logger.info(" owner of proof task id(" + proofId +") is not signer, next...");
             continue;
         }
 

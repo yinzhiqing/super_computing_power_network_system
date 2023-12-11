@@ -4,8 +4,8 @@
 pragma solidity ^0.8.2;
 
 import "./SCPNSBase.sol";
-import "./interface/ISCPNSComputilityUnit.sol";
-import "./interface/ISCPNSTypeUnit.sol";
+import "./interfaces/ISCPNSComputilityUnit.sol";
+import "./interfaces/ISCPNSTypeUnit.sol";
 import "./ContractProject.sol";
 
 /**

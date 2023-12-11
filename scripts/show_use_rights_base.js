@@ -27,9 +27,9 @@ async function datas_from_token_id(tokenId) {
 
     let datas = utils.w3str_to_str(await cobj.datasOf(row["tokenId"]));
 
-    logger.debug("tokenId: " + row["tokenId"], "token info");
-    logger.debug("deadLine:" + row["deadline"]);
-    logger.debug(JSON.parse(datas));
+    //logger.debug("tokenId: " + row["tokenId"], "token info");
+    //logger.debug("deadLine:" + row["deadline"]);
+    //logger.debug(JSON.parse(datas));
 
     let typeUnitCount = utils.w3uint256_to_str(await cobj.typeUnitCountOf(row["tokenId"]));
     let typeUnitId    = await cobj.typeUnitIdOf(row["tokenId"]);
@@ -37,9 +37,9 @@ async function datas_from_token_id(tokenId) {
     row["model"] = typeUnitName;
     row["unit count"] = typeUnitCount.toString();
 
-    logger.debug("typeUnitId: " + typeUnitId);
-    logger.debug("typeUnitCount: " + typeUnitCount);
-    logger.debug("typeUnitName:" +  typeUnitName)
+    //logger.debug("typeUnitId: " + typeUnitId);
+    //logger.debug("typeUnitCount: " + typeUnitCount);
+    //logger.debug("typeUnitName:" +  typeUnitName)
 
     let use_right = {
         "使用权通证ID": row["tokenId"],
@@ -57,8 +57,8 @@ async function datas_from_token_id(tokenId) {
     let unitInfo = JSON.parse(utils.w3str_to_str(unitDatas));
     unitInfo["name"] = typeUnitName;
 
-    logger.debug(use_right,  "token info: " + tokenId);
-    logger.debug(unitInfo, "型号参数");
+    //logger.debug(use_right,  "token info: " + tokenId);
+    //logger.debug(unitInfo, "型号参数");
 
     return {
         use_right: use_right,

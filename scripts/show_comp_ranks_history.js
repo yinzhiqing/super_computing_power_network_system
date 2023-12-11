@@ -51,7 +51,7 @@ async function show_tokens() {
         let type_unit_ids = await cobj.typeUnitIdsOf(parameters[i]);
         let t = {};
         for (let l = 0; l < type_unit_ids.length; l++) {
-            let range  = await proof_parameter.computilityRangeOfTypeUnit(parameters[i], type_unit_ids[i]);
+            let range  = await proof_parameter.computilityRangeOfTypeUnit(parameters[i], type_unit_ids[l]);
             let type_unit_name = utils.w3bytes32_to_str(await type_unit.nameOf(type_unit_ids[l]));
             logger.debug(range);
             let min = range[0].toString();

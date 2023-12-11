@@ -11,7 +11,7 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgrad
 import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "./interface/ISCPNSBase.sol";
+import "./interfaces/ISCPNSBase.sol";
 import "./ArrayAddresses.sol";
 import "./ContractProject.sol";
 

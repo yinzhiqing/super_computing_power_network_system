@@ -75,30 +75,28 @@ async function run() {
 
         let typeUnitId = await computility_vm.typeUnitIdOf(computility_vm_id);
         let typeUnitName  = utils.w3bytes32_to_str(await typeUnit.nameOf(typeUnitId));
-        if (!types.includes(typeUnitName)) {
-            logger.debug("only use " + types);
-            continue;
+
+        if (types.includes(typeUnitName)) {
+            let deadline = await computility_vm.deadLine(computility_vm_id);
+            let token_id = await new_token_id(computility_vm_id);
+            let datas = utils.json_to_w3str({data: "test"});
+            logger.debug("new token: " + token_id + " deadline: " + deadline);
+            logger.debug("vm id: " + computility_vm_id);
+
+
+            let tx = await use_right.connect(signer).mint(to, token_id,  deadline, 
+                [computility_vm_id], datas);
+
+            rows.push({
+                to: to,
+                token_id: token_id,
+            })
         }
-
-        let deadline = await computility_vm.deadLine(computility_vm_id);
-        let token_id = await new_token_id(computility_vm_id);
-        let datas = utils.json_to_w3str({data: "test"});
-        logger.debug("new token: " + token_id + " deadline: " + deadline);
-        logger.debug("vm id: " + computility_vm_id);
-
-  
-        let tx = await use_right.connect(signer).mint(to, token_id,  deadline, 
-                    [computility_vm_id], datas);
-
-        rows.push({
-            to: to,
-            token_id: token_id,
-        })
     }
     logger.table(rows, "new tokens");
 }
 
-run()
+run(["CPU", "GTX_1050"])
   .then(() => process.exit(0))
   .catch(error => {
     console.error(error);

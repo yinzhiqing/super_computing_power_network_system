@@ -187,6 +187,9 @@ show_comp_ranks:
 show_comp_ranks_history:
 	$(call run_script, "show_comp_ranks_history")
 
+show_comp_ranks_target:
+	$(call run_script, "show_comp_ranks_target")
+
 mint_gpu:
 	$(call run_script, "mint_gpu")
 
@@ -225,6 +228,21 @@ mint_verify_task_target:
 
 cancel_proof_tasks:
 	$(call run_script, "cancel_proof_tasks")
+
+put_market:
+	$(call run_script, "put_market")
+
+buy_market:
+	$(call run_script, "buy_market")
+
+show_balances:
+	$(call run_script, "show_balances")
+
+remoke_market:
+	$(call run_script, "remoke_market")
+
+show_market:
+	$(call run_script, "show_market")
 
 tests:
 	@npx hardhat run scripts/test.js

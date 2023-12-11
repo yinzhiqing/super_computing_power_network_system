@@ -4,17 +4,17 @@ pragma solidity ^0.8.2;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
-import "./interface/ISCPNSDns.sol";
-import "./interface/ISCPNSBase.sol";
-import "./interface/ISCPNSComputilityRanking.sol";
-import "./interface/ISCPNSComputilityUnit.sol";
-import "./interface/ISCPNSComputilityVM.sol";
-import "./interface/ISCPNSProofParameter.sol";
-import "./interface/ISCPNSProofTask.sol";
-import "./interface/ISCPNSTypeUnit.sol";
-import "./interface/ISCPNSUseRightToken.sol";
-import "./interface/ISCPNSGpuList.sol";
-import "./interface/ISCPNSVerifyTask.sol";
+import "./interfaces/ISCPNSDns.sol";
+import "./interfaces/ISCPNSBase.sol";
+import "./interfaces/ISCPNSComputilityRanking.sol";
+import "./interfaces/ISCPNSComputilityUnit.sol";
+import "./interfaces/ISCPNSComputilityVM.sol";
+import "./interfaces/ISCPNSProofParameter.sol";
+import "./interfaces/ISCPNSProofTask.sol";
+import "./interfaces/ISCPNSTypeUnit.sol";
+import "./interfaces/ISCPNSUseRightToken.sol";
+import "./interfaces/ISCPNSGpuList.sol";
+import "./interfaces/ISCPNSVerifyTask.sol";
 import "./refs/IGPUStore.sol";
 
 abstract contract ContractProject is Initializable {

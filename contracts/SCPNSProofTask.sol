@@ -5,10 +5,10 @@ pragma solidity ^0.8.2;
 
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "./SCPNSBase.sol";
-import "./interface/ISCPNSProofTask.sol";
-import "./interface/ISCPNSUseRightToken.sol";
-import "./interface/ISCPNSProofParameter.sol";
-import "./interface/ISCPNSComputilityRanking.sol";
+import "./interfaces/ISCPNSProofTask.sol";
+import "./interfaces/ISCPNSUseRightToken.sol";
+import "./interfaces/ISCPNSProofParameter.sol";
+import "./interfaces/ISCPNSComputilityRanking.sol";
 import "./ContractProject.sol";
 import "./PairValues.sol";
 import "./ArraryUint256.sol";

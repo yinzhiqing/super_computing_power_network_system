@@ -5,7 +5,7 @@ pragma solidity ^0.8.2;
 
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "./SCPNSBase.sol";
-import "./interface/ISCPNSGpuList.sol";
+import "./interfaces/ISCPNSGpuList.sol";
 
 contract SCPNSGpuList is SCPNSBase, ISCPNSGpuList {
 
