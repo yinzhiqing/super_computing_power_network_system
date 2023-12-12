@@ -5,6 +5,8 @@ const utils     = require("./utils");
 const logger    = require("./logger");
 const prj       = require("../prj.config.js");
 const gs_abi    = require("./datas/abis/GPUStore.json");
+const { users }       = require("./datas/env.config.js");
+const { contracts_load } = require("./contracts.js");
 
 const bak_path  = prj.caches_contracts;
 const tokens  = require(prj.contract_conf);
@@ -17,7 +19,6 @@ async function has_role(cobj, address, role) {
     return has;
 }
 
-
 async function run() {
     logger.debug("start working...", "show mark");
 
@@ -27,6 +28,7 @@ async function run() {
     let to               = await dns.addressOf("GPUStore");
     let gpu_store        = await utils.contract_ext(gs_abi, to);
 
+    let signer = users.seller.signer; 
     let orders = await gpu_store.getOrderIds();
     logger.debug(orders);
 
@@ -40,7 +42,7 @@ async function run() {
             owner: gpu_sale_info[3],
         })
 
-        await gpu_store.removeGpuTokenFromStore(saleIds[i]);
+        await gpu_store.connect(signer).removeGpuTokenFromStore(saleIds[i]);
 
         //only remove first
         break;

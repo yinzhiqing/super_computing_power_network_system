@@ -1,4 +1,3 @@
-
 const fs        = require('fs');
 const path      = require("path");
 const program   = require('commander');
@@ -39,7 +38,7 @@ async function select_use_right_id(signer_address) {
 
 }
 
-async function run() {
+async function works(signer) {
     logger.debug("start working...", "put mark");
 
     //获取合约SCPNSProofTask对象
@@ -48,9 +47,6 @@ async function run() {
     let to               = await dns.addressOf("GPUStore");
     let gpu_store        = await utils.contract_ext(gs_abi, to);
 
-    //1.
-    // 获取钱包中account, 此account是使用权通证(use_right_id)的拥有者
-    let signer = users.seller.signer; 
     let owner = await signer.getAddress();
     // 从配置文件中读取使用权通证(一个算力节点对应一个使用权通证)
     let use_right_id = await select_use_right_id(owner);
@@ -91,6 +87,19 @@ async function run() {
     logger.table(info, "new proof task");
 }
 
+async function run() {
+    //1.
+    // 获取钱包中account, 此account是使用权通证(use_right_id)的拥有者
+    let signer = users.buyer.signer; 
+    let owner = await signer.getAddress();
+
+    let use_right       = await utils.contract("SCPNSUseRightToken");
+    let use_right_count = await use_right.balanceOf(owner);
+    while(use_right_count > 0) {
+        use_right_count = await use_right.balanceOf(owner);
+        await works(signer);
+    }
+}
 run()
   .then(() => process.exit(0))
   .catch(error => {

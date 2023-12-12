@@ -4,19 +4,13 @@ const program   = require('commander');
 const utils     = require("./utils");
 const logger    = require("./logger");
 const prj       = require("../prj.config.js");
+const {users}       = require("./datas/env.config.js");
+const { contracts_load } = require("./contracts.js");
 
 const bak_path  = prj.caches_contracts;
 const tokens  = require(prj.contract_conf);
 const {ethers, upgrades}    = require("hardhat");
 
-async function get_contract(name, address) {
-    return await utils.get_contract(name, address);
-}
-
-async function show_accounts() {
-    const accounts = await ethers.provider.listAccounts();
-    console.log(accounts);
-}
 
 async function has_role(cobj, address, role) {
     let brole = web3.eth.abi.encodeParameter("bytes32", web3.utils.soliditySha3(role));
@@ -25,33 +19,23 @@ async function has_role(cobj, address, role) {
     return has;
 }
 
-async function count_of(client) {
-    let count = await client.totalSupply();
-    logger.debug(count);
-    return count;
-}
-
 async function new_token_id(pre) {
     var date = new Date();
     return web3.utils.sha3(pre + date.getTime().toString());
 }
 
-async function contract(name) {
-    let token = tokens[name];
-    return await get_contract(token.name, token.address);
-}
 async function works() {
     logger.debug("start working...", "mint");
 
-    let use_right = await contract("SCPNSUseRightToken");
-    let proof_task      = await contract("SCPNSProofTask");
-    let verify_task      = await utils.contract("SCPNSVerifyTask");
+    let contracts       = await contracts_load();
+    let use_right       = contracts.SCPNSUseRightToken;
+    let proof_task      = contracts.SCPNSProofTask;
+    let verify_task     = contracts.SCPNSVerifyTask;
 
-    let role   = "MINTER_ROLE";
-    let signer = ethers.provider.getSigner(0); 
-    let receiver = ethers.provider.getSigner(1); 
-    let minter = await signer.getAddress(); 
-
+    let role     = "MINTER_ROLE";
+    let signer   = users.buyer.signer; 
+    let receiver = users.prover.signer; 
+    let minter   = await signer.getAddress(); 
 
     let has_miter = await has_role(proof_task, minter, role);
     if (has_miter != true) {

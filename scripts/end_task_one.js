@@ -6,42 +6,12 @@ const logger    = require("./logger");
 const prj       = require("../prj.config.js");
 const readline  = require('readline');
 const merkle    = require("./merkle");
+const { users }       = require("./datas/env.config.js");
+const { contracts_load } = require("./contracts.js");
 
 const bak_path  = prj.caches_contracts;
 const tokens  = require(prj.contract_conf);
 const {ethers, upgrades}    = require("hardhat");
-
-async function get_contract(name, address) {
-    return await utils.get_contract(name, address);
-}
-
-async function show_accounts() {
-    const accounts = await ethers.provider.listAccounts();
-    console.log(accounts);
-}
-
-async function has_role(cobj, address, role) {
-    let brole = web3.eth.abi.encodeParameter("bytes32", web3.utils.soliditySha3(role));
-    let has = await cobj.hasRole(brole, address);
-
-    return has;
-}
-
-async function count_of(client) {
-    let count = await client.totalSupply();
-    logger.debug(count);
-    return count;
-}
-
-async function new_token_id(pre) {
-    var date = new Date();
-    return web3.utils.sha3(pre + date.getTime().toString());
-}
-
-async function contract(name) {
-    let token = tokens[name];
-    return await get_contract(token.name, token.address);
-}
 
 async function create_merkle_datas(dynamicData, leaf_count, leaf_deep) {
     logger.table({dynamicData: dynamicData, leaf_count: leaf_count, leaf_deep: leaf_deep}, "create merkle tree")
@@ -53,9 +23,9 @@ async function create_merkle_datas(dynamicData, leaf_count, leaf_deep) {
 }
 
 async function select_use_right_id() {
-    let use_right = await contract("SCPNSUseRightToken");
-    let use_right_count = await use_right.totalSupply();
-    let proof_task      = await contract("SCPNSProofTask");
+    let use_right       = await utils.contract("SCPNSUseRightToken");
+    let use_right_count = await utils.use_right.totalSupply();
+    let proof_task      = await utils.contract("SCPNSProofTask");
 
     for (var i = 0; i < use_right_count; i++) {
         let use_right_id = utils.w3uint256_to_hex(await use_right.tokenByIndex(i));
@@ -72,9 +42,9 @@ async function run() {
     logger.debug("start working...", "mint");
 
     //初始化合约、钱包，从配置文件读取算力节点对应的通证ID
-    let proof_task      = await contract("SCPNSProofTask");
+    let proof_task      = await utils.contract("SCPNSProofTask");
     //算力使用权通证持有者或发布算力证明时设置的to用户； mint(to, use_right_id). 
-    let signer = ethers.provider.getSigner(0); 
+    let signer = users.prover.signer; 
     //算力节点对应的通证ID
     let use_right_id = select_use_right_id();
 

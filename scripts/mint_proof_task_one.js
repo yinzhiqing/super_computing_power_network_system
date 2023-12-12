@@ -4,41 +4,16 @@ const program   = require('commander');
 const utils     = require("./utils");
 const logger    = require("./logger");
 const prj       = require("../prj.config.js");
+const { users }       = require("./datas/env.config.js");
+const { contracts_load } = require("./contracts.js");
 
 const bak_path  = prj.caches_contracts;
 const tokens  = require(prj.contract_conf);
 const {ethers, upgrades}    = require("hardhat");
 
-async function get_contract(name, address) {
-    return await utils.get_contract(name, address);
-}
-
-async function show_accounts() {
-    const accounts = await ethers.provider.listAccounts();
-    console.log(accounts);
-}
-
-async function has_role(cobj, address, role) {
-    let brole = web3.eth.abi.encodeParameter("bytes32", web3.utils.soliditySha3(role));
-    let has = await cobj.hasRole(brole, address);
-
-    return has;
-}
-
-async function count_of(client) {
-    let count = await client.totalSupply();
-    logger.debug(count);
-    return count;
-}
-
 async function new_token_id(pre) {
     var date = new Date();
     return web3.utils.sha3(pre + date.getTime().toString());
-}
-
-async function contract(name) {
-    let token = tokens[name];
-    return await get_contract(token.name, token.address);
 }
 
 async function select_use_right_id() {
@@ -74,7 +49,7 @@ async function run() {
 
     //1.
     // 获取钱包中account, 此account是使用权通证(use_right_id)的拥有者
-    let signer = ethers.provider.getSigner(0); 
+    let signer = users.buyer.signer; 
     // 从配置文件中读取使用权通证(一个算力节点对应一个使用权通证)
     let use_right_id = await select_use_right_id();
 

@@ -21,9 +21,9 @@ async function contract(name) {
 
 //选择一个使用权通证
 async function select_use_right_id(target_id) {
-    let use_right = await contract("SCPNSUseRightToken");
+    let use_right       = await contract("SCPNSUseRightToken");
     let use_right_count = await use_right.totalSupply();
-    let verify_task      = await contract("SCPNSVerifyTask");
+    let verify_task     = await contract("SCPNSVerifyTask");
 
     if (target_id != null) {
         return target_id;
@@ -80,7 +80,7 @@ async function run() {
 
     //1. 挑战者
     // 获取钱包中account, 此account是使用权通证(use_right_id)的拥有者
-    let signer = ethers.provider.getSigner(0); 
+    let signer = users.buyer.signer; 
     // 从配置文件中读取使用权通证(一个算力节点对应一个使用权通证)
     let use_right_id = await select_use_right_id();
 

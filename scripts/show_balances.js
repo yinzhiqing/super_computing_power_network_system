@@ -7,6 +7,8 @@ const prj       = require("../prj.config.js");
 const gs_abi    = require("./datas/abis/GPUStore.json");
 const vnet_abi    = require("./datas/abis/IERC20Upgradeable.json");
 const sur       = require("./show_use_rights_base.js");
+const { users }       = require("./datas/env.config.js");
+const { contracts_load } = require("./contracts.js");
 
 const bak_path  = prj.caches_contracts;
 const tokens  = require(prj.contract_conf);
@@ -19,21 +21,22 @@ async function has_role(cobj, address, role) {
     return has;
 }
 
-
 async function run() {
     logger.debug("start working...", "show balance");
 
     //获取合约SCPNSProofTask对象
-    let use_right        = await utils.contract("SCPNSUseRightToken");
-    let dns              = await utils.contract("SCPNSDns");
+    let contracts        = await contracts_load();
+    let use_right        = contracts.SCPNSUseRightToken;
+    let dns              = contracts.SCPNSDns;
     let to               = await dns.addressOf("GPUStore");
-    let gpu_store        = await utils.contract_ext(gs_abi, to);
-    let vnet_token       = await utils.contract_ext(vnet_abi.abi, await gpu_store._paymentToken());
-    let users = [0, 19];
+    logger.info("to: " + to);
+    let gpu_store        = contracts.GPUStore;
+    let vnet_token       = contracts.VNetToken;
     let list  = [];
     for (let i in users) {
-        let account = ethers.provider.getSigner(users[i]); 
+        let account = users[i].signer; 
         list.push({
+            name: users[i].alias,
             account: await account.getAddress(),
             balance: Number(await vnet_token.balanceOf(account.getAddress()))
         })

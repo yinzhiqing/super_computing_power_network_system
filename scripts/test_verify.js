@@ -8,6 +8,8 @@ const utils     = require("./utils");
 const logger    = require("./logger");
 const prj       = require("../prj.config.js");
 const merkle  = require('./merkle');
+const { users }       = require("./datas/env.config.js");
+const { contracts_load } = require("./contracts.js");
 
 const bak_path  = prj.caches_contracts;
 const tokens  = require(prj.contract_conf);
@@ -24,7 +26,7 @@ async function work(buf) {
 
     let verify_task     = await utils.contract("SCPNSVerifyTask");
 
-    let signer          = ethers.provider.getSigner(1); 
+    let signer          = users.manager.signer; 
     let signer_address  = await signer.getAddress();
 
     let sample = 10;

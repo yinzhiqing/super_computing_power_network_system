@@ -6,24 +6,12 @@ const program   = require('commander');
 const utils     = require("./utils");
 const logger    = require("./logger");
 const prj       = require("../prj.config.js");
+const { users }       = require("./datas/env.config.js");
+const { contracts_load } = require("./contracts.js");
 
 const bak_path  = prj.caches_contracts;
 const tokens  = require(prj.contract_conf);
 const {ethers, upgrades}    = require("hardhat");
-
-async function get_contract(name, address) {
-    return await utils.get_contract(name, address);
-}
-
-async function contract(name) {
-    let token = tokens[name];
-    return await get_contract(token.name, token.address);
-}
-
-function is_dns(token_name) {
-    let target_token_name = "AssemblyDNS";
-    return (target_token_name == "" || target_token_name == token_name) && token_name != "";
-}
 
 async function has_role(cobj, address, role) {
     let brole = web3.eth.abi.encodeParameter("bytes32", web3.utils.soliditySha3(role));
@@ -66,7 +54,7 @@ async function run() {
     let verify_task      = await contract("SCPNSVerifyTask");
 
     const accounts = await web3.eth.getAccounts();
-    let signer = ethers.provider.getSigner(0); 
+    let signer = users.manager.signer; 
 
     // grant manager role to SCPNSComputilityVM
     //               contract           roler                   role

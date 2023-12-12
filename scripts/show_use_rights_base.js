@@ -67,6 +67,29 @@ async function datas_from_token_id(tokenId) {
     }
 
 }
+
+async function tokensByOwner(owner) {
+    let use_right= await utils.contract("SCPNSUseRightToken");
+    let typeUnit = await utils.contract("SCPNSTypeUnit");
+    let gpu      = await utils.contract("SCPNSGpuList");
+
+    let amounts = await use_right.balanceOf(user);
+    let list = [];
+    for (let i = 0; i < amounts; i++) {
+        let tokenId = await use_right.tokenOfOwnerByIndex(user, owner_count - 1);
+        let datas = await datas_from_token_id(tokenId);
+        list.push(datas["row"]);
+    } 
+    return list;
+}
+
+async function tokensByTokenId(tokenId) {
+    let use_right= await utils.contract("SCPNSUseRightToken");
+    let list = [];
+    let datas = await datas_from_token_id(tokenId);
+    list.push(datas["row"]);
+    return list;
+}
 async function works() {
     let cobj     = await utils.contract("SCPNSUseRightToken");
     let typeUnit = await utils.contract("SCPNSTypeUnit");
@@ -91,5 +114,7 @@ async function works() {
 module.exports = {
     works,
     datas_from_token_id,
+    tokensByTokenId,
+    tokensByOwner,
     type_unit_id_of
 }

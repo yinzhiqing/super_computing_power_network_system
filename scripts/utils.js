@@ -7,6 +7,8 @@ const { ethers, upgrades } = require("hardhat");
 const crypto    = require("crypto");
 const tokens    = require(prj.contract_conf);
 const schedule  = require('node-schedule');
+const env       = require("./datas/env.config.js");
+const users      = env.users;
 
 const ARG_FLG_TXT = "!REF:";
 const ARG_VAL_SPLIT = ".";
@@ -274,6 +276,7 @@ function min_from_right(value, count) {
 }
 
 module.exports = {
+    users,
     get_contract,
     contract,
     contract_ext,

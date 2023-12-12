@@ -5,23 +5,16 @@ const utils     = require("./utils");
 const logger    = require("./logger");
 const prj       = require("../prj.config.js");
 const merkle    = require("./merkle");
+const { users }       = require("./datas/env.config.js");
+const { contracts_load } = require("./contracts.js");
 
 const bak_path  = prj.caches_contracts;
 const tokens  = require(prj.contract_conf);
 const {ethers, upgrades}    = require("hardhat");
 
-async function get_contract(name, address) {
-    return await utils.get_contract(name, address);
-}
-
-async function contract(name) {
-    let token = tokens[name];
-    return await get_contract(token.name, token.address);
-}
-
 //选择一个使用权通证
 async function select_use_right_id(user) {
-    let use_right = await contract("SCPNSUseRightToken");
+    let use_right = await utils.contract("SCPNSUseRightToken");
 
     let owner_count = await use_right.balanceOf(user);
     if (owner_count == 0) {
@@ -55,12 +48,12 @@ async function run() {
     logger.debug("start working...", "mint");
 
     //获取合约SCPNSVerifyTask对象
-    let verify_task      = await contract("SCPNSVerifyTask");
-    let proof_task       = await contract("SCPNSProofTask");
+    let verify_task      = await utils.contract("SCPNSVerifyTask");
+    let proof_task       = await utils.contract("SCPNSProofTask");
 
     //1. 挑战者
     // 获取钱包中account, 此account是使用权通证(use_right_id)的拥有者
-    let signer = ethers.provider.getSigner(0); 
+    let signer = users.seller.signer; 
     // 从配置文件中读取使用权通证(一个算力节点对应一个使用权通证)
 
     let user = "0xFbB84C3b36b61356425e8B916D81bB977071BbD0";

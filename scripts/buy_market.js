@@ -7,6 +7,8 @@ const prj       = require("../prj.config.js");
 const gs_abi    = require("./datas/abis/GPUStore.json");
 const {abi}     = require("./datas/abis/IERC20Upgradeable.json");
 const erc20_abi = abi;
+const { users }       = require("./datas/env.config.js");
+const { contracts_load } = require("./contracts.js");
 
 const bak_path  = prj.caches_contracts;
 const tokens  = require(prj.contract_conf);
@@ -18,7 +20,6 @@ async function has_role(cobj, address, role) {
 
     return has;
 }
-
 
 async function run() {
     logger.debug("start working...", "show mark");
@@ -32,7 +33,7 @@ async function run() {
     logger.debug("store address: " + gpu_store.address);
     logger.debug("vnet token address: " + vnet_token.address);
 
-    let signer = ethers.provider.getSigner(19); 
+    let signer = users.buyer.signer; 
     let buyer = await signer.getAddress();
     logger.debug("buyer: " + buyer);
 

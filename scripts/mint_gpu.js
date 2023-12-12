@@ -5,6 +5,8 @@ const utils     = require("./utils");
 const logger    = require("./logger");
 const prj       = require("../prj.config.js");
 const units_cfg     = require("./datas/units.config.js");
+const { users }       = require("./datas/env.config.js");
+const { contracts_load } = require("./contracts.js");
 
 const units      = units_cfg.units;
 const gpus       = units.gpus;
@@ -12,35 +14,12 @@ const bak_path  = prj.caches_contracts;
 const tokens  = require(prj.contract_conf);
 const {ethers, upgrades}    = require("hardhat");
 
-async function get_contract(name, address) {
-    return await utils.get_contract(name, address);
-}
-
-function is_target_name(token_name) {
-    let target_token_name = "SCPNSGpuList";
-    return (target_token_name == "" || target_token_name == token_name) && token_name != "";
-}
-
-async function show_accounts() {
-    const accounts = await ethers.provider.listAccounts();
-    console.log(accounts);
-}
-
-async function conv_type_id(id) {
-    return web3.utils.soliditySha3(utils.str_to_w3uint256(id));
-}
 async function has_role(cobj, address, role) {
     let brole = web3.eth.abi.encodeParameter("bytes32", web3.utils.soliditySha3(role));
     let has = await cobj.hasRole(brole, address);
     logger.info(address + " check role(" + role + ") state: " + has);
 
     return has;
-}
-
-async function count_of(client) {
-    let count = await client.totalSupply();
-    logger.debug(count);
-    return count;
 }
 
 async function mint(client, signer, token_id, name, datas) {
@@ -65,7 +44,7 @@ async function run() {
 
         const accounts = await web3.eth.getAccounts();
         let role = "MINTER_ROLE";
-        let signer = ethers.provider.getSigner(0); 
+        let signer = user.manager.signer; 
         let minter = await signer.getAddress(); 
         logger.debug("minter = " + minter);
 
@@ -75,9 +54,6 @@ async function run() {
             return;
         } 
 
-
-        await count_of(cobj);
-        logger.debug(gpus);
         for (var name in gpus) {
             let token_id = web3.utils.soliditySha3(name);
             logger.debug("token_id= " + token_id);

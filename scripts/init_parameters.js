@@ -5,6 +5,8 @@ const utils     = require("./utils");
 const logger    = require("./logger");
 const prj       = require("../prj.config.js");
 const units_cfg = require("./datas/units.config.js");
+const { users }       = require("./datas/env.config.js");
+const { contracts_load } = require("./contracts.js");
 
 const {ethers, upgrades}    = require("hardhat");
 const units                 = units_cfg.units;
@@ -135,7 +137,7 @@ async function run() {
     let gpu_list        = await utils.contract("SCPNSGpuList");
 
     let role   = "MINTER_ROLE";
-    let signer = ethers.provider.getSigner(0); 
+    let signer = users.manager.signer; 
     let minter = await signer.getAddress(); 
 
     let has_miter = await has_role(proof_parameter, minter, role);

@@ -5,6 +5,8 @@ const utils     = require("./utils");
 const logger    = require("./logger");
 const prj       = require("../prj.config.js");
 const merkle    = require('./merkle');
+const {users}       = require("./datas/env.config.js");
+const { contracts_load } = require("./contracts.js");
 
 const bak_path  = prj.caches_contracts;
 const tokens    = require(prj.contract_conf);
@@ -24,7 +26,7 @@ async function run() {
     let use_right       = await utils.contract("SCPNSUseRightToken");
     let proof_task      = await utils.contract("SCPNSProofTask");
 
-    let signer = ethers.provider.getSigner(1); 
+    let signer = users.prover.signer; 
     let use_right_count = await use_right.totalSupply();
     let signer_address  = await signer.getAddress();
     logger.debug("signer_address: " + signer_address);

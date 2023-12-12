@@ -5,14 +5,12 @@ const program   = require('commander');
 const utils     = require("./utils");
 const logger    = require("./logger");
 const prj       = require("../prj.config.js");
+const { users }       = require("./datas/env.config.js");
+const { contracts_load } = require("./contracts.js");
 
 const bak_path  = prj.caches_contracts;
 const tokens  = require(prj.contract_conf);
 const {ethers, upgrades}    = require("hardhat");
-
-async function get_contract(name, address) {
-    return await utils.get_contract(name, address);
-}
 
 async function conv_type_id(id) {
     return web3.utils.soliditySha3(utils.str_to_w3uint256(id));
@@ -23,12 +21,6 @@ async function has_role(cobj, address, role) {
     logger.debug(address + " check role(" + role + ") state: " + has);
 
     return has;
-}
-
-async function count_of(client) {
-    let count = await client.totalSupply();
-    logger.debug(count);
-    return count;
 }
 
 async function mint(client, signer, token_id, name, unitAddr, unitId, datas) {
@@ -48,9 +40,8 @@ async function run() {
     let gpu_addr = gpu_cobj.address;
     let cobj = await utils.contract("SCPNSTypeUnit");
 
-    const accounts = await web3.eth.getAccounts();
     let role = "MINTER_ROLE";
-    let signer = ethers.provider.getSigner(0); 
+    let signer = users.manager.signer; 
     let minter = await signer.getAddress(); 
     logger.debug("minter = " + minter);
 

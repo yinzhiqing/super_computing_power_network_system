@@ -4,19 +4,12 @@ const program   = require('commander');
 const utils     = require("./utils");
 const logger    = require("./logger");
 const prj       = require("../prj.config.js");
+const {users}            = require("./datas/env.config.js");
+const { contracts_load } = require("./contracts.js");
 
 const bak_path  = prj.caches_contracts;
 const tokens  = require(prj.contract_conf);
 const {ethers, upgrades}    = require("hardhat");
-
-async function get_contract(name, address) {
-    return await utils.get_contract(name, address);
-}
-
-async function show_accounts() {
-    const accounts = await ethers.provider.listAccounts();
-    console.log(accounts);
-}
 
 async function has_role(cobj, address, role) {
     let brole = web3.eth.abi.encodeParameter("bytes32", web3.utils.soliditySha3(role));
@@ -25,32 +18,16 @@ async function has_role(cobj, address, role) {
     return has;
 }
 
-async function count_of(client) {
-    let count = await client.totalSupply();
-    logger.debug(count);
-    return count;
-}
-
-async function new_token_id(pre) {
-    var date = new Date();
-    return web3.utils.sha3(pre + date.getTime().toString());
-}
-
-async function contract(name) {
-    let token = tokens[name];
-    return await get_contract(token.name, token.address);
-}
 async function run() {
     logger.debug("start working...", "mint");
 
-    let use_right = await contract("SCPNSUseRightToken");
-    let proof_task      = await contract("SCPNSProofTask");
+    let use_right       = await utils.contract("SCPNSUseRightToken");
+    let proof_task      = await utils.contract("SCPNSProofTask");
 
     let role   = "MINTER_ROLE";
-    let signer = ethers.provider.getSigner(0); 
-    let receiver = ethers.provider.getSigner(1); 
+    let signer = users.seller.signer; 
+    let receiver = users.prover.signer; 
     let minter = await signer.getAddress(); 
-
 
     let has_miter = await has_role(proof_task, minter, role);
     if (has_miter != true) {
@@ -58,13 +35,11 @@ async function run() {
         return;
     } 
 
-
     let from_address = await signer.getAddress();
     let to = await receiver.getAddress();
     let use_right_count = await use_right.balanceOf(from_address);
 
     let rows = [];
-
     for (var i = 0; i < use_right_count; i++) {
         let use_right_id = utils.w3uint256_to_hex(await use_right.tokenOfOwnerByIndex(from_address, i));
 
@@ -87,7 +62,6 @@ async function run() {
         let datas = utils.json_to_w3str({data: "test"});
         logger.debug("new task to " + to + " deadline: " + deadline);
         logger.debug("vm id: " + use_right_id);
-
   
         let tx = await proof_task.connect(signer).mint(to, use_right_id, 
                                 utils.str_to_w3bytes32(""), datas);
@@ -98,7 +72,7 @@ async function run() {
         })
         break;
     }
-    logger.table(rows, "new tokens");
+    logger.table(rows, "new proof task");
 }
 
 run()

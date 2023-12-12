@@ -5,19 +5,12 @@ const program   = require('commander');
 const utils     = require("./utils");
 const logger    = require("./logger");
 const prj       = require("../prj.config.js");
+const { users }       = require("./datas/env.config.js");
+const { contracts_load } = require("./contracts.js");
 
 const bak_path  = prj.caches_contracts;
 const tokens  = require(prj.contract_conf);
 const {ethers, upgrades}    = require("hardhat");
-
-async function get_contract(name, address) {
-    return await utils.get_contract(name, address);
-}
-
-function is_dns(token_name) {
-    let target_token_name = "AssemblyDNS";
-    return (target_token_name == "" || target_token_name == token_name) && token_name != "";
-}
 
 async function has_role(client, address) {
     let role= await client.MANAGER_ROLE();
@@ -42,12 +35,10 @@ async function set(client, signer, name, address){
 async function run() {
     logger.debug("start working...", "notes");
 
-    token = tokens["SCPNSDns"];
-    let cobj = await get_contract(token.name, token.address);
+    let cobj = await utils.contract("SCPNSDns");
 
-    const accounts = await web3.eth.getAccounts();
     let role = 0x00; //"DEFAULT_ADMIN_ROLE";
-    let signer = ethers.provider.getSigner(0); 
+    let signer = users.manager.signer; 
 
     extends_token = [];
     extends_token.push({"name": "", "address":""});
@@ -60,7 +51,7 @@ async function run() {
     let thd_contracts = [
         {
             name: "GPUStore",
-            address: "0x74Fd67abD3244E8dc05945B35dFc4338db03b0F1",
+            address: "0x04d582f07977Bcb9cBA3Df50ACb44916C7c0Fe70",
         }
     ]
 
@@ -71,7 +62,6 @@ async function run() {
         logger.table(extends_token);
     }
 }
-
 
 run()
   .then(() => process.exit(0))

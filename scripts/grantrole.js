@@ -79,7 +79,8 @@ async function run() {
         let platform = accounts[2];
 
         let addresses = [
-            "0xFbB84C3b36b61356425e8B916D81bB977071BbD0"
+            "0xFbB84C3b36b61356425e8B916D81bB977071BbD0",
+            "0xDB10B29830D75A8157BaB7442d3047Dc200D007E"
         ]
 
         for (let i = 0; i < addresses.length; i++) {

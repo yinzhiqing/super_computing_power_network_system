@@ -232,14 +232,17 @@ cancel_proof_tasks:
 put_market:
 	$(call run_script, "put_market")
 
+buyer_put_market:
+	$(call run_script, "buyer_put_market")
+
 buy_market:
 	$(call run_script, "buy_market")
 
 show_balances:
 	$(call run_script, "show_balances")
 
-remoke_market:
-	$(call run_script, "remoke_market")
+revoke_market:
+	$(call run_script, "revoke_market")
 
 show_market:
 	$(call run_script, "show_market")
