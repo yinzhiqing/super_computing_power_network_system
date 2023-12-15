@@ -20,7 +20,7 @@ async function datas_from_token_id(tokenId) {
     let gpu      = await utils.contract("SCPNSGpuList");
 
     let row = new Map();
-    row["tokenId"] = tokenId;
+    row["tokenId"] = utils.w3uint256_to_hex(tokenId);
     row["owner"] = await cobj.ownerOf(row["tokenId"]);
     row["deadline"] = await cobj.deadLine(row["tokenId"]);
     row["deadline"] = (new Date(Number(row["deadline"]))).toLocaleString();

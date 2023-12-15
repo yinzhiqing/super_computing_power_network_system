@@ -238,14 +238,23 @@ buyer_put_market:
 buy_market:
 	$(call run_script, "buy_market")
 
-show_balances:
-	$(call run_script, "show_balances")
-
 revoke_market:
 	$(call run_script, "revoke_market")
 
-show_market:
-	$(call run_script, "show_market")
+show_market_use:
+	$(call run_script, "show_market_use")
+
+show_market_revenue:
+	$(call run_script, "show_market_revenue")
+
+show_balances:
+	$(call run_script, "show_balances")
+
+show_revenues:
+	$(call run_script, "show_revenues")
+
+show_orders:
+	$(call run_script, "show_orders")
 
 tests:
 	@npx hardhat run scripts/test.js

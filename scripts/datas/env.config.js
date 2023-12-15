@@ -29,6 +29,18 @@ config = {
                 signer: get_signer(0),
             },
         },
+        store: {
+            filter: {
+                seller: {
+                    use: true,
+                    list: ["0xDB10B29830D75A8157BaB7442d3047Dc200D007E"],
+                },
+                tokens: {
+                    use: true,
+                    list: ["0xdff57360e87a4eaff76274653b373fbf577bdf1e4103b843ad168a5256208c33"]
+                },
+            },
+        },
     },
 };
 

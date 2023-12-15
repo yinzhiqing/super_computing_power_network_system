@@ -116,12 +116,12 @@ interface IGPUStore {
     function tradeRevenueToken(uint256 revenueTokenId) external;
 
     //
-    // Distribute revenue to owner who holds Revene Token
+    // Distribute revenue to the owners who holds Revene Token
     //
     function distributeRevenues() external;
 
     //
-    // Charge from owner accunt who holds GPU Token periodically
+    // Charge from owner accunts who holds GPU Token periodically
     // Note: if fails to charge, contract Store will revoke GPU Token from holder account. 
     //
     function chargePerMonth() external;

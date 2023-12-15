@@ -69,6 +69,7 @@ module.exports = {
       },
       mainnet: {
           //url: `http://124.251.110.238/rpc`,
+          //read event
           url: `http://106.14.38.214:6060`,
           accounts :{mnemonic : mnemonic}
       }

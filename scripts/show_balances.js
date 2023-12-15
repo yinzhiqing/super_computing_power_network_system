@@ -42,6 +42,18 @@ async function run() {
         })
 
     }
+    
+    let other_address = [
+        {alias: "市场", address: gpu_store.address},
+    ]
+
+    for(let key in other_address) {
+        list.push({
+            name: other_address[key].alias,
+            account: other_address[key].address,
+            balance: Number(await vnet_token.balanceOf(other_address[key].address))
+        })
+    }
     logger.table(list);
 }
 

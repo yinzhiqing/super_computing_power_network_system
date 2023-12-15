@@ -9,6 +9,7 @@ const tokens    = require(prj.contract_conf);
 const schedule  = require('node-schedule');
 const env       = require("./datas/env.config.js");
 const gs_abi    = require("./datas/abis/GPUStore.json");
+const rt_abi    = require("./datas/abis/RevenueToken.json");
 const {abi}     = require("./datas/abis/IERC20Upgradeable.json");
 const erc20_abi = abi;
 const users      = env.users;
@@ -31,14 +32,11 @@ async function contract_ext(abi, address) {
     return await ethers.getContractAt(abi, address);
 }
 
-async function vnet_token() {
+async function contracts_load() {
     let dns              = await contract("SCPNSDns");
     let to               = await dns.addressOf("GPUStore");
     let gpu_store        = await contract_ext(gs_abi, to);
-    return await contract_ext(erc20_abi, await gpu_store._paymentToken());
-}
-
-async function contracts_load() {
+    let vnet_token       = await contract_ext(erc20_abi, await gpu_store._paymentToken());
     return {
         SCPNSDns: await contract("SCPNSDns"),
         SCPNSComputilityUnit: await contract("SCPNSComputilityUnit"),
@@ -52,7 +50,8 @@ async function contracts_load() {
         SCPNSVerifyTask: await contract("SCPNSVerifyTask"),
         SCPNSMarketLink: await contract("SCPNSMarketLink"),
         GPUStore: await contract_ext(gs_abi, await (await contract("SCPNSDns")).addressOf("GPUStore")),
-        VNetToken: await vnet_token(),
+        VNetToken: await contract_ext(erc20_abi, await gpu_store._paymentToken()),
+        RevenueToken: await contract_ext(rt_abi, await gpu_store._revenueToken()),
     };
 }
 

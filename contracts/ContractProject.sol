@@ -15,7 +15,7 @@ import "./interfaces/ISCPNSTypeUnit.sol";
 import "./interfaces/ISCPNSUseRightToken.sol";
 import "./interfaces/ISCPNSGpuList.sol";
 import "./interfaces/ISCPNSVerifyTask.sol";
-import "./refs/IGPUStore.sol";
+import "./refs/store/interfaces/IGPUStore.sol";
 
 abstract contract ContractProject is Initializable {
 
