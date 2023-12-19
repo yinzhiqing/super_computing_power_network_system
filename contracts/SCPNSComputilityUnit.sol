@@ -145,6 +145,11 @@ contract SCPNSComputilityUnit is
         return  _id2TypeUnitCount[tokenId];
     }
 
+    function revenueValueOf(uint256 tokenId) public view virtual override returns(uint256) {
+        uint256 typeUnitId = SCPNSComputilityUnit.typeUnitIdOf(tokenId);
+        return _typeRevenueIf().valueOfTypeUnitId(typeUnitId);
+    }
+
     function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal virtual override {
         super._beforeTokenTransfer(from, to, tokenId);
 

@@ -7,7 +7,7 @@ interface IGPUStore {
     //
     event AddGPUTokenToStoreEvent(
         uint256 indexed gpuTokenId,
-        uint256 price, // fee for each month
+        uint256 price, // fee per month
         address indexed provider,
         uint256 timestamp
     );
@@ -56,12 +56,22 @@ interface IGPUStore {
     );
 
     event ChargePerMonthEvent(
+        uint256 indexed orderId,
         uint256 indexed gpuTokenId,
         uint256 fee,
         address ChargedAccount,
         uint256 timestamp
     );
 
+    event RevokeGPUToken(
+        uint256 indexed gpuTokenId,
+        address indexed from,
+        address indexed to,
+        uint256 orderPrice,
+        uint256 allowance,
+        uint256 balance,
+        uint256 timestap
+    );
     //
     //  Functions
     //
@@ -71,7 +81,11 @@ interface IGPUStore {
     //
     function addGpuTokenToStore(uint256 gpuTokenId, uint256 price) external;
 
+    function mintGPUAndRevenuToken2( uint256 gpuTokenId, address[] memory owners, uint256[] memory values) external; 
+
+    //
     // Remove GPU Token from store
+    //
     function removeGpuTokenFromStore(uint256 gpuTokenId) external;
 
     //

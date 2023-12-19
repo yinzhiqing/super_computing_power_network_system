@@ -131,6 +131,17 @@ contract SCPNSComputilityVM is
         return _tokenComputilityUnits[tokenId].keyOfByIndex(index);
     }
 
+    function revenueValueOf(uint256 tokenId) public view virtual override returns(uint256) {
+        uint256 len = _tokenComputilityUnits[tokenId].length();
+
+        uint256 total = 0;
+        for(uint256 i = 0; i < len; i++) {
+            uint256 computilityUnitId = _tokenComputilityUnits[tokenId].keyOfByIndex(i);
+            total += _computilityUnitIf().revenueValueOf(computilityUnitId);
+        }
+
+        return total;
+    }
 
      uint256[48] private __gap;
    }

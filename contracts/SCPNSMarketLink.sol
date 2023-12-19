@@ -9,6 +9,7 @@ import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
 import "./interfaces/ISCPNSMarketLink.sol";
+import "./refs/store/interfaces/IRevenueToken.sol";
 import "./PairValues.sol";
 import "./ArraryUint256.sol";
 import "./ContractProject.sol";
@@ -120,6 +121,7 @@ contract SCPNSMarketLink is
         return (block.timestamp > 1000000000000) ? 1000 : 1;
     }
 
+
     function putToMarket(uint256 tokenId, uint256 price) public virtual override {
         require(_useRightTokenIf().exists(tokenId), "SCPNSMarketLink: tokenId is not use right token");
         require(price > 0);
@@ -136,6 +138,22 @@ contract SCPNSMarketLink is
         _gpuStoreIf().removeGpuTokenFromStore(tokenId);
 
         _stdOfIf(address(_useRightTokenIf())).transferFrom(address(this), _msgSender(), tokenId);
+    }
+
+    function mintRevenue(uint256 tokenId, address[] memory owners, uint256[] memory values) public virtual override {
+        uint256 __revenueValue = _computilityVMIf().revenueValueOf(tokenId);
+        require(__revenueValue > 0, "SCPNSMarketLink: revenue value of tokenId is 0");
+        require(owners.length == values.length, "SCPNSMarketLink: value len of owners is no-match");
+        //check is mint?
+
+        uint256 total = 0;
+        for(uint256 i = 0; i < owners.length; i++) {
+            total += values[i];
+        }
+
+        require(total == __revenueValue, "SCPNSMarketLink: revenue value allocation is unreasonable");
+
+        _gpuStoreIf().mintGPUAndRevenuToken2(tokenId, owners, values);
     }
 }
 

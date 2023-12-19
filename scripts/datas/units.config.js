@@ -185,6 +185,34 @@ units = {
                 }
             }
         },
+    },
+    revenue_values: {
+        H100_NVL:       1000,
+        H100_SXM:       1000,
+        H100_PCIE:      1000,
+        A100_SXM:       800,
+        A100_PCIE:      800,
+        A800_80G_SXM:   400,
+        A800_40G_PCIE:  300,
+        A800_80G_PCIE:  400,
+        H800:           200,
+        GTX_1060:       150,
+        GTX_1050:       100,
+        CPU:            50,
+    },
+    default_revenue_value: {
+        H100_NVL:       "H100_NVL",
+        H100_SXM:       "H100_SXM",
+        H100_PCIE:      "H100_PCIE",
+        A100_SXM:       "A100_SXM",
+        A100_PCIE:      "A100_PCIE",
+        A800_80G_SXM:   "A800_80G_SXM",
+        A800_40G_PCIE:  "A800_40G_PCIE",
+        A800_80G_PCIE:  "A800_80G_PCIE",
+        H800:           "H800",
+        GTX_1060:       "GTX_1060",
+        GTX_1050:       "GTX_1050",
+        CPU:            "CPU",
     }
 };
 

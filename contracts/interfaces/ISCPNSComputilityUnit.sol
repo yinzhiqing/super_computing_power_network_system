@@ -70,4 +70,12 @@ interface ISCPNSComputilityUnit is
     * @return 算力资源数量
     */
     function leaveCountOf(uint256 tokenId) external view returns(uint256);
+
+    /**
+    * @notice 获取算力单元获益权份额值
+    * @dev 根据算力算力单元类型获取收益权份额值
+    * @param tokenId 算力资源ID
+    * @return 收益权份额值
+    */
+    function revenueValueOf(uint256 tokenId) external view returns(uint256);
 }

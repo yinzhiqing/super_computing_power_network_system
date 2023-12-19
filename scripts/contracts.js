@@ -38,20 +38,21 @@ async function contracts_load() {
     let gpu_store        = await contract_ext(gs_abi, to);
     let vnet_token       = await contract_ext(erc20_abi, await gpu_store._paymentToken());
     return {
-        SCPNSDns: await contract("SCPNSDns"),
-        SCPNSComputilityUnit: await contract("SCPNSComputilityUnit"),
-        SCPNSComputilityVM : await contract("SCPNSComputilityVM"),
-        SCPNSProofTask: await contract("SCPNSProofTask"),
-        SCPNSUseRightToken: await contract("SCPNSUseRightToken"),
-        SCPNSGpuList: await contract("SCPNSGpuList"),
-        SCPNSComputilityRanking: await contract("SCPNSComputilityRanking"),
-        SCPNSProofParameter: await contract("SCPNSProofParameter"),
-        SCPNSTypeUnit: await contract("SCPNSTypeUnit"),
-        SCPNSVerifyTask: await contract("SCPNSVerifyTask"),
-        SCPNSMarketLink: await contract("SCPNSMarketLink"),
-        GPUStore: await contract_ext(gs_abi, await (await contract("SCPNSDns")).addressOf("GPUStore")),
-        VNetToken: await contract_ext(erc20_abi, await gpu_store._paymentToken()),
-        RevenueToken: await contract_ext(rt_abi, await gpu_store._revenueToken()),
+        SCPNSDns:               await contract("SCPNSDns"),
+        SCPNSComputilityUnit:   await contract("SCPNSComputilityUnit"),
+        SCPNSComputilityVM :    await contract("SCPNSComputilityVM"),
+        SCPNSProofTask:         await contract("SCPNSProofTask"),
+        SCPNSUseRightToken:     await contract("SCPNSUseRightToken"),
+        SCPNSGpuList:           await contract("SCPNSGpuList"),
+        SCPNSComputilityRanking:await contract("SCPNSComputilityRanking"),
+        SCPNSProofParameter:    await contract("SCPNSProofParameter"),
+        SCPNSTypeUnit:          await contract("SCPNSTypeUnit"),
+        SCPNSTypeRevenue:       await contract("SCPNSTypeRevenue"),
+        SCPNSVerifyTask:        await contract("SCPNSVerifyTask"),
+        SCPNSMarketLink:        await contract("SCPNSMarketLink"),
+        GPUStore:               await contract_ext(gs_abi, await (await contract("SCPNSDns")).addressOf("GPUStore")),
+        VNetToken:              await contract_ext(erc20_abi, await gpu_store._paymentToken()),
+        RevenueToken:           await contract_ext(rt_abi, await gpu_store._revenueToken()),
     };
 }
 

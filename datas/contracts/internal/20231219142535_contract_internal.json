@@ -125,8 +125,8 @@
 	},
 	"SCPNSTypeRevenue": {
 		"name": "SCPNSTypeRevenue",
-		"address": "0x92A9319EA1A6152f79C6CFaD82E413A92981669F",
-		"deploy": false,
+		"address": "0x191f0749677Fd02f1F4BC3978dF25Cb1b5A1B1E6",
+		"deploy": true,
 		"upgrade": false,
 		"fixed": false,
 		"params": [

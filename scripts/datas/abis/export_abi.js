@@ -1,6 +1,6 @@
 const fs = require('fs');
 
-const contracts = ["GPUToken", 'GPUStore'];
+const contracts = ["GPUToken", 'GPUStore', 'RevenueToken'];
 for(var i=0; i< contracts.length; i++)
 {
     console.log("./build/contracts/"+ contracts[i]);

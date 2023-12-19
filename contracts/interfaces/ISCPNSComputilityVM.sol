@@ -6,7 +6,7 @@ pragma solidity ^0.8.2;
 import  "./ISCPNSBase.sol";
 
 /**
-* @title 算力管理
+* @title 算力资源管理
 * @author yinzhiqing
 * @notice 算力管理即管理算力资源
 * @dev 算力管理合约是算力使用权通证的基础，依赖算力单元合约
@@ -92,4 +92,13 @@ interface ISCPNSComputilityVM is
     * @return 状态
     */
     function isFree(uint256 tokenId) external view returns(bool);
+
+
+    /**
+    * @notice 获取算力资源获取收益权份额值
+    * @dev 根据算力资源类型获取对应的收益权份额值，算力资源可能包含多个算力类型单元
+    * @param tokenId 算力资源ID
+    * @return 收益权份额值
+    */
+    function revenueValueOf(uint256 tokenId) external view returns(uint256);
 }

@@ -10,8 +10,6 @@ pragma solidity ^0.8.2;
 */
 interface ISCPNSMarketLink
 {
-
-
     /** 
     * @notice 将使用权通证添加到市场
     * @dev 添加到市场合约
@@ -30,4 +28,6 @@ interface ISCPNSMarketLink
     * @return 精度值
     */
     function pricision() external view returns(uint256);
+
+    function mintRevenue(uint256 tokenId, address[] memory owners, uint256[] memory values) external;
 }

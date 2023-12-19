@@ -22,6 +22,8 @@ async function datas_from_token_id(tokenId) {
     let row = new Map();
     row["tokenId"] = utils.w3uint256_to_hex(tokenId);
     row["owner"] = await cobj.ownerOf(row["tokenId"]);
+    row["revenueValue"] = Number(await cobj.revenueValueOf(row["tokenId"]));
+    //logger.log(row["revenueValue"]);
     row["deadline"] = await cobj.deadLine(row["tokenId"]);
     row["deadline"] = (new Date(Number(row["deadline"]))).toLocaleString();
 

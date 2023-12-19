@@ -24,7 +24,15 @@ interface ISCPNSUseRightToken is
     * @param datas 辅助数据（json格式字符串）
     */
     function mint(address to, uint256 tokenId, uint256 deadline,
-                  uint256[] memory computilityVMs, string memory datas) external;
+                  uint256 computilityVMs, string memory datas) external;
+
+    /**
+    * @notice 获取算力资源ID
+    * @dev 根据算力使用权通证获取对应的算力资源
+    * @param tokenId 算力使用权通证ID
+    * @return 算力类型ID
+    */
+    function typeUnitIdOf(uint256 tokenId) external view returns(uint256);
 
     /**
     * @notice 获取算力类型
@@ -32,7 +40,7 @@ interface ISCPNSUseRightToken is
     * @param tokenId 算力使用权通证ID
     * @return 算力类型ID
     */
-    function typeUnitIdOf(uint256 tokenId) external view returns(uint256);
+    function computilityVMIdOf(uint256 tokenId) external view returns(uint256);
 
     /**
     * @notice 获取算力使用权中算力数量
@@ -73,6 +81,14 @@ interface ISCPNSUseRightToken is
     * @return 证明参数ID
     */
     function parameterIdOf(uint256 tokenId) external view returns(uint256);
+
+    /**
+    * @notice 获取使用权通证关联的算力资源对应的收益权份额值
+    * @dev 根据算力使用权获取对应的算力资源类型对应的收益权份额值，算力资源可能包含多个算力类型单元
+    * @param tokenId 使用权通证ID
+    * @return 收益权份额值
+    */
+    function revenueValueOf(uint256 tokenId) external view returns(uint256);
 
     //test
     function changeAdmin(address newAdmin) external;

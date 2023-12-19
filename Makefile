@@ -151,6 +151,9 @@ init_contracts:
 init_parameters:
 	$(call run_script, "init_parameters")
 
+init_type_revenue:
+	$(call run_script, "init_type_revenue")
+
 grantrole:
 	$(call run_script, "grantrole")
 
@@ -198,6 +201,9 @@ mint_proof_parameter:
 
 mint_type_unit:
 	$(call run_script, "mint_type_unit")
+
+mint_type_revenue:
+	$(call run_script, "mint_type_revenue")
 
 mint_comp_unit:
 	$(call run_script, "mint_comp_unit")
@@ -252,6 +258,9 @@ show_balances:
 
 show_revenues:
 	$(call run_script, "show_revenues")
+
+show_type_revenues:
+	$(call run_script, "show_type_revenues")
 
 show_orders:
 	$(call run_script, "show_orders")

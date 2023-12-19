@@ -27,6 +27,11 @@ async function set(client, signer, name, address){
         return;
     } 
 
+    let old_address = await client.addressOf(name);
+    if(old_address == address) {
+        return;
+    }
+
     logger.info("set dns(name, address): (" + name + " ," + address + ")");
     tx = await client.connect(signer).set(name, address);
     logger.debug(tx);
@@ -51,7 +56,7 @@ async function run() {
     let thd_contracts = [
         {
             name: "GPUStore",
-            address: "0x04d582f07977Bcb9cBA3Df50ACb44916C7c0Fe70",
+            address: "0x9261A1595E59aA4B052c0F8C629427fb1FcDf8EE",
         }
     ]
 

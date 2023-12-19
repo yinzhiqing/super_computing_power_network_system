@@ -127,7 +127,7 @@
 		"name": "SCPNSTypeRevenue",
 		"address": "0x92A9319EA1A6152f79C6CFaD82E413A92981669F",
 		"deploy": false,
-		"upgrade": false,
+		"upgrade": true,
 		"fixed": false,
 		"params": [
 			"!REF:SCPNSDns.address"

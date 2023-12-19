@@ -3,6 +3,7 @@ pragma solidity ^0.8.2;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol";
 
+
 interface IGPUToken is IERC721Enumerable {
     enum GPUType {
         A100,

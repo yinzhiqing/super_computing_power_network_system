@@ -16,6 +16,7 @@ import "./interfaces/ISCPNSUseRightToken.sol";
 import "./interfaces/ISCPNSGpuList.sol";
 import "./interfaces/ISCPNSVerifyTask.sol";
 import "./refs/store/interfaces/IGPUStore.sol";
+import "./interfaces/ISCPNSTypeRevenue.sol";
 
 abstract contract ContractProject is Initializable {
 
@@ -29,6 +30,7 @@ abstract contract ContractProject is Initializable {
     string public constant DNS_NAME_USERIGHTTOKEN       = "SCPNSUseRightToken";
     string public constant DNS_NAME_CHALLENGE           = "SCPNSVerifyTask";
     string public constant DNS_NAME_GPUSTORE            = "GPUStore";
+    string public constant DNS_NAME_TYPEREVENUE         = "SCPNSTypeRevenue";
 
     address private __dnsAddress;
     ISCPNSDns private _dnsIf;
@@ -101,4 +103,9 @@ abstract contract ContractProject is Initializable {
     function _gpuStoreIf() internal view virtual returns(IGPUStore) {
         return IGPUStore(_addressOf(DNS_NAME_GPUSTORE));
     }
+
+    function _typeRevenueIf() internal view virtual returns(ISCPNSTypeRevenue) {
+        return ISCPNSTypeRevenue(_addressOf(DNS_NAME_TYPEREVENUE));
+    }
+
 }

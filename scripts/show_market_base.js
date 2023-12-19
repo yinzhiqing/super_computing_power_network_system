@@ -6,12 +6,28 @@ const logger    = require("./logger");
 const prj       = require("../prj.config.js");
 const gs_abi    = require("./datas/abis/GPUStore.json");
 const sur       = require("./show_use_rights_base.js");
-const { users }       = require("./datas/env.config.js");
+const { users, store }       = require("./datas/env.config.js");
 const { contracts_load } = require("./contracts.js");
 
 const bak_path  = prj.caches_contracts;
 const tokens  = require(prj.contract_conf);
 const {ethers, upgrades}    = require("hardhat");
+
+function filter(seller, token) {
+    if (store.filter.seller.use == true) {
+        if (store.filter.seller.list.includes(seller) == false) {
+            return true;
+        }
+    }
+
+    if (store.filter.tokens.use == true) {
+        if (store.filter.tokens.list.includes(token) == false) {
+            return true;
+        }
+    }
+
+    return false;
+}
 
 async function store_use() {
     logger.debug("start working...", "使用权通证市场");
@@ -29,15 +45,23 @@ async function store_use() {
     let saleIds = await gpu_store.getGPUTokenForSaleIds();
     let list = []
     for (let i in saleIds) {
-        let sale_info = await gpu_store._gpuTokenStore(saleIds[i]);
+        let sale_info    = await gpu_store._gpuTokenStore(saleIds[i]);
+        let use_right_id = utils.w3uint256_to_hex(sale_info[0]);
+        let seller       = sale_info[3];
+        let price        = Number(sale_info[2]);
 
-        let token_id = utils.w3uint256_to_hex(sale_info[0]);
-        let type_unit_id = await sur.type_unit_id_of(token_id);
-        let rights = await sur.datas_from_token_id(token_id);
+        //过滤非目标出售信息
+        if (filter(seller, use_right_id)) {
+            continue;
+        }
+        let type_unit_id = await sur.type_unit_id_of(use_right_id);
+        let rights       = await sur.datas_from_token_id(use_right_id);
         let use_right_info = rights["use_right"];
+
         logger.log("==========================================================================================================");
         logger.log("\t\t\t\t\t\t使用权通证市场信息表");
         logger.log("----------------------------------------------------------------------------------------------------------");
+
         for(var k in use_right_info) {
             if (k.length >= 6) {
                 logger.log(k + "\t\t\t" + use_right_info[k].toString());
@@ -46,13 +70,13 @@ async function store_use() {
             }
         }
         logger.log("----------------------------------------------------------------------------------------------------------");
-        logger.log("挂单者：\t\t\t" + sale_info[3]);
-        logger.log("价格(VNET Token)：\t\t" + Number(sale_info[2]));
+        logger.log("挂单者：\t\t\t" + seller);
+        logger.log("价格(VNET Token)：\t\t" + price);
         logger.log("==========================================================================================================");
 
         list.push({
-            "使用权通证ID": utils.w3uint256_to_hex(sale_info[0]),
-            "价格": Number(sale_info[2]),
+            "使用权通证ID": use_right_id,
+            "价格": price,
         })
 
         logger.log("\t");
@@ -131,8 +155,8 @@ async function orders() {
     let contracts        = await contracts_load();
     let revenue_token    = contracts.RevenueToken;
     let dns              = contracts.SCPNSDns;
-    let to               = await dns.addressOf("GPUStore");
     let gpu_store        = contracts.GPUStore;
+    let to               = gpu_store.address;
     logger.log("market address: " + to);
     logger.log("vnet   address: " + await gpu_store._paymentToken());
     logger.log("");
@@ -188,9 +212,27 @@ async function orders() {
     return list;
 
 }
+
+async function revenue_orders() {
+    logger.debug("start working...", "收益权交易记录");
+    let contracts        = await contracts_load();
+    let gpu_store        = contracts.GPUStore;
+    let revenue_token    = contracts.RevenueToken;
+    let vnet_token       = contracts.VNetToken;
+    let to               = gpu_store.address;
+    //await gpu_store.events.AddGPUTokenToStoreEvent("0xd34967bbedd89ccf8b9b11cacd5545dc93bb5d14f1397401a76131658655e715", "0xDB10B29830D75A8157BaB7442d3047Dc200D007E")
+
+    let ev = await vnet_token.queryFilter('Transfer',
+        26749720,
+        "latest");
+
+    logger.debug(ev);
+}
+
 module.exports = {
     store_revenue,
     store_use,
     revenues,
     orders,
+    revenue_orders
 }
