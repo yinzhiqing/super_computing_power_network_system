@@ -160,6 +160,10 @@ function w3str_to_str(data) {
     return web3.eth.abi.decodeParameter("string", data);
 }
 
+function w3address_to_hex(data) {
+    return web3.eth.abi.decodeParameter("address", data);
+}
+
 function str_to_w3bytes(data) {
     return web3.eth.abi.encodeParameter("bytes", web3.utils.toHex(data));
 }
@@ -170,6 +174,11 @@ function w3bytes32_to_str(data) {
 
 function w3uint256_to_hex(data) {
     return web3.utils.toHex(data.toString());
+}
+
+function w3uint256_to_shex(data) {
+    let ddata = web3.eth.abi.decodeParameter("uint256", web3.utils.toHex(data));
+    return web3.utils.toHex(ddata.toString());
 }
 
 function w3uint256_to_str(data) {
@@ -297,9 +306,11 @@ module.exports = {
     strs_to_w3strs,
     strs_to_w3uint256s,
     w3uint256_to_hex,
+    w3uint256_to_shex,
     w3uint256_to_str,
     w3uint256_to_number,
     w3bytes32_to_str,
+    w3address_to_hex,
     str_to_w3str,
     w3str_to_str,
     json_to_w3str,
