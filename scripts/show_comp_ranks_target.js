@@ -60,8 +60,12 @@ async function works(use_right_id) {
             logger.log("");
             logger.log("----------------------------------------------------------------------------------------------------------");
             let state = "异常";
-            if (postion >= range[0] && postion <= range[1]) {
+            if (postion <= range[1]) {
                 state = "正常";
+            }
+            
+            if (postion <= range[0]) {
+                state += "(小于规定值范围)"
             }
             logger.log("* 算力是否正常:"  + state);
 
@@ -92,8 +96,8 @@ async function run() {
     let cobj     = await utils.contract("SCPNSUseRightToken");
     let amounts = await cobj.totalSupply();
     for (let i = 0; i < amounts; i++) {
-        let tokenId = utils.w3uint256_to_hex(await cobj.tokenByIndex(i));
-        await works(tokenId);
+        use_right_id = utils.w3uint256_to_hex(await cobj.tokenByIndex(i));
+        await works(use_right_id);
     }
 }
 run()
