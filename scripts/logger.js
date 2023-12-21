@@ -88,6 +88,35 @@ function log(msg) {
     console.log(msg);
 }
 
+function form_frame() {
+    console.log("==========================================================================================================");
+}
+
+function form_split() {
+    console.log("----------------------------------------------------------------------------------------------------------");
+}
+function form_title(title) {
+    form_frame();
+    console.log("\t\t\t\t--" + title + "--");
+    form_frame();
+}
+function form_info(info) {
+    for(let i in info){
+        process.stdout.write(i);
+        process.stdout.write("\t\t\t\t\t");
+        process.stdout.write(info[i].toString());
+        process.stdout.write("\n");
+    }
+}
+function form(title, ...infos) {
+    form_title(title);
+    for (let i in infos) {
+        form_info(infos[i]);
+        form_split()
+    }
+    form_frame();
+}
+
 function show_msg(msg, title = "", kwargs = {}) {
     type        = get_kwargs(kwargs, "type", "log");
     title_color = get_kwargs(kwargs, "title_color", "red");
@@ -152,4 +181,5 @@ module.exports = {
     lines,
     clear,
     log,
+    form,
 }

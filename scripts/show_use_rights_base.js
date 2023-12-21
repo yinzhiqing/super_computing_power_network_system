@@ -21,6 +21,7 @@ async function datas_from_token_id(tokenId) {
 
     let row = new Map();
     row["tokenId"] = utils.w3uint256_to_hex(tokenId);
+    row["cvmId"] = utils.w3uint256_to_hex(await cobj.computilityVMIdOf(row["tokenId"]));
     row["owner"] = await cobj.ownerOf(row["tokenId"]);
     row["revenueValue"] = Number(await cobj.revenueValueOf(row["tokenId"]));
     //logger.log(row["revenueValue"]);
@@ -45,6 +46,7 @@ async function datas_from_token_id(tokenId) {
 
     let use_right = {
         "使用权通证ID": row["tokenId"],
+        "算力资源ID": row["cvmId"],
         "拥有者": row["owner"],
         "类型ID":  utils.w3uint256_to_hex(typeUnitId),
         "类型":  await typeUnit.unitTypeOf(typeUnitId),

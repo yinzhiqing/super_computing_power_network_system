@@ -65,7 +65,7 @@ async function run(types) {
             logger.debug("vm id: " + computility_vm_id);
 
             let tx = await use_right.connect(signer).mint(to, token_id,  deadline, 
-                [computility_vm_id], datas);
+                computility_vm_id, datas);
 
             logger.debug(tx);
             rows.push({

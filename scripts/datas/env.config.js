@@ -20,6 +20,10 @@ config = {
                 alias: "证明者",
                 signer: get_signer(1),
             },
+            cleaner: {
+                alias: "市场清理者",
+                signer: get_signer(8),
+            },
             manager: {
                 alias: "管理者",
                 signer: get_signer(0),
@@ -37,7 +41,7 @@ config = {
                 },
                 tokens: {
                     use: false,
-                    list: ["0xdff57360e87a4eaff76274653b373fbf577bdf1e4103b843ad168a5256208c33"]
+                    list: ["0xd425dcd4f2d46e5f21eefcf8c6b3ceacecfd03803baf91d28d6505869c51c6d9"]
                 },
             },
         },

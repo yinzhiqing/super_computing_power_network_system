@@ -11,8 +11,7 @@ async function run() {
     let saleIds = await gpu_store.getGPUTokenForSaleIds();
     for (let i in saleIds) {
         let use_right_id = utils.w3uint256_to_hex(saleIds[i]);
-        await mb.buy_use(users.buyer.signer, use_right_id);
-        break;
+        await mb.buy_use(users.cleaner.signer, use_right_id);
     }
 }
 

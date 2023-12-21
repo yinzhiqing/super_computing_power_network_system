@@ -34,6 +34,7 @@ async function works() {
 
         let datas = utils.w3str_to_str(await cobj.datasOf(row["tokenId"]));
         logger.debug("tokenId: " + row["tokenId"], "token info");
+        logger.debug("owner: " + await cobj.ownerOf(row["tokenId"]));
         logger.debug("datas: ");
         logger.debug(JSON.parse(datas));
 

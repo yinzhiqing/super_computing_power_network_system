@@ -14,46 +14,43 @@ const bak_path  = prj.caches_contracts;
 const tokens  = require(prj.contract_conf);
 const {ethers, upgrades}    = require("hardhat");
 
-async function has_role(cobj, address, role) {
-    let brole = web3.eth.abi.encodeParameter("bytes32", web3.utils.soliditySha3(role));
-    let has = await cobj.hasRole(brole, address);
-
-    return has;
-}
-
 async function run() {
-    logger.debug("start working...", "show balance");
+    logger.info("账户金额");
 
     //获取合约SCPNSProofTask对象
     let contracts        = await contracts_load();
     let use_right        = contracts.SCPNSUseRightToken;
     let dns              = contracts.SCPNSDns;
     let to               = await dns.addressOf("GPUStore");
-    logger.info("to: " + to);
     let gpu_store        = contracts.GPUStore;
     let vnet_token       = contracts.VNetToken;
+    logger.debug("vnet token address: " + vnet_token.address);
     let list  = [];
-    for (let i in users) {
-        let account = users[i].signer; 
-        list.push({
-            name: users[i].alias,
-            account: await account.getAddress(),
-            balance: Number(await vnet_token.balanceOf(account.getAddress()))
-        })
+    let merge_users = {};
 
+    for (let i in users) {
+        let account = users[i].signer;
+        let addr = await users[i].signer.getAddress();
+        merge_users[addr] = (merge_users[addr] == undefined ? "" : merge_users[addr] + ", ") + users[i].alias;
     }
     
     let other_address = [
         {alias: "市场", address: gpu_store.address},
     ]
 
-    for(let key in other_address) {
+    for (let i in other_address) {
+        let addr = await other_address[i].address;
+        merge_users[addr] = (merge_users[addr] == undefined ? "" : merge_users[addr] + ", ") + other_address[i].alias;
+    }
+
+    for (let key in merge_users) {
         list.push({
-            name: other_address[key].alias,
-            account: other_address[key].address,
-            balance: Number(await vnet_token.balanceOf(other_address[key].address))
+            name: merge_users[key],
+            account: key,
+            balance: (await vnet_token.balanceOf(key)).toString(),
         })
     }
+
     logger.table(list);
 }
 
