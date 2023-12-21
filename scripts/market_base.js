@@ -164,7 +164,7 @@ async function revenues() {
         let value   = await revenue_token.balanceOf(tokenId);
         let balance = await vnet_token.balanceOf(owner);
         list.push({
-            "收益权通证ID": utils.w3uint256_to_hex(tokenId),
+            "收益权通证ID": utils.w3uint256_to_shex(tokenId),
             "通证拥有者": owner,
             "算力资源ID": utils.w3uint256_to_hex(slot),
             "通证数量": Number(value),
@@ -245,13 +245,32 @@ async function revenue_orders() {
     let revenue_token    = contracts.RevenueToken;
     let vnet_token       = contracts.VNetToken;
     let to               = gpu_store.address;
-    //await gpu_store.events.AddGPUTokenToStoreEvent("0xd34967bbedd89ccf8b9b11cacd5545dc93bb5d14f1397401a76131658655e715", "0xDB10B29830D75A8157BaB7442d3047Dc200D007E")
 
-    let ev = await vnet_token.queryFilter('Transfer',
-        26749720,
-        "latest");
-
-    logger.debug(ev);
+    let msgs = [];
+    let order_id = "0xb1c01496d8e61bc48cc67721f4889387763ec2a61903f79f7e806cf74c30a66a";
+    //filter = await gpu_store.filters.ChargePerMonthEvent(order_id, null);
+    filter = await gpu_store.filters.DistributeRevenueEvent(null);
+    filter["fromBlock"] = "earliest";
+    filter["toBlock"] = "latest";
+    logs = await ethers.provider.getLogs(filter);
+    for (i in logs) {
+        log = logs[i];
+        logger.debug(log);
+        data = log["data"];
+        datas = web3.eth.abi.decodeParameters(["uint256", "uint256"], data);
+        let event_data = { 
+            //blockNumber: log["blockNumber"],
+            //blockHash: log["blockHash"],
+            //transactionHash: log["transactionHash"],
+            "收益权ID": utils.w3uint256_to_shex(log["topics"][1]),
+            "分配VNet token": datas["0"],
+            "收益账户地址": utils.w3address_to_hex(log["topics"][2]),
+            "时戳": datas["1"], 
+        };
+        msgs.push(event_data);
+    }
+    logger.table(msgs);
+    //msgs.forEach(function(item) {logger.table(item)});
 }
 
 async function buy_use(signer, use_right_id) {
