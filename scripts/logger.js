@@ -1,4 +1,5 @@
 const prj           = require("../prj.config.js");
+const util          = require('util');
 const debug_model   = prj.debug;
 function date_format(dash = "-", colon = ":", space = " ") {
     function pad(n) {return n < 10 ? "0" + n : n}
@@ -100,18 +101,34 @@ function form_title(title) {
     console.log("\t\t\t\t--" + title + "--");
     form_frame();
 }
-function form_info(info) {
-    for(let i in info){
-        process.stdout.write(i);
-        process.stdout.write("\t\t\t\t\t");
-        process.stdout.write(info[i].toString());
+function form_info(info, max) {
+    for(let k in info){
+        let tcount = Math.trunc((max - k.length * 2) / 8 + 1);
+        let tables = "";
+        for(let i = 0; i < tcount; i++) {
+            tables += "\t";
+        }
+
+        process.stdout.write(k);
+        process.stdout.write(tables);
+        process.stdout.write(info[k].toString());
         process.stdout.write("\n");
     }
 }
 function form(title, ...infos) {
     form_title(title);
+
+    let max = 0;
+    for (let j in infos) {
+        let info = infos[j];
+        for(let k in info){
+            max = max < k.length ? k.length : max;
+        }
+    }
+    max = (Math.trunc((max * 2) / 8) + 1) * 8 * 2;
+
     for (let i in infos) {
-        form_info(infos[i]);
+        form_info(infos[i], max);
         form_split()
     }
     form_frame();

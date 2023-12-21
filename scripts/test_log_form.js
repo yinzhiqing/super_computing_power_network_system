@@ -2,7 +2,15 @@ const fs        = require('fs');
 const utils     = require("./utils");
 const logger    = require("./logger");
 async function run() {
-    logger.form("这里是标题", {"姓名": "小嘎手动阀地方", "地点阿斯顿发发": "asdfadf", "number":1221421}, {"总结": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"});
+    logger.form("这里是标题", 
+        {
+            "姓名": "小嘎手动阀地方", 
+            "地点阿斯顿发发": "asdfadf", 
+            "点numba":1221421
+        }, 
+        {
+            "总结": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+        });
 }
 
 run()
