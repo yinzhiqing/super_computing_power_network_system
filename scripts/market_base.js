@@ -48,10 +48,14 @@ async function select_use_right_id(signer_address) {
 
 }
 
-async function _use_right_info_print(use_right_id) {
+async function _use_right_info_load(use_right_id) {
     let type_unit_id = await sur.type_unit_id_of(use_right_id);
     let rights       = await sur.datas_from_token_id(use_right_id);
-    let use_right_info = rights["use_right"];
+
+    return  rights["use_right"];
+}
+async function _use_right_info_print(use_right_id) {
+    let use_right_info = await _use_right_info_load(use_right_id);
 
     for(var k in use_right_info) {
         if (k.length >= 6) {
@@ -158,18 +162,21 @@ async function revenues() {
     logger.debug("revenue count: " + Number(total));
     let list = [];
     for (let i = 0; i < total; i++) {
-        let tokenId = await revenue_token.tokenByIndex(i);
-        let owner   = await revenue_token.ownerOf(tokenId);
-        let slot    = await revenue_token.slotOf(tokenId);
-        let value   = await revenue_token.balanceOf(tokenId);
+        let token_id = await revenue_token.tokenByIndex(i);
+        let owner   = await revenue_token.ownerOf(token_id);
+        let slot    = await revenue_token.slotOf(token_id);
+        let value   = await revenue_token.balanceOf(token_id);
         let balance = await vnet_token.balanceOf(owner);
-        list.push({
-            "收益权通证ID": utils.w3uint256_to_shex(tokenId),
+        let revenue_info = {
+            "收益权通证ID": utils.w3uint256_to_shex(token_id),
             "通证拥有者": owner,
             "算力资源ID": utils.w3uint256_to_hex(slot),
             "通证数量": Number(value),
             "稳定币数量": balance.toString()
-        });
+        };
+
+        logger.form("shou yi quan", revenue_info);
+        list.push(revenue_info);
     }
     logger.table(list);
     return list;
@@ -336,12 +343,14 @@ async function put_use(signer, use_right_id) {
     //检查使用权通证是否已经生成收益权通证
     let cvmId       = await use_right.computilityVMIdOf(use_right_id);
     let token_count = await revenue_token.tokenSupplyInSlot(cvmId);
+    let revenue_info = {};
+    let owners = [];
+    let values = [];
     //==0 则说明没有创建过, 需要创建收益权通证
     if (token_count == 0) {
         logger.info("创建新的收益权");
         let revenue_value = await use_right.revenueValueOf(use_right_id);
-        let owners = [owner, await users.beneficiary.signer.getAddress()];
-        let values = [];
+        owners = [owner, await users.beneficiary.signer.getAddress()];
         let last = revenue_value;
         let avg = revenue_value / owners.length;
         for (let i = 0; i < owners.length -1; i++) {
@@ -350,17 +359,37 @@ async function put_use(signer, use_right_id) {
             last -= avg
         }
         values.push(last);
-        logger.log("算力资源ID" + utils.w3uint256_to_hex(cvmId));
-        logger.log("收益权获得者列表"+ "[" + owners.toString() + "]");
-        logger.log("收益权值"+ "[" + values.toString() + "]");    
-        
-        //await market_link.mintRevenue(cvmId, owners, values);
+        logger.debug("算力资源ID" + utils.w3uint256_to_hex(cvmId));
+        logger.debug("收益权获得者列表"+ "[" + owners.toString() + "]");
+        logger.debug("收益权值"+ "[" + values.toString() + "]");    
+
+        await market_link.mintRevenue(cvmId, owners, values);
         logger.info("成功创建新的收益权");
+    } else {
+        //查询收益权及对应的账户和所有值
+        let owner_value = {};
+        for(let i = 0; i < token_count; i++)  {
+            let token_id = await revenue_token.tokenInSlotByIndex(cvmId, i);
+            let owner   = await revenue_token.ownerOf(token_id);
+            let value   = await revenue_token.balanceOf(token_id);
+            owner_value[owner] = owner_value[owner] != undefined ? owner_value[owner] + value : value;
+        }
+        
+        for(let key in owner_value) {
+            owners.push(key);
+            values.push(owner_value[key]);
+        }
     }
+
+    revenue_info = {
+        "算力资源ID" : utils.w3uint256_to_hex(cvmId),
+        "收益权获得者": "[" + owners.toString() + "]",
+        "收益权": "[" + values.toString() + "]",    
+    };
+    logger.debug(revenue_info);
 
     let addr0 = "0x0000000000000000000000000000000000000000";
     let approved = await use_right.connect(signer).getApproved(use_right_id);
-    logger.debug("pre call approved: " + approved);
 
     if (approved != to) {
         await use_right.connect(signer).approve(to, use_right_id);
@@ -371,14 +400,17 @@ async function put_use(signer, use_right_id) {
 
     let price = 10000;
     //算力使用权用户signer发起一个证明任务给指定的算力节点（use_right_id）
-    //await gpu_store.connect(signer).addGpuTokenToStore(use_right_id, price);
+    await gpu_store.connect(signer).addGpuTokenToStore(use_right_id, price);
 
-    await title_print("出售使用权通证信息");
-    await _use_right_info_print(use_right_id);
-    logger.log("----------------------------------------------------------------------------------------------------------");
-    logger.log("市场地址: \t\t\t" + to);
-    logger.log("价格(VNET Token):\t\t" + price);
-    logger.log("==========================================================================================================");
+    let sale_info = {
+       "市场":  to,
+       "价格":  price,
+    };
+    logger.debug(sale_info);
+    //await title_print("出售使用权通证信息");
+    let use_right_info = await _use_right_info_load(use_right_id);
+    logger.debug(use_right_info);
+    logger.form("出售使用权通证信息", use_right_info, revenue_info, sale_info);
 }
 
 async function title_print(title) {

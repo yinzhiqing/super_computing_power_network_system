@@ -24,6 +24,7 @@ async function run() {
     let to               = await dns.addressOf("GPUStore");
     let gpu_store        = contracts.GPUStore;
     let vnet_token       = contracts.VNetToken;
+    let revenue_token    = contracts.RevenueToken;
     logger.debug("vnet token address: " + vnet_token.address);
     let list  = [];
     let merge_users = {};
@@ -31,7 +32,10 @@ async function run() {
     for (let i in users) {
         let account = users[i].signer;
         let addr = await users[i].signer.getAddress();
-        merge_users[addr] = (merge_users[addr] == undefined ? "" : merge_users[addr] + ", ") + users[i].alias;
+        merge_users[addr] = {
+            alias: (merge_users[addr] == undefined ? "" : merge_users[addr]["alias"]+ ", ") + users[i].alias,
+            revenue_count: 0,
+        };
     }
     
     let other_address = [
@@ -40,13 +44,31 @@ async function run() {
 
     for (let i in other_address) {
         let addr = await other_address[i].address;
-        merge_users[addr] = (merge_users[addr] == undefined ? "" : merge_users[addr] + ", ") + other_address[i].alias;
+        merge_users[addr] = {
+            alias: (merge_users[addr] == undefined ? "" : merge_users[addr].alias + ", ") + other_address[i].alias,
+            revenue_count: 0,
+        };
+    }
+
+    let total = await revenue_token.totalSupply();
+    let total_value = 0;
+    for (let i = 0; i < total; i++) {
+        let token_id = await revenue_token.tokenByIndex(i);
+        let owner   = await revenue_token.ownerOf(token_id);
+
+        let slot    = await revenue_token.slotOf(token_id);
+        let value   = await revenue_token.balanceOf(token_id);
+        total_value += Number(value);
+        if (merge_users[owner] != undefined) {
+            merge_users[owner].revenue_count += Number(value);
+        }
     }
 
     for (let key in merge_users) {
         list.push({
-            name: merge_users[key],
+            name: merge_users[key].alias,
             account: key,
+            revenue_count: merge_users[key].revenue_count + "/" + total_value,
             balance: (await vnet_token.balanceOf(key)).toString(),
         })
     }

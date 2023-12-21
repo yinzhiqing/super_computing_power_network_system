@@ -177,8 +177,8 @@ function w3uint256_to_hex(data) {
 }
 
 function w3uint256_to_shex(data) {
-    let ddata = web3.eth.abi.decodeParameter("uint256", web3.utils.toHex(data));
-    return web3.utils.toHex(ddata.toString());
+    //let data = web3.eth.abi.decodeParameter("uint256", web3.utils.toHex(data));
+    return web3.utils.toHex(data.toString());
 }
 
 function w3uint256_to_str(data) {
