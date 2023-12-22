@@ -1,1 +1,1 @@
-watch -n 1 make show_market_use
+watch -n 1 -c -d -t make show_market_use
