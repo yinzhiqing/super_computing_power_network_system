@@ -62,5 +62,5 @@ module.exports = {
     use_types:          config[config.run].use_types,
     users_cache_name:   config[config.run].users_cache_name,
     vm:                 config[config.run].vm,
-    use_right:          config[config.run].use_right,
+    env_use_right:          config[config.run].use_right,
 };
