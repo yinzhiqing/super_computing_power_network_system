@@ -7,14 +7,64 @@ const prj       = require("../prj.config.js");
 const gs_abi    = require("./datas/abis/GPUStore.json");
 const vnet_abi    = require("./datas/abis/IERC20Upgradeable.json");
 const sur       = require("./show_use_rights_base.js");
-const { users }       = require("./datas/env.config.js");
+const { users, 
+    users_cache_name }   = require("./datas/env.config.js");
+const users_cache_path   = path.join(__dirname ,  "/datas/" , users_cache_name);
+const users_cache        = require(users_cache_path);
 const { contracts_load } = require("./contracts.js");
 
 const bak_path  = prj.caches_contracts;
 const tokens  = require(prj.contract_conf);
 const {ethers, upgrades}    = require("hardhat");
 
-async function run() {
+function update_cache() {
+    utils.write_json(users_cache_path, users_cache);
+}
+
+function get_user(user) {
+    return new_user(user);
+}
+function new_user(user) {
+    if (users_cache[user] == undefined) {
+        users_cache[user] = {
+            init: false,
+            revenue:     0,
+            revenue_chg: 0,
+            revenue_chg_info: "",
+            vtoken:      0,
+            vtoken_chg:  0,
+            vtoken_chg_info:  ""
+        }
+    }
+    return users_cache[user];
+}
+
+function update_user(user, revenue, vtoken) {
+    let cache = get_user(user);
+    if (!cache.init) {
+        cache.revenue = revenue;
+        cache.vtoken  = vtoken;
+        cache.init    = true;
+
+        return cache;
+    }
+
+    if (cache.revenue != revenue) {
+        cache.revenue_chg = cache.revenue - revenue;
+        //'↓'
+        cache.revenue_chg_info = (cache.revenue_chg > 0 ? "↓ " : "↑ ") + Math.abs(cache.revenue_chg).toString();
+        cache.revenue = revenue;
+    }
+
+    if (cache.vtoken != vtoken) {
+        cache.vtoken_chg = cache.vtoken - vtoken;
+        cache.vtoken_chg_info = (cache.vtoken_chg > 0 ? "↓ " : "↑ " ) + Math.abs(cache.vtoken_chg).toString();
+        cache.vtoken = vtoken;
+    }
+    return cache;
+}
+
+async function works() {
     logger.info("账户金额");
 
     //获取合约SCPNSProofTask对象
@@ -65,18 +115,30 @@ async function run() {
     }
 
     for (let key in merge_users) {
+        let revenue = merge_users[key].revenue_count;
+        let vtoken  = (await vnet_token.balanceOf(key)).toString();
+
+        let user    = update_user(key, revenue, vtoken);
         list.push({
-            name: merge_users[key].alias,
-            account: key,
-            revenue_count: merge_users[key].revenue_count + "/" + total_value,
-            balance: (await vnet_token.balanceOf(key)).toString(),
+            "账户地址": key,
+            "账户类型": merge_users[key].alias,
+            "收益权值": revenue + "/" + total_value,
+            "收益权值变动": user.revenue_chg_info,
+            "账户资金": vtoken,
+            "账户资金变动": user.vtoken_chg_info,
         })
     }
 
     logger.table(list);
+    update_cache();
 }
 
-run()
+async function run(times) {
+    let buf = {};
+    //await utils.scheduleJob(times, works, buf, true);
+    await works();
+}
+run(3)
   .then(() => process.exit(0))
   .catch(error => {
     console.error(error);

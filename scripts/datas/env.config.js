@@ -7,6 +7,7 @@ function get_signer(idx) {
 config = {
     run: "dev",
     dev: {
+        users_cache_name: "users.cache.json",
         users: {
             buyer: {
                 alias: "算力购买者",
@@ -50,5 +51,6 @@ config = {
 
 module.exports = {
     users: config[config.run].users,
+    users_cache_name: config[config.run].users_cache_name,
     store: config[config.run].store
 };

@@ -251,6 +251,16 @@ async function schedule_job(time, func) {
     });
 }
 
+/**
+ * @notice 循环执行
+ * @param times 间隔时间
+ * @param func  要执行的参数
+ * @param parameter func 参数
+ * @param clear true：清空控制台 
+ * @param reset_buf: 清空buf周期（秒）
+ *
+ *
+ */
 async function scheduleJob(times, func, parameter, clear, reset_buf) {
     let starttime = Date.now();
     while(1) {
