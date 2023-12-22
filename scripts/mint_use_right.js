@@ -4,7 +4,7 @@ const program   = require('commander');
 const utils     = require("./utils");
 const logger    = require("./logger");
 const prj       = require("../prj.config.js");
-const { users }       = require("./datas/env.config.js");
+const { users , use_right}       = require("./datas/env.config.js");
 const { contracts_load } = require("./contracts.js");
 
 const bak_path  = prj.caches_contracts;
@@ -42,8 +42,7 @@ async function run(types) {
         return;
     } 
 
-    let deadline = Math.floor(((new Date()).getTime())/1000) + 60 * 6 ;
-    logger.warning(deadline);
+    let deadline = Math.floor(((new Date()).getTime())/1000) + use_right.deadline ;
     let computility_vm_count = await computility_vm.totalSupply();
 
     let rows = [];
@@ -63,7 +62,6 @@ async function run(types) {
             //使用权通证时间与算力资源寿命相同
             //let deadline = await computility_vm.deadLine(computility_vm_id);
             // 10分钟
-            let deadline = await computility_vm.deadLine(computility_vm_id);
             let token_id = await new_token_id(computility_vm_id);
             let datas = utils.json_to_w3str({data: "test"});
             logger.debug("new token: " + token_id + " deadline: " + deadline);

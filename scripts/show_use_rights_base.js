@@ -26,7 +26,8 @@ async function datas_from_token_id(tokenId) {
     row["revenueValue"] = Number(await cobj.revenueValueOf(row["tokenId"]));
     //logger.log(row["revenueValue"]);
     row["deadline"] = await cobj.deadLine(row["tokenId"]);
-    row["deadline"] = (new Date(Number(row["deadline"]))).toLocaleString();
+    let pricision_chain = await cobj.pricision();
+    row["deadline"] = (new Date(Number(row["deadline"]) * pricision_chain)).toLocaleString();
 
     let datas = utils.w3str_to_str(await cobj.datasOf(row["tokenId"]));
 

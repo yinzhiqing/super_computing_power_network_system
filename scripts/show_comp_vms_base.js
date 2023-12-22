@@ -16,11 +16,12 @@ async function works() {
     let amounts = await cobj.totalSupply();
     logger.debug("totalSupply: " + amounts);
     let list = [];
+    let pricision_chain = await cobj.pricision();
     for (let i = 0; i < amounts; i++) {
         let row = new Map();
         row["tokenId"]      = utils.w3uint256_to_hex(await cobj.tokenByIndex(i));
         row["算力单元数量"] = Number(utils.w3uint256_to_str(await cobj.computilityUnitCountOf(row["tokenId"])));
-        row["deadline"]     = Number(await cobj.deadLine(row["tokenId"])) * 1000;
+        row["deadline"]     = Number(await cobj.deadLine(row["tokenId"])) * pricision_chain;
         row["deadline"]     =  (new Date(row["deadline"])).toLocaleString();
         let typeUnitId      = await cobj.typeUnitIdOf(row["tokenId"])
         let typeUnitName    = utils.w3bytes32_to_str(await typeUnit.nameOf(typeUnitId));
