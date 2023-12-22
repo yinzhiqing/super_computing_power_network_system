@@ -42,6 +42,8 @@ async function run(types) {
         return;
     } 
 
+    let deadline = Math.floor(((new Date()).getTime())/1000) + 60 * 6 ;
+    logger.warning(deadline);
     let computility_vm_count = await computility_vm.totalSupply();
 
     let rows = [];
@@ -58,6 +60,9 @@ async function run(types) {
         let typeUnitName  = utils.w3bytes32_to_str(await typeUnit.nameOf(typeUnitId));
         
         if (types.includes(typeUnitName)) {
+            //使用权通证时间与算力资源寿命相同
+            //let deadline = await computility_vm.deadLine(computility_vm_id);
+            // 10分钟
             let deadline = await computility_vm.deadLine(computility_vm_id);
             let token_id = await new_token_id(computility_vm_id);
             let datas = utils.json_to_w3str({data: "test"});

@@ -5,7 +5,7 @@ const program   = require('commander');
 const utils     = require("./utils");
 const logger    = require("./logger");
 const prj       = require("../prj.config.js");
-const { users }       = require("./datas/env.config.js");
+const { users, use_types }       = require("./datas/env.config.js");
 const { contracts_load } = require("./contracts.js");
 
 const bak_path  = prj.caches_contracts;
@@ -67,7 +67,7 @@ async function run(types) {
     logger.table(rows, "new tokens");
 }
 
-run(["CPU", "GTX_1050"])
+run(use_types)
   .then(() => process.exit(0))
   .catch(error => {
     console.error(error);

@@ -7,6 +7,7 @@ function get_signer(idx) {
 config = {
     run: "dev",
     dev: {
+        use_types: ["CPU", "GTX_1050"],
         users_cache_name: "users.cache.json",
         users: {
             buyer: {
@@ -50,7 +51,8 @@ config = {
 };
 
 module.exports = {
-    users: config[config.run].users,
-    users_cache_name: config[config.run].users_cache_name,
-    store: config[config.run].store
+    users:              config[config.run].users,
+    store:              config[config.run].store,
+    use_types:          config[config.run].use_types,
+    users_cache_name:   config[config.run].users_cache_name,
 };

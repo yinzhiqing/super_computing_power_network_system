@@ -442,6 +442,7 @@ async function use_right_ids_of(user) {
 }
 
 module.exports = {
+    filter,
     store_revenue,
     store_use,
     revenues,
