@@ -70,7 +70,6 @@ async function datas_from_token_id(tokenId) {
         unit_info: unitInfo,
         row: row
     }
-
 }
 
 async function tokensByOwner(owner) {
@@ -108,9 +107,9 @@ async function works() {
     let list = [];
     for (let i = 0; i < amounts; i++) {
         let tokenId = utils.w3uint256_to_hex(await cobj.tokenByIndex(i));
-        let datas = await datas_from_token_id(tokenId);
-        list.push(datas["row"]);
-
+        let rights = await datas_from_token_id(tokenId);
+        logger.form("使用权通证基本信息", rights["use_right"]);
+        list.push(rights["row"]);
         //let gpuDatas = utils.w3str_to_str(await gpu.datasOf(typeId);
     } 
     logger.table(list, "all token");
