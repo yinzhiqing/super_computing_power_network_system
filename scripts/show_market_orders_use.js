@@ -14,7 +14,7 @@ const {ethers, upgrades}    = require("hardhat");
 
 
 async function run() {
-    await mb.orders();
+    await mb.use_orders();
 }
 
 run()

@@ -48,6 +48,29 @@ async function select_use_right_id(signer_address) {
 
 }
 
+async function select_revenue_id(signer_address) {
+    let contracts        = await contracts_load();
+    let use_right        = contracts.SCPNSUseRightToken;
+    let revenue_token    = contracts.RevenueToken;
+    let skeep = [''];
+    let total = await revenue_token.totalSupply();
+    logger.debug("revenue count: " + Number(total));
+    let list = [];
+    for (let i = 0; i < total; i++) {
+        let token_id    = await revenue_token.tokenByIndex(i);
+        let owner       = await revenue_token.ownerOf(token_id);
+
+        if (skeep.includes(token_id)) {
+            continue;
+        }
+
+        return token_id;
+    }
+    throw("没有收益权通证");
+
+}
+
+
 async function _use_right_info_load(use_right_id) {
     let type_unit_id = await sur.type_unit_id_of(use_right_id);
     let rights       = await sur.datas_from_token_id(use_right_id);
@@ -85,7 +108,7 @@ async function store_use() {
         let sale_info    = await gpu_store._gpuTokenStore(saleIds[i]);
         let use_right_id = utils.w3uint256_to_hex(sale_info[0]);
         let seller       = sale_info[3];
-        let price        = Number(sale_info[2]);
+        let price        = sale_info[2].toString();
 
         //过滤非目标出售信息
         if (filter(seller, use_right_id)) {
@@ -129,19 +152,21 @@ async function store_revenue() {
     let saleIds = await gpu_store.getRevenueTokenForSaleIds();
     let list = []
     for (let i in saleIds) {
-        let sale_info = await gpu_store._RevenueTokenStore(saleIds[i]);
+        let sale_info = await gpu_store._revenueTokenStore(saleIds[i]);
 
         let token_id = utils.w3uint256_to_hex(sale_info[0]);
         let value   = await revenue_token.balanceOf(token_id);
-        logger.log("==========================================================================================================");
-        logger.log("\t\t\t\t\t\t收益权通证市场信息表");
-        logger.log("----------------------------------------------------------------------------------------------------------");
-        logger.log("----------------------------------------------------------------------------------------------------------");
-        logger.log("收益权通证ID：\t\t\t" + sale_info[0]);
-        logger.log("挂单者：\t\t\t" + sale_info[2]);
-        logger.log("数量(VNET Token)：\t\t" + value.toString());
-        logger.log("价格(VNET Token)：\t\t" + sale_info[1].toString());
-        logger.log("==========================================================================================================");
+        let slot    = await revenue_token.slotOf(token_id);
+        //let owner   = await revenue_token.ownerOf(token_id);
+        let show_sale_info = {
+        "收益权通证": utils.w3uint256_to_hex(sale_info[0]),
+        "算力资源ID": utils.w3uint256_to_hex(slot),
+        //"通证拥有者": owner,
+        "挂单者" : sale_info[2],
+        "权益值" : value.toString(),
+        "价格" : sale_info[1].toString(),
+        }
+        logger.form("收益权通证市场信息表", show_sale_info);
         logger.log("\t");
     }
     return list;
@@ -158,6 +183,7 @@ async function revenues() {
     logger.debug("market address: " + gpu_store.address);
     logger.debug("revenue address: " + revenue_token.address);
     
+
     let total = await revenue_token.totalSupply();
     logger.debug("revenue count: " + Number(total));
     let list = [];
@@ -167,23 +193,26 @@ async function revenues() {
         let slot    = await revenue_token.slotOf(token_id);
         let value   = await revenue_token.balanceOf(token_id);
         let balance = await vnet_token.balanceOf(owner);
+
+        let vms = await sur.datas_from_comp_vm_id(slot);
+        let vms_info = vms["infos"];
         let revenue_info = {
             "收益权通证ID": utils.w3uint256_to_shex(token_id),
             "通证拥有者": owner,
-            "算力资源ID": utils.w3uint256_to_hex(slot),
-            "通证数量": Number(value),
+            //"算力资源ID": utils.w3uint256_to_hex(slot),
+            "通证权益值": Number(value) ,
             "稳定币数量": balance.toString()
         };
 
-        logger.form("shou yi quan", revenue_info);
+        logger.form("收益权通证信息", vms_info, revenue_info);
         list.push(revenue_info);
     }
     logger.table(list);
     return list;
 }
 
-async function orders() {
-    logger.info("交易记录");
+async function use_orders() {
+    logger.info("使用权通证交易记录");
     let contracts        = await contracts_load();
     let revenue_token    = contracts.RevenueToken;
     let dns              = contracts.SCPNSDns;
@@ -204,7 +233,7 @@ async function orders() {
             token_id:       utils.w3uint256_to_hex(order[0]),
             provider:       order[2],
             customer:       order[3],
-            price:          Number(order[1]),
+            price:          order[1].toString(),
             trade_time:     (new Date(Number(order[4]))).toLocaleString(),
             charging_time:  (new Date(Number(order[5]))).toLocaleString()
         }
@@ -246,7 +275,7 @@ async function orders() {
 }
 
 async function revenue_orders() {
-    logger.debug("start working...", "收益权交易记录");
+    logger.info("收益权通证交易记录");
     let contracts        = await contracts_load();
     let gpu_store        = contracts.GPUStore;
     let revenue_token    = contracts.RevenueToken;
@@ -254,8 +283,38 @@ async function revenue_orders() {
     let to               = gpu_store.address;
 
     let msgs = [];
-    let order_id = "0xb1c01496d8e61bc48cc67721f4889387763ec2a61903f79f7e806cf74c30a66a";
-    //filter = await gpu_store.filters.ChargePerMonthEvent(order_id, null);
+    filter = await gpu_store.filters.TradeRevenueTokenEvent(null, null, null);
+    filter["fromBlock"] = "earliest";
+    filter["toBlock"] = "latest";
+    logs = await ethers.provider.getLogs(filter);
+    for (i in logs) {
+        log = logs[i];
+        logger.debug(log);
+        data = log["data"];
+        datas = web3.eth.abi.decodeParameters(["uint256", "uint256"], data);
+        let event_data = { 
+            //blockNumber: log["blockNumber"],
+            //blockHash: log["blockHash"],
+            //transactionHash: log["transactionHash"],
+            "收益权ID": utils.w3uint256_to_shex(log["topics"][1]),
+            "价格": datas["0"].toString(),
+            "挂单者": utils.w3address_to_hex(log["topics"][2]),
+            "购买者": utils.w3address_to_hex(log["topics"][3]),
+            "时戳": datas["1"], 
+        };
+        msgs.push(event_data);
+    }
+    logger.table(msgs);
+}
+async function revenue_distribute_revenue() {
+    logger.info("结算记录");
+    let contracts        = await contracts_load();
+    let gpu_store        = contracts.GPUStore;
+    let revenue_token    = contracts.RevenueToken;
+    let vnet_token       = contracts.VNetToken;
+    let to               = gpu_store.address;
+
+    let msgs = [];
     filter = await gpu_store.filters.DistributeRevenueEvent(null);
     filter["fromBlock"] = "earliest";
     filter["toBlock"] = "latest";
@@ -297,15 +356,15 @@ async function buy_use(signer, use_right_id) {
     logger.debug("buyer: " + buyer);
 
     let list = [];
-    let gpu_sale_info = await gpu_store._gpuTokenStore(use_right_id);
-    //let use_right_id  = utils.w3uint256_to_hex(gpu_sale_info[0]);
-    let price         = Number(gpu_sale_info[2]);
+    let sale_info = await gpu_store._gpuTokenStore(use_right_id);
+    //let use_right_id  = utils.w3uint256_to_hex(sale_info[0]);
+    let price         = sale_info[2].toString();
 
-    logger.debug(gpu_sale_info);
+    logger.debug(sale_info);
     list.push({
         use_right_id: use_right_id,
         price: price,
-        seller: gpu_sale_info[3],
+        seller: sale_info[3],
         buyer: buyer
     });
 
@@ -384,7 +443,7 @@ async function put_use(signer, use_right_id) {
     revenue_info = {
         "算力资源ID" : utils.w3uint256_to_hex(cvmId),
         "收益权获得者": "[" + owners.toString() + "]",
-        "收益权": "[" + values.toString() + "]",    
+        "收益权值": "[" + values.toString() + "]",    
     };
     logger.debug(revenue_info);
 
@@ -407,17 +466,98 @@ async function put_use(signer, use_right_id) {
        "价格":  price,
     };
     logger.debug(sale_info);
-    //await title_print("出售使用权通证信息");
     let use_right_info = await _use_right_info_load(use_right_id);
     logger.debug(use_right_info);
     logger.form("出售使用权通证信息", use_right_info, revenue_info, sale_info);
 }
 
-async function title_print(title) {
-    logger.log("==========================================================================================================");
-    logger.log("\t\t\t\t--" + title + "--");
-    logger.log("==========================================================================================================");
+async function put_revenue(signer, revenue_id) {
+    logger.info("收益权通证添加到市场");
+
+    //获取合约SCPNSProofTask对象
+    let contracts        = await contracts_load();
+    let use_right        = contracts.SCPNSUseRightToken;
+    let dns              = contracts.SCPNSDns;
+    let gpu_store        = contracts.GPUStore;
+    let to               = gpu_store.address;
+    let market_link      = contracts.SCPNSMarketLink;
+    let revenue_token    = contracts.RevenueToken;
+
+    //1.
+    // 获取钱包中account, 此account是使用权通证(revenue_id)的拥有者
+
+    let owner   = await revenue_token.ownerOf(revenue_id);
+    logger.debug("to: " + to);
+    logger.debug("revenue_id: " + revenue_id);
+
+    let addr0 = "0x0000000000000000000000000000000000000000";
+    let approved = await revenue_token.connect(signer).getApproved(revenue_id);
+
+    if (approved != to) {
+        await revenue_token.connect(signer).approve(to, revenue_id);
+        while(approved != to) {
+            approved = await revenue_token.connect(signer).getApproved(revenue_id);
+        }
+    }
+
+    let value   = await revenue_token.balanceOf(revenue_id);
+    let revenue_info = {
+        "算力资源ID" : utils.w3uint256_to_hex(revenue_id),
+        "收益权获得者": "[" + owner.toString() + "]",
+        "收益权值": "[" + value.toString() + "]",    
+    };
+
+    let price = 22000;
+    //收益权用户signer发起一个证明任务给指定的算力节点（revenue_id）
+    await gpu_store.connect(signer).addRevenueTokenToStore(revenue_id, price);
+
+    let sale_info = {
+       "市场":  to,
+       "价格":  price,
+    };
+    logger.debug(sale_info);
+    logger.form("出售收益权通证信息", revenue_info, sale_info);
 }
+
+async function buy_revenue(signer, revenue_id) {
+    logger.debug("start working...", "购买通证");
+
+    //获取合约SCPNSProofTask对象
+    let contracts        = await contracts_load();
+    let use_right        = contracts.SCPNSUseRightToken;
+    let dns              = contracts.SCPNSDns;
+    let gpu_store        = contracts.GPUStore;
+    let vnet_token       = contracts.VNetToken;
+    let to               = gpu_store.address;
+    logger.debug("store address: " + gpu_store.address);
+    logger.debug("vnet token address: " + vnet_token.address);
+
+    let buyer = await signer.getAddress();
+    logger.debug("buyer: " + buyer);
+
+    let list = [];
+    let sale_info = await gpu_store._revenueTokenStore(revenue_id);
+    let price         = sale_info[1].toString();
+
+    logger.debug(sale_info);
+    list.push({
+        revenue_id: revenue_id,
+        price: price,
+        seller: gpu_sale_info[2],
+        buyer: buyer
+    });
+
+    await vnet_token.connect(signer).approve(gpu_store.address, price);
+
+    let amount = await vnet_token.connect(signer).allowance(buyer, gpu_store.address);
+    while(amount < price) {
+        amount = await vnet_token.connect(signer).allowance(buyer, gpu_store.address);
+    }
+    await gpu_store.connect(signer).tradeRevenueToken(revenue_id);
+
+    logger.table(list);
+}
+
 async function use_right_ids_of(user) {
 
     let address          = await user.signer.getAddress();
@@ -437,6 +577,7 @@ async function use_right_ids_of(user) {
 
     }
     logger.table(list, alias + " 拥有的使用权通证")
+
     return list;
 
 }
@@ -446,10 +587,14 @@ module.exports = {
     store_revenue,
     store_use,
     revenues,
-    orders,
+    use_orders,
     revenue_orders,
+    revenue_distribute_revenue,
     buy_use,
     put_use,
+    buy_revenue,
+    put_revenue,
     select_use_right_id,
+    select_revenue_id,
     use_right_ids_of,
 }

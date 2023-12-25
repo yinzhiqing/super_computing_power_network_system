@@ -164,6 +164,10 @@ function w3address_to_hex(data) {
     return web3.eth.abi.decodeParameter("address", data);
 }
 
+function hex_to_address(data) {
+    return web3.eth.abi.encodeParameter("address", data);
+}
+
 function str_to_w3bytes(data) {
     return web3.eth.abi.encodeParameter("bytes", web3.utils.toHex(data));
 }
@@ -321,6 +325,7 @@ module.exports = {
     w3uint256_to_number,
     w3bytes32_to_str,
     w3address_to_hex,
+    hex_to_address,
     str_to_w3str,
     w3str_to_str,
     json_to_w3str,
