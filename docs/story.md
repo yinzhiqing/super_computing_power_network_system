@@ -85,6 +85,6 @@
 ## 获取收益（收益所有者获取收益）
     根据持有收益比例获取收益
 
-   展示：![账户资金](./images/show_balances.png)
+   展示：![账户资金][./images/show_balances.png]
    
 
