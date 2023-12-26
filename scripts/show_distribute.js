@@ -1,4 +1,3 @@
-
 const fs        = require('fs');
 const path      = require("path");
 const program   = require('commander');
@@ -13,8 +12,9 @@ const bak_path  = prj.caches_contracts;
 const tokens  = require(prj.contract_conf);
 const {ethers, upgrades}    = require("hardhat");
 
+
 async function run() {
-    await mb.revenues();
+    await mb.revenue_distribute_revenue();
 }
 
 run()

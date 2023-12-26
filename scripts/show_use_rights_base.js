@@ -14,6 +14,51 @@ async function type_unit_id_of(tokenId) {
     return typeUnitId;
 }
 
+async function datas_from_comp_vm_id(tokenId) {
+    let cobj     = await utils.contract("SCPNSComputilityVM");
+    let typeUnit = await utils.contract("SCPNSTypeUnit");
+    let gpu      = await utils.contract("SCPNSGpuList");
+
+    let row = new Map();
+    row["tokenId"] = utils.w3uint256_to_hex(tokenId);
+    row["owner"] = await cobj.ownerOf(row["tokenId"]);
+    row["revenueValue"] = Number(await cobj.revenueValueOf(row["tokenId"]));
+    row["deadline"] = await cobj.deadLine(row["tokenId"]);
+    let pricision_chain = await cobj.pricision();
+    row["deadline"] = (new Date(Number(row["deadline"]) * pricision_chain)).toLocaleString();
+
+    let datas = utils.w3str_to_str(await cobj.datasOf(row["tokenId"]));
+
+    let typeUnitCount = utils.w3uint256_to_str(await cobj.typeUnitCountOf(row["tokenId"]));
+    let typeUnitId    = await cobj.typeUnitIdOf(row["tokenId"]);
+    let typeUnitName  = utils.w3bytes32_to_str(await typeUnit.nameOf(typeUnitId));
+    row["model"] = typeUnitName;
+    row["unit count"] = typeUnitCount.toString();
+
+    let infos = {
+        "算力资源ID": row["tokenId"],
+        "资源拥有者": row["owner"],
+        "类型ID":  utils.w3uint256_to_hex(typeUnitId),
+        "类型":  await typeUnit.unitTypeOf(typeUnitId),
+        "型号": typeUnitName,
+        "数量": typeUnitCount.toString(),
+        "可发行收益权通证权益值": row["revenueValue"],
+        "使用截止日期": row["deadline"]
+    }
+
+    let unit = await typeUnit.unitIdOf(typeUnitId);
+    let unitDatas = await gpu.datasOf(unit);
+
+    let unitInfo = JSON.parse(utils.w3str_to_str(unitDatas));
+    unitInfo["name"] = typeUnitName;
+
+    return {
+        infos: infos,
+        unit_info: unitInfo,
+        row: row
+    }
+}
+
 async function datas_from_token_id(tokenId) {
     let cobj     = await utils.contract("SCPNSUseRightToken");
     let typeUnit = await utils.contract("SCPNSTypeUnit");
@@ -118,6 +163,7 @@ async function works() {
 module.exports = {
     works,
     datas_from_token_id,
+    datas_from_comp_vm_id,
     tokensByTokenId,
     tokensByOwner,
     type_unit_id_of

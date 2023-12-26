@@ -235,17 +235,29 @@ mint_verify_task_target:
 cancel_proof_tasks:
 	$(call run_script, "cancel_proof_tasks")
 
-put_market:
-	$(call run_script, "put_market")
+put_market_use:
+	$(call run_script, "put_market_use")
 
-buyer_put_market:
-	$(call run_script, "buyer_put_market")
+buyer_put_market_use:
+	$(call run_script, "buyer_put_market_use")
 
-buy_market:
-	$(call run_script, "buy_market")
+buy_market_use:
+	$(call run_script, "buy_market_use")
 
-revoke_market:
-	$(call run_script, "revoke_market")
+revoke_market_use:
+	$(call run_script, "revoke_market_use")
+
+put_market_revenue:
+	$(call run_script, "put_market_revenue")
+
+buyer_put_market_revenue:
+	$(call run_script, "buyer_put_market_revenue")
+
+buy_market_revenue:
+	$(call run_script, "buy_market_revenue")
+
+revoke_market_revenue:
+	$(call run_script, "revoke_market_revenue")
 
 show_market_use:
 	$(call run_script, "show_market_use")
@@ -259,17 +271,21 @@ show_balances:
 show_revenues:
 	$(call run_script, "show_revenues")
 
-show_revenue_orders:
-	$(call run_script, "show_revenue_orders")
-
 show_type_revenues:
 	$(call run_script, "show_type_revenues")
 
-show_orders:
-	$(call run_script, "show_orders")
+show_market_orders_use:
+	$(call run_script, "show_market_orders_use")
+
+show_market_orders_revenue:
+	$(call run_script, "show_market_orders_revenue")
 
 show_use_rights_market:
 	$(call run_script, "show_use_rights_market")
+
+show_distribute:
+	$(call run_script, "show_distribute")
+
 
 tests:
 	@npx hardhat run scripts/test.js
