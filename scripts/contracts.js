@@ -52,8 +52,7 @@ async function contracts_load() {
         SCPNSMarketLink:        await contract("SCPNSMarketLink"),
         GPUStore:               await contract_ext(gs_abi, await (await contract("SCPNSDns")).addressOf("GPUStore")),
         VNetToken:              await contract_ext(erc20_abi, await gpu_store._paymentToken()),
-        //RevenueToken:           await contract_ext(rt_abi, await gpu_store._revenueToken()),
-        RevenueToken:           await contract_ext("IRevenueToken", await gpu_store._revenueToken()),
+        RevenueToken:           await contract_ext(rt_abi, await gpu_store._revenueToken()),
     };
 }
 
