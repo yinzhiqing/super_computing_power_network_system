@@ -96,9 +96,10 @@ function form_frame() {
 function form_split() {
     console.log("----------------------------------------------------------------------------------------------------------");
 }
-function form_title(title) {
+function form_title(title, kwargs = {}) {
     form_frame();
-    console.log("\t\t\t\t--" + title + "--");
+    kwargs = __merge_kwargs(kwargs, {"format":false, "type":"log", "color" : "yellow"});
+    show_msg("\t\t\t\t\t--" + title + "--", "", kwargs);
     form_frame();
 }
 function form_info(info, max) {
@@ -129,7 +130,7 @@ function form(title, ...infos) {
 
     for (let i in infos) {
         form_info(infos[i], max);
-        form_split()
+        i < infos.length - 1 ?  form_split() : "" ;
     }
     form_frame();
 }

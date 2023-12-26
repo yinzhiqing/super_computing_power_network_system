@@ -23,7 +23,6 @@ async function datas_from_comp_vm_id(tokenId) {
     row["tokenId"] = utils.w3uint256_to_hex(tokenId);
     row["owner"] = await cobj.ownerOf(row["tokenId"]);
     row["revenueValue"] = Number(await cobj.revenueValueOf(row["tokenId"]));
-    //logger.log(row["revenueValue"]);
     row["deadline"] = await cobj.deadLine(row["tokenId"]);
     let pricision_chain = await cobj.pricision();
     row["deadline"] = (new Date(Number(row["deadline"]) * pricision_chain)).toLocaleString();

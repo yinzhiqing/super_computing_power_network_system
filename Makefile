@@ -271,9 +271,6 @@ show_balances:
 show_revenues:
 	$(call run_script, "show_revenues")
 
-show_revenue_orders:
-	$(call run_script, "show_revenue_orders")
-
 show_type_revenues:
 	$(call run_script, "show_type_revenues")
 
@@ -285,6 +282,10 @@ show_market_orders_revenue:
 
 show_use_rights_market:
 	$(call run_script, "show_use_rights_market")
+
+show_distribute:
+	$(call run_script, "show_distribute")
+
 
 tests:
 	@npx hardhat run scripts/test.js
