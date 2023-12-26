@@ -151,30 +151,28 @@ async function store_revenue(title = "收益权通证市场") {
     logger.debug("");
 
     let saleIds = await gpu_store.getRevenueTokenForSaleIds();
+    logger.debug(saleIds);
     let list = []
     for (let i in saleIds) {
         let sale_info = await gpu_store._revenueTokenStore(saleIds[i]);
-        //get revenue sale is empty
-        if (saleIds[i] != sale_info[0]) {
-            continue;
-        }
 
         let token_id  = utils.w3uint256_to_hex(sale_info[0]);
         let value     = await revenue_token.balanceOf(token_id);
         let slot      = await revenue_token.slotOf(token_id);
         //let owner   = await revenue_token.ownerOf(token_id);
+        logger.debug(sale_info);
         let show_sale_info = {
             "收益权通证": utils.w3uint256_to_hex(sale_info[0]),
             "算力资源ID": utils.w3uint256_to_hex(slot),
             //"通证拥有者": owner,
-            "挂单者" : sale_info[2],
+            "挂单者" : sale_info[3],
             "权益值" : value.toString(),
-            "价格" : sale_info[1].toString(),
+            "价格" : sale_info[2].toString(),
         }
         list.push({
             "收益权通证": utils.w3uint256_to_hex(sale_info[0]),
-            "挂单者" : sale_info[2],
-            "价格" : sale_info[1].toString(),
+            "挂单者" : sale_info[3],
+            "价格" : sale_info[2].toString(),
         })
         logger.form("收益权通证市场信息表", show_sale_info);
         logger.log("\t");
@@ -560,19 +558,21 @@ async function buy_revenue(signer, revenue_id, title = "购买通证") {
 
     let list = [];
     let sale_info = await gpu_store._revenueTokenStore(revenue_id);
-    let price         = sale_info[1].toString();
+    let price         = sale_info[2].toString();
 
     logger.debug(sale_info);
     list.push({
         "收益权ID": revenue_id,
         "价格": price,
-        "挂单者": sale_info[2],
+        "挂单者": sale_info[3],
         "购买者": buyer
     });
 
+    logger.debug(list);
     await vnet_token.connect(signer).approve(gpu_store.address, price);
 
     let amount = await vnet_token.connect(signer).allowance(buyer, gpu_store.address);
+    logger.debug("allowance: " + amount.toString());
     while(amount < price) {
         amount = await vnet_token.connect(signer).allowance(buyer, gpu_store.address);
     }

@@ -21,8 +21,9 @@ async function run() {
             continue;
         }
         await mb.buy_revenue(users.buyer.signer, token_id);
-        break;
+        return;
     }
+    throw("未发现出售收益权");
 }
 
 run()

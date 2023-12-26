@@ -31,21 +31,25 @@ function new_user(user) {
             revenue:     0,
             revenue_chg: 0,
             revenue_chg_info: "",
+            revenue_block: 0,
             vtoken:      0,
             vtoken_chg:  0,
-            vtoken_chg_info:  ""
+            vtoken_chg_info:  "",
+            vtoken_block: 0,
         }
     }
     return users_cache[user];
 }
 
-function update_user(user, revenue, vtoken) {
+async function update_user(user, revenue, vtoken) {
     let cache = get_user(user);
+    let block = await ethers.provider.getBlockNumber();
     if (!cache.init) {
         cache.revenue = revenue;
-        cache.vtoken  = vtoken;
+        cache.vtoken  = vtoken.toString();
         cache.init    = true;
-
+        cache.revenue_block = block;
+        cache.vtoken_block = block;
         return cache;
     }
 
@@ -54,12 +58,17 @@ function update_user(user, revenue, vtoken) {
         //'↓'
         cache.revenue_chg_info = (cache.revenue_chg > 0 ? "↓ " : "↑ ") + Math.abs(cache.revenue_chg).toString();
         cache.revenue = revenue;
+        cache.revenue_block = block;
     }
 
     if (cache.vtoken != vtoken) {
-        cache.vtoken_chg = cache.vtoken - vtoken;
+        cache.vtoken_chg = web3.utils.toBN(cache.vtoken).sub(web3.utils.toBN(vtoken.toString()));
+        logger.debug("votken_chg: " + cache.vtoken_chg);
+        logger.debug("vtoken: " + vtoken);
+        logger.debug("cache vtoken: " + web3.utils.toBN(cache.vtoken));
         cache.vtoken_chg_info = (cache.vtoken_chg > 0 ? "↓ " : "↑ " ) + Math.abs(cache.vtoken_chg).toString();
-        cache.vtoken = vtoken;
+        cache.vtoken = vtoken.toString();
+        cache.vtoken_block = block;
     }
     return cache;
 }
@@ -84,7 +93,7 @@ async function works() {
         let addr = await users[i].signer.getAddress();
         merge_users[addr] = {
             alias: (merge_users[addr] == undefined ? "" : merge_users[addr]["alias"]+ ", ") + users[i].alias,
-            revenue_count: 0,
+            revenue: 0,
         };
     }
     
@@ -96,7 +105,7 @@ async function works() {
         let addr = await other_address[i].address;
         merge_users[addr] = {
             alias: (merge_users[addr] == undefined ? "" : merge_users[addr].alias + ", ") + other_address[i].alias,
-            revenue_count: 0,
+            revenue: 0,
         };
     }
 
@@ -110,22 +119,24 @@ async function works() {
         let value   = await revenue_token.balanceOf(token_id);
         total_value += Number(value);
         if (merge_users[owner] != undefined) {
-            merge_users[owner].revenue_count += Number(value);
+            merge_users[owner].revenue += Number(value);
         }
     }
 
     for (let key in merge_users) {
-        let revenue = merge_users[key].revenue_count;
-        let vtoken  = (await vnet_token.balanceOf(key)).toString();
+        let revenue = merge_users[key].revenue;
+        let vtoken  = (await vnet_token.balanceOf(key));
 
-        let user    = update_user(key, revenue, vtoken);
+        let user    = await update_user(key, revenue, vtoken);
         list.push({
             "账户地址": key,
             "账户类型": merge_users[key].alias,
             "收益权值": revenue + "/" + total_value,
             "收益权值变动": user.revenue_chg_info,
-            "账户资金": vtoken,
+            "收益权值变动时间": user.revenue_block,
+            "账户资金": vtoken.toString(),
             "账户资金变动": user.vtoken_chg_info,
+            "账户资金变动时间": user.vtoken_block,
         })
     }
 
