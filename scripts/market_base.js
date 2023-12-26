@@ -152,9 +152,12 @@ async function store_revenue(title = "收益权通证市场") {
 
     let saleIds = await gpu_store.getRevenueTokenForSaleIds();
     let list = []
-    logger.debug(saleIds);
     for (let i in saleIds) {
         let sale_info = await gpu_store._revenueTokenStore(saleIds[i]);
+        //get revenue sale is empty
+        if (saleIds[i] != sale_info[0]) {
+            continue;
+        }
 
         let token_id  = utils.w3uint256_to_hex(sale_info[0]);
         let value     = await revenue_token.balanceOf(token_id);
