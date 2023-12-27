@@ -247,6 +247,24 @@ function hex_to_ascii(data) {
     return web3.utils.hexToAscii(data);
 }
 
+function time_s_to_dhms(value) {
+    let min_sec   = 60; 
+    let hour_sec  = 60 * min_sec;
+    let day_sec   = 24 * hour_sec;
+    let days      = Math.floor(value/ day_sec);
+    let hours     = Math.floor((value - day_sec * days) / hour_sec);
+    let mins      = Math.floor((value - day_sec * days - hours * hour_sec) / min_sec);
+    let secs      = value - day_sec * days - hours * hour_sec - mins * min_sec;
+
+    let date_str = "";
+    date_str = days > 0 ? days + "天" : "";
+    date_str += (hours > 0 ? hours + "小时" : "");
+    date_str += (mins > 0 ? mins + "分" : "");
+    date_str += (secs + "秒");
+
+    return date_str;
+}
+
 async function schedule_job(time, func) {
     let times = '\/' + time + '* * * * *';
     //const job = schedule.scheduleJob('/5 * * * * *', func);
@@ -333,5 +351,6 @@ module.exports = {
     hex_to_ascii,
     create_leaf_hash,
     scheduleJob,
-    min_from_right 
+    min_from_right,
+    time_s_to_dhms,
 }

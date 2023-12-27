@@ -123,6 +123,7 @@ async function works() {
         }
     }
 
+    let block = await ethers.provider.getBlockNumber();
     for (let key in merge_users) {
         let revenue = merge_users[key].revenue;
         let vtoken  = (await vnet_token.balanceOf(key));
@@ -133,10 +134,10 @@ async function works() {
             "账户类型": merge_users[key].alias,
             "收益权值": revenue + "/" + total_value,
             "收益权值变动": user.revenue_chg_info,
-            "收益权值变动时间": user.revenue_block,
+            "收益权值保持时间(秒)": utils.time_s_to_dhms((block - user.revenue_block) * 2),
             "账户资金": vtoken.toString(),
             "账户资金变动": user.vtoken_chg_info,
-            "账户资金变动时间": user.vtoken_block,
+            "账户资金保持时间(秒)": utils.time_s_to_dhms((block - user.vtoken_block) * 2),
         })
     }
 
