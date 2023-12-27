@@ -63,29 +63,29 @@
    * 利用物理资源在链上注册算力资源VID.(相当于创建包含指定GPU的虚拟环境vGPU)
    * 利用算力资源在链上注册使用权通证UID. (相当于云上的一个算力ID)
    
-   展示：![算力使用权通证信息](./images/show_use_rights.png)
+   ![算力使用权通证信息](./images/show_use_rights.png)
   
 ## 创建算力使用权通证过程(用已有算力资源)
     算力资源已经创建，并且没有被任何算力使用权通证绑定, 则新创建的算力使用权通证
     可以绑定此算力资源
 
-   展示：![算力使用权通证信息](./images/show_use_rights.png)
+   ![算力使用权通证信息](./images/show_use_rights.png)
 
 ## 算力使用权通证添加到市场（初次登录, 需要创建收益权）
     算力使用权所有者（算力资源拥有者）将拥有的使用权添加到市场上销售，
     如果使用权通证对应的算力资源收益权未确定，则需要先创建收益权通证，确定收益分配规则
 
-   展示：![算力市场](./images/show_market_use.png)
+   ![算力市场](./images/show_market_use.png)
 
 ## 算力使用权通证添加到市场（用已有收益权）
     算力使用权绑定的算力资源已经在市场中注册了收益权，并有效
 
-   展示：![算力市场](./images/show_market_use.png)
+   ![算力市场](./images/show_market_use.png)
 
 ## 购买算力使用权通证(获取算力资源使用权限)
     算力市场购买指定算力使用权，影响资金池
 
-   展示： ![算力市场、用户持有算力使用权通证信息](./images/market_and_users.png)
+   ![算力市场、用户持有算力使用权通证信息](./images/market_and_users.png)
 
 ## 算力证明（算力使用权所有者）
     执行算力证明，并将结果在链上存储
@@ -96,28 +96,28 @@
       3. 完成挑战任务
       4. 更新排行数据
 
-   展示：![算力排行信息](./images/show_com_ranks_detail.png)
+   ![算力排行信息](./images/show_com_ranks_detail.png)
 
 ## 收益权交易 
     收益权持有者将收益权通证在市场上销售获取稳定币，收益权交易者（需求者）购买收益权通证获取算力使用权通证收益的分配权。
     收益权通证可在市场上自由交易，拥有收益权通证的账户拥有发起分账的权限，并可以根据收益权持有份额获取相应的收益。
 
-    展示：![收益权信息](./images/show_revenues.png)
+   ![收益权信息](./images/show_revenues.png)
 
 ## 获取收益（收益所有者获取收益）
     收益权持有者根据持有收益比例获取收益
 
-   展示：![账户资金](./images/show_balances.png)
+   ![账户资金](./images/show_balances.png)
    
 ## 使用权通证交易信息
     使用权通证交易信息显示使用权通证在市场上的交易历史数据
 
-    展示：![成交订单](./images/show_orders.png)
+   ![成交订单](./images/show_orders.png)
 
 ## 收益权通证交易信息
     收益权通证交易信息显示使用权通证在市场上的交易历史数据
 
-    展示：![成交订单](./images/show_orders_re.png)
+   ![成交订单](./images/show_orders_revenue.png)
 
 
 
