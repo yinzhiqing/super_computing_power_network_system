@@ -7,8 +7,8 @@ mkdir -p ./datas/merkles/
 
 FILE=./scripts/datas/users.cache.json
 if test -f "$FILE"; then
-    echo "use exists users.cache.json"
+    echo "users.cache.json is exists"
 else
-   echo "{}" >> "$FILE"
+   echo "{}" > "$FILE"
 fi
 
