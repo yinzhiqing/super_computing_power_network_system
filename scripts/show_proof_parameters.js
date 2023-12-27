@@ -32,9 +32,11 @@ async function show_tokens() {
 
         let parameter = utils.w3str_to_str(await cobj.parameterOf(row["tokenId"]));
         let datas = utils.w3str_to_str(await cobj.datasOf(row["tokenId"]));
-        logger.info("info: tokenId: " + row["tokenId"] + " name: " + row["name"] +  ")");
-        logger.info(">> parameter: " + parameter);
-        logger.info(">> datas: " + datas);
+        logger.debug("info: tokenId: " + row["tokenId"] + " name: " + row["name"] +  ")");
+        logger.debug(">> parameter: " + parameter);
+        logger.debug(">> datas: " + datas);
+        parameter = JSON.parse(parameter);
+
 
         let type_units_ids = await cobj.typeUnitIds();
         let type_units = [];
@@ -50,27 +52,27 @@ async function show_tokens() {
                 //get range
                 let range = await cobj.computilityRangeOfTypeUnit(para_id, type_unit_id);
                 rgs.push({
-                    name: row["name"],
-                    typeUnitName: type_unit_name,
-                    min: utils.w3uint256_to_number(range[0]),
-                    max: utils.w3uint256_to_number(range[1]),
-                    verify_sample: verify_sample
+                    "算力类型": type_unit_name,
+                    "证明时间范围(秒)": utils.w3uint256_to_number(range[0]) + "~" + utils.w3uint256_to_number(range[1]),
+                    "生成Merkle树叶子数": parameter["leaf_count"],
+                    "生成Merkle树叶子深度": parameter["leaf_deep"],
+                    "挑战次数": parameter["sample"],
                 })
 
             }
         }
 
-        use["name"] = row["name"];
-        use["typeUnitName"] = type_units.toString();
+        use["参数名称"] = row["name"];
+        use["算力类型"] = type_units.toString();
         uses.push(use);
-        logger.info(">> used: " + type_units.toString());
+        logger.debug(">> used: " + type_units.toString());
 
         list.push(row);
 
     } 
-    logger.table(list);
-    logger.table(uses);
-    logger.table(rgs);
+    logger.table(list, "证明参数列表");
+    logger.table(uses, "算力类型使用证明参数列表");
+    logger.table(rgs, "算力类型证明参数信息");
 }
 
 async function run() {

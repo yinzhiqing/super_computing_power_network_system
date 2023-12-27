@@ -17,7 +17,7 @@ async function works() {
     logger.debug("name: " + name);
 
     let amounts = await cobj.totalSupply();
-    logger.debug("totalSupply: " + amounts);
+    logger.debug("totalSupply: " + amounts.toString());
     let list = [];
     for (let i = 0; i < amounts; i++) {
         let row = new Map();

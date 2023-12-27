@@ -10,7 +10,8 @@ const bak_path  = prj.caches_contracts;
 const tokens  = require(prj.contract_conf);
 const {ethers, upgrades}    = require("hardhat");
 
-async function show_tokens() {
+async function show_tokens(title = "算力类型权益值") {
+    logger.info(title);
     let contracts   = await contracts_load();
     let cobj        = contracts.SCPNSTypeRevenue;
     let type_unit   = await utils.contract("SCPNSTypeUnit");
@@ -33,9 +34,9 @@ async function show_tokens() {
         let value = await cobj.rvalueOf(row["tokenId"]);
         let datas = await cobj.datasOf(row["tokenId"]);
         row["value"] = Number(value);
-        logger.info("info: tokenId: " + row["tokenId"] + " name: " + row["revenueName"] +  ")");
-        logger.info(">> value: " + value);
-        logger.info(">> datas: " + datas);
+        logger.debug("info: tokenId: " + row["tokenId"] + " name: " + row["revenueName"] +  ")");
+        logger.debug(">> value: " + value);
+        logger.debug(">> datas: " + datas);
 
         let type_units_ids = await cobj.typeUnitIds();
         let type_units = [];
@@ -50,17 +51,26 @@ async function show_tokens() {
             }
         }
 
+        row["typeUnitName"] = type_units.toString();
         use["typeUnitName"] = type_units.toString();
         use["revenueName"] = row["revenueName"];
         uses.push(use);
-        logger.info(">> used: " + type_units.toString());
+        logger.debug(">> used: " + type_units.toString());
 
         list.push(row);
 
     } 
-    logger.table(list);
-    logger.table(uses);
-    logger.table(rgs);
+    let show_list = [];
+    for (let i in list) {
+        show_list.push({
+            "ID": list[i]["tokenId"],
+            "算力资源类型": list[i]["typeUnitName"],
+            "收益权值": list[i]["value"],
+        })
+
+    }
+    logger.table(show_list);
+    //logger.table(uses);
 }
 
 async function run() {
