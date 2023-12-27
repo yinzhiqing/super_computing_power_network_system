@@ -125,8 +125,8 @@
 
    ![算力类型](./images/show_types.png)
 
-## GPU算力类型
-    GPU算力类型指分布式算力中支持的具体GPU型号，此信息由DAO组织中相关参与者共同决定。
+## GPU类型(算力类型之一）
+    GPU类型指分布式算力中支持的具体GPU型号，此信息由DAO组织中相关参与者共同决定。
 
    ![GPU资源列表](./images/show_gpus.png)
 
