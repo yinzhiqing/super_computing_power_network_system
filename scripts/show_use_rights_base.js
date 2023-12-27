@@ -158,7 +158,7 @@ async function works(latest_count) {
         list.push(rights["row"]);
         //let gpuDatas = utils.w3str_to_str(await gpu.datasOf(typeId);
     } 
-    logger.table(list, "all token");
+    logger.table(list, "使用权通证列表(最大显示数量: " + latest_count + ")");
 }
 
 module.exports = {

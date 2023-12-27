@@ -58,7 +58,7 @@ async function works(latest_count) {
 
         detail_of[row["tokenId"]] = "verify [t, s, f]  " + verify_stat_of;
         detail_of[row["tokenId"]] = {
-            useRightId: use_right_id_sub,
+            use_right_id: use_right_id_sub,
             total: Number(verify_stat_of[0].toString()),
             succees: Number(verify_stat_of[1].toString()),
             failed: Number(verify_stat_of[2].toString()),
@@ -72,9 +72,9 @@ async function works(latest_count) {
         list.push(row);
 
     } 
-    logger.table(detail, "token verify total");
-    logger.table(detail_of, "token verify of "); 
-    logger.table(list);
+    logger.table(detail, "使用权通证证明统计");
+    logger.table(detail_of, "使用权通证挑战任务信息 "); 
+    logger.table(list, "使用权通证挑战状态信息");
 }
 
 module.exports = {

@@ -8,9 +8,11 @@ config = {
     run: "dev",
     dev: {
         vm: {
+            //算力资源使用期限5年
             deadline: 5 * 365 * 24 * 60 * 60,
         },
         use_right: {
+            //使用权通证使用期限10分钟
             deadline:  10 * 60,
             filter_count: 10,
         },
@@ -51,8 +53,8 @@ config = {
         store: {
             filter: {
                 orders: {
-                    use: 2,
-                    revenue: 1,
+                    use: 10,
+                    revenue: 10,
                 },
                 seller: {
                     use: false,

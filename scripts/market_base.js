@@ -280,7 +280,7 @@ async function use_orders(latest_count = 2, title = "使用权通证交易记录
             //"续约时间":     row.charging_time,
         });
     }
-    logger.table(list, title);
+    logger.table(list, title + " (最大显示数量: " + latest_count + ")");
     return list;
 
 }
@@ -323,7 +323,7 @@ async function revenue_orders(latest_count, title = "收益权通证交易记录
         logger.form("收益权通证信息", vms_info, event_data);
         msgs.push(event_data);
     }
-    logger.table(msgs, title);
+    logger.table(msgs, title + " (最大显示数量: " + latest_count + ")");
 }
 async function revenue_distribute_revenue(title = "结算记录") {
     logger.info(title);

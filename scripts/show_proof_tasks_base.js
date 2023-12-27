@@ -7,7 +7,7 @@ const prj       = require("../prj.config.js");
 
 const {ethers, upgrades}    = require("hardhat");
 
-async function works(latest_count) {
+async function works(latest_count, title = "算力证明任务列表") {
     let cobj = await utils.contract("SCPNSProofTask");
     logger.warning("算力证明任务信息");
 
@@ -48,7 +48,7 @@ async function works(latest_count) {
         list.push(row);
 
     } 
-    logger.table(list);
+    logger.table(list, title + "(最大显示数量： " + latest_count +")");
 }
 
 module.exports = {
