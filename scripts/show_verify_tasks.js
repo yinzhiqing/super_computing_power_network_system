@@ -5,14 +5,12 @@ const utils     = require("./utils");
 const logger    = require("./logger");
 const prj       = require("../prj.config.js");
 const svt       = require("./show_verify_tasks_base.js");
+const {verify_task}          = require("./datas/env.config.js");
 
-const bak_path  = prj.caches_contracts;
-const tokens  = require(prj.contract_conf);
-const {ethers, upgrades}    = require("hardhat");
 
 async function run() {
         logger.debug("show verify tasks");
-        await svt.works(5);
+        await svt.works(verify_task.filter_count);
 }
 run()
   .then(() => process.exit(0))

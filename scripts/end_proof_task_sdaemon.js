@@ -98,11 +98,11 @@ async function work(buf) {
 
     let is_owner = await proof_task.isOwner(taskId, signer_address);
     if (!is_owner) {
-        logger.info(" owner of proof task id(" + taskId +") is not signer, next...");
+        logger.debug(" owner of proof task id(" + taskId +") is not signer, next...");
         return;
     }
 
-    logger.info("update: " + use_right_id);
+    logger.debug("update: " + use_right_id);
 
     logger.debug("dynamicData: " + dynamicData, "parameters of use_right_id(" + use_right_id + ")");
     logger.debug("parameter: " + utils.w3str_to_str(parameters[1]));

@@ -5,11 +5,9 @@ const utils     = require("./utils");
 const logger    = require("./logger");
 const prj       = require("../prj.config.js");
 
-const bak_path  = prj.caches_contracts;
-const tokens  = require(prj.contract_conf);
 const {ethers, upgrades}    = require("hardhat");
 
-async function works() {
+async function works(latest_count) {
     let cobj = await utils.contract("SCPNSProofTask");
     logger.warning("算力证明任务信息");
 
@@ -19,7 +17,8 @@ async function works() {
     let amounts = await cobj.totalSupply();
     logger.debug("totalSupply: " + amounts);
     let list = [];
-    for (let i = 0; i < amounts; i++) {
+    let start = utils.min_from_right(amounts, latest_count);
+    for (let i = start ; i < amounts; i++) {
         let row = new Map();
         row["tokenId"] = utils.w3uint256_to_hex(await cobj.tokenByIndex(i));
         logger.debug(">> tokenId; "     + row["tokenId"]);

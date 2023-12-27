@@ -13,6 +13,12 @@ config = {
         use_right: {
             deadline:  24 * 60 * 60,
         },
+        proof_task:  {
+            filter_count: 10,
+        },
+        verify_task:  {
+            filter_count: 10,
+        },
         use_types: ["CPU", "GTX_1050"],
         users_cache_name: "users.cache.json",
         users: {
@@ -62,5 +68,7 @@ module.exports = {
     use_types:          config[config.run].use_types,
     users_cache_name:   config[config.run].users_cache_name,
     vm:                 config[config.run].vm,
-    env_use_right:          config[config.run].use_right,
+    env_use_right:      config[config.run].use_right,
+    proof_task:         config[config.run].proof_task,
+    verify_task:         config[config.run].verify_task,
 };
