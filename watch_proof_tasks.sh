@@ -1,2 +1,2 @@
 #!/bin/sh
-watch -n 1 -c -d -t make show_proof_tasks
+watch -n 10 -c -d -t make show_proof_tasks

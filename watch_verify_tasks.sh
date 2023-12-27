@@ -1,2 +1,2 @@
 #!/bin/sh
-watch -n 1 -c -d -t make show_verify_tasks
+watch -n 5 -c -d -t make show_verify_tasks

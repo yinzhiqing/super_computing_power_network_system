@@ -1,2 +1,2 @@
 #!/bin/sh
-watch -n 1 -c -d -t make show_balances
+watch -n 7 -c -d -t make show_balances
