@@ -4,7 +4,7 @@ const program   = require('commander');
 const utils     = require("./utils");
 const logger    = require("./logger");
 const prj       = require("../prj.config.js");
-const { users , env_use_right}       = require("./datas/env.config.js");
+const { users , use_right}       = require("./datas/env.config.js");
 const { contracts_load } = require("./contracts.js");
 
 const bak_path  = prj.caches_contracts;
@@ -42,7 +42,7 @@ async function run(types) {
         return;
     } 
 
-    let deadline = Math.floor(((new Date()).getTime())/1000) + env_use_right.deadline ;
+    let deadline = Math.floor(((new Date()).getTime())/1000) + use_right.deadline ;
     logger.warning(deadline);
     let computility_vm_count = await computility_vm.totalSupply();
 

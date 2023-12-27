@@ -221,7 +221,7 @@ async function revenues(title = "收益权通证列表") {
     return list;
 }
 
-async function use_orders(title = "使用权通证交易记录") {
+async function use_orders(latest_count = 2, title = "使用权通证交易记录") {
     logger.info(title);
     let contracts        = await contracts_load();
     let revenue_token    = contracts.RevenueToken;
@@ -234,7 +234,8 @@ async function use_orders(title = "使用权通证交易记录") {
     
     let orders = await gpu_store.getOrderIds();
     let list = [];
-    for (let i = 0; i < orders.length; i++) {
+    let start = utils.min_from_right(orders.length, latest_count);
+    for (let i = start; i < orders.length; i++) {
         let order = await gpu_store._orders(orders[i]);
         let charging_time = (new Date(Number(order[5]))).toLocaleString();
         charging_time = charging_time == undefined ? "" : charging_time;
@@ -284,7 +285,7 @@ async function use_orders(title = "使用权通证交易记录") {
 
 }
 
-async function revenue_orders(title = "收益权通证交易记录") {
+async function revenue_orders(latest_count, title = "收益权通证交易记录") {
     logger.info(title);
     let contracts        = await contracts_load();
     let gpu_store        = contracts.GPUStore;
@@ -299,7 +300,8 @@ async function revenue_orders(title = "收益权通证交易记录") {
     filter["fromBlock"] = "earliest";
     filter["toBlock"] = "latest";
     logs = await ethers.provider.getLogs(filter);
-    for (i in logs) {
+    let start = utils.min_from_right(logs.length, latest_count);
+    for (let i = start; i < logs.length; i++) {
         log = logs[i];
         logger.debug(log);
         datas = web3.eth.abi.decodeParameters(["uint256", "uint256"], log["data"]);

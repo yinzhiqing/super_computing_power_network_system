@@ -7,6 +7,7 @@ const prj       = require("../prj.config.js");
 const gs_abi    = require("./datas/abis/GPUStore.json");
 const sur       = require("./show_use_rights_base.js");
 const mb       = require("./market_base.js");
+const {store}          = require("./datas/env.config.js");
 
 const bak_path  = prj.caches_contracts;
 const tokens  = require(prj.contract_conf);
@@ -14,7 +15,7 @@ const {ethers, upgrades}    = require("hardhat");
 
 
 async function run() {
-    await mb.use_orders();
+    await mb.use_orders(store.filter.orders.use);
 }
 
 run()

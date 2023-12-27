@@ -12,6 +12,7 @@ config = {
         },
         use_right: {
             deadline:  24 * 60 * 60,
+            filter_count: 10,
         },
         proof_task:  {
             filter_count: 10,
@@ -49,6 +50,10 @@ config = {
         },
         store: {
             filter: {
+                orders: {
+                    use: 2,
+                    revenue: 1,
+                },
                 seller: {
                     use: false,
                     list: ["0xDB10B29830D75A8157BaB7442d3047Dc200D007E"],
@@ -68,7 +73,7 @@ module.exports = {
     use_types:          config[config.run].use_types,
     users_cache_name:   config[config.run].users_cache_name,
     vm:                 config[config.run].vm,
-    env_use_right:      config[config.run].use_right,
+    use_right:      config[config.run].use_right,
     proof_task:         config[config.run].proof_task,
     verify_task:         config[config.run].verify_task,
 };

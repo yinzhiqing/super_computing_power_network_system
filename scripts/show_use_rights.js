@@ -1,17 +1,11 @@
-const fs        = require('fs');
-const path      = require("path");
-const program   = require('commander');
 const utils     = require("./utils");
 const logger    = require("./logger");
-const prj       = require("../prj.config.js");
-const bak_path  = prj.caches_contracts;
-const tokens  = require(prj.contract_conf);
-const {ethers, upgrades}    = require("hardhat");
 const sur       = require("./show_use_rights_base.js");
+const {use_right}          = require("./datas/env.config.js");
 
 async function run() {
     logger.debug("start working...", "show_tokens");
-    await sur.works();
+    await sur.works(use_right.filter_count);
 }
 run()
   .then(() => process.exit(0))

@@ -139,7 +139,7 @@ async function tokensByTokenId(tokenId) {
     list.push(datas["row"]);
     return list;
 }
-async function works() {
+async function works(latest_count) {
     let cobj     = await utils.contract("SCPNSUseRightToken");
     let typeUnit = await utils.contract("SCPNSTypeUnit");
     let gpu      = await utils.contract("SCPNSGpuList");
@@ -150,7 +150,8 @@ async function works() {
     let amounts = await cobj.totalSupply();
     logger.debug("totalSupply: " + amounts);
     let list = [];
-    for (let i = 0; i < amounts; i++) {
+    let start = utils.min_from_right(amounts, latest_count);
+    for (let i = start; i < amounts; i++) {
         let tokenId = utils.w3uint256_to_hex(await cobj.tokenByIndex(i));
         let rights = await datas_from_token_id(tokenId);
         logger.form("使用权通证基本信息", rights["use_right"]);
