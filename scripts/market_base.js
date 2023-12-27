@@ -590,6 +590,7 @@ async function use_right_ids_of(user) {
     let contracts        = await contracts_load();
     let use_right        = contracts.SCPNSUseRightToken;
     let use_right_count = await use_right.balanceOf(address);
+    logger.debug(alias + " 地址：" + address);
 
     let list = []
     for (var i = 0; i < use_right_count; i++) {

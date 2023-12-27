@@ -11,7 +11,7 @@ config = {
             deadline: 5 * 365 * 24 * 60 * 60,
         },
         use_right: {
-            deadline:  24 * 60 * 60,
+            deadline:  10 * 60,
             filter_count: 10,
         },
         proof_task:  {

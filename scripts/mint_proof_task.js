@@ -19,13 +19,16 @@ async function has_role(cobj, address, role) {
 }
 
 async function run() {
-    logger.debug("start working...", "mint");
+    logger.debug("start working...", "mint proof task");
 
-    let use_right       = await utils.contract("SCPNSUseRightToken");
-    let proof_task      = await utils.contract("SCPNSProofTask");
+    let contracts        = await contracts_load();
+    let use_right        = contracts.SCPNSUseRightToken;
+    let proof_task       = contracts.SCPNSProofTask;
 
     let role   = "MINTER_ROLE";
-    let signer = users.seller.signer; 
+    let user   = users.buyer;
+    let signer = user.signer; 
+    let from_address = await signer.getAddress();
     let receiver = users.prover.signer; 
     let minter = await signer.getAddress(); 
 
@@ -35,9 +38,9 @@ async function run() {
         return;
     } 
 
-    let from_address = await signer.getAddress();
     let to = await receiver.getAddress();
     let use_right_count = await use_right.balanceOf(from_address);
+    logger.debug(from_address + " 拥有使用权通证数量:" + Number(use_right_count));
 
     let rows = [];
     for (var i = 0; i < use_right_count; i++) {
