@@ -24,7 +24,7 @@ async function new_token_id(pre) {
     return web3.utils.sha3(pre + date.getTime().toString());
 }
 
-async function works() {
+async function works(owner, prover) {
     logger.debug("start working...", "mint");
 
     let contracts       = await contracts_load();
@@ -33,8 +33,8 @@ async function works() {
     let verify_task     = contracts.SCPNSVerifyTask;
 
     let role     = "MINTER_ROLE";
-    let signer   = users.buyer.signer; 
-    let receiver = users.prover.signer; 
+    let signer   = owner.signer; 
+    let receiver = (prover == undefined ? users.prover : prover).signer; 
     let minter   = await signer.getAddress(); 
 
     let has_miter = await has_role(proof_task, minter, role);

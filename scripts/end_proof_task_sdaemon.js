@@ -12,11 +12,6 @@ const bak_path  = prj.caches_contracts;
 const tokens  = require(prj.contract_conf);
 const {ethers, upgrades}    = require("hardhat");
 
-async function new_token_id(pre) {
-    var date = new Date();
-    return web3.utils.sha3(pre + date.getTime().toString());
-}
-
 async function create_merkle_datas(dynamicData, leaf_count, leaf_deep) {
     logger.table({dynamicData: dynamicData, leaf_count: leaf_count, leaf_deep: leaf_deep}, "create merkle tree")
     //create merkle

@@ -98,6 +98,10 @@ contract SCPNSBase is Initializable, ContextUpgradeable, AccessControlEnumerable
     function _mint(address to, uint256 tokenId, bytes32 name_, string memory datas) internal virtual {
         require(hasRole(MINTER_ROLE, _msgSender()) || hasRole(CONTROLLER_ROLE, _msgSender()), 
                 "SCPNSBase: must have minter(controller) role to mint");
+        _mint_no_minter_role(to, tokenId, name_, datas);
+    }
+
+    function _mint_no_minter_role(address to, uint256 tokenId, bytes32 name_, string memory datas) internal virtual {
         require(name_ == NO_NAME || !_exists(_name2IDs[name_]), 
                 "SCPNSBase: token name is exists.");
 
@@ -111,7 +115,6 @@ contract SCPNSBase is Initializable, ContextUpgradeable, AccessControlEnumerable
 
         emit UpdateDatas(_msgSender(), _msgSender(), tokenId, _id2Names[tokenId], datas);
     }
-
     /**
       * @dev Update datas of token
       *

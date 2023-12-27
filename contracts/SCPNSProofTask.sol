@@ -79,7 +79,7 @@ ISCPNSProofTask
                 "SCPNSProofTask: useRight token is in Verify");
 
         uint256 tokenId = _idGenerator.current();
-        _mint(to, tokenId, NO_NAME, datas);
+        _mint_no_minter_role(to, tokenId, NO_NAME, datas);
 
         TaskParameter storage tp = _id2TaskParameter[tokenId];
         tp.dynamicData = __prefixed(keccak256(abi.encodePacked(block.timestamp, _msgSender(), tokenId, tp.taskType)));
