@@ -27,7 +27,7 @@ async function run(types) {
     logger.debug("start working...", "mint");
 
     let computility_vm = await utils.contract("SCPNSComputilityVM");
-    let use_right      = await utils.contract("SCPNSUseRightToken");
+    let use_right_c      = await utils.contract("SCPNSUseRightToken");
     let typeUnit       = await utils.contract("SCPNSTypeUnit");
 
     let role   = "MINTER_ROLE";
@@ -36,7 +36,7 @@ async function run(types) {
     let seller = users.seller.signer; 
     let to = await seller.getAddress();
 
-    let has_miter = await has_role(use_right, minter, role);
+    let has_miter = await has_role(use_right_c, minter, role);
     if (has_miter != true) {
         logger.error(minter + " no minter role." );
         return;
@@ -68,7 +68,7 @@ async function run(types) {
             logger.debug("new token: " + token_id + " deadline: " + deadline);
             logger.debug("vm id: " + computility_vm_id);
 
-            let tx = await use_right.connect(signer).mint(to, token_id,  deadline, 
+            let tx = await use_right_c.connect(signer).mint(to, token_id,  deadline, 
                 computility_vm_id, datas);
 
             logger.debug(tx);
