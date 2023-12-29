@@ -427,10 +427,11 @@ async function put_use(signer, use_right_id, title = "添加使用权通证到�
     let revenue_info = {};
     let owners = [];
     let values = [];
+    let revenue_value = 0;
     //==0 则说明没有创建过, 需要创建收益权通证
     if (token_count == 0) {
         logger.info("创建新的收益权");
-        let revenue_value = await use_right.revenueValueOf(use_right_id);
+        revenue_value = await use_right.revenueValueOf(use_right_id);
         owners = [owner, await users.beneficiary.signer.getAddress()];
         let last = revenue_value;
         let avg = revenue_value / owners.length;
@@ -453,9 +454,16 @@ async function put_use(signer, use_right_id, title = "添加使用权通证到�
             let token_id = await revenue_token.tokenInSlotByIndex(cvmId, i);
             let owner   = await revenue_token.ownerOf(token_id);
             let value   = await revenue_token.balanceOf(token_id);
+            revenue_value += Number(value);
             owner_value[owner] = owner_value[owner] != undefined ? owner_value[owner] + value : value;
         }
         
+        let token_ids = [];
+        for(let i = 0; i < token_count; i++)  {
+            let token_id = await revenue_token.tokenInSlotByIndex(cvmId, i);
+            token_ids.push(token_id);
+        }
+
         for(let key in owner_value) {
             owners.push(key);
             values.push(owner_value[key]);
@@ -464,9 +472,11 @@ async function put_use(signer, use_right_id, title = "添加使用权通证到�
 
     revenue_info = {
         "算力资源ID" : utils.w3uint256_to_hex(cvmId),
-        "收益权获得者": "[" + owners.toString() + "]",
-        "收益权值": "[" + values.toString() + "]",    
+        "收益权益值": revenue_value, 
     };
+    for (let i = 0; i < owners.length; i++) {
+        revenue_info["    " + owners[i]] = values[i];
+    }
     logger.debug(revenue_info);
 
     let addr0 = "0x0000000000000000000000000000000000000000";
@@ -485,7 +495,7 @@ async function put_use(signer, use_right_id, title = "添加使用权通证到�
 
     let sale_info = {
        "市场":  to,
-       "价格":  price,
+       "价格(VNet)":  price,
     };
     logger.debug(sale_info);
     let use_right_info = await _use_right_info_load(use_right_id);

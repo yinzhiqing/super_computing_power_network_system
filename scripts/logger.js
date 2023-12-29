@@ -104,7 +104,8 @@ function form_title(title, kwargs = {}) {
 }
 function form_info(info, max) {
     for(let k in info){
-        let tcount = Math.trunc((max - k.length * 2) / 8 + 1);
+        //计算需要补充的'\t'个数
+        let tcount = Math.ceil((max - str_show_len(k)) / 8);
         let tables = "";
         for(let i = 0; i < tcount; i++) {
             tables += "\t";
@@ -120,13 +121,21 @@ function form(title, ...infos) {
     form_title(title);
 
     let max = 0;
+    //获取shell显示时字节最大长度: 中文有特殊字符 /[\u4e00-\u9fa5]/ 不应算在显示内容中
     for (let j in infos) {
         let info = infos[j];
         for(let k in info){
-            max = max < k.length ? k.length : max;
+            let length = str_show_len(k);
+            max = max < length ? length : max;
         }
     }
-    max = (Math.trunc((max * 2) / 8) + 1) * 8 * 2;
+
+    //将字符串换算成\t后长度（值最左边位置）
+    //// \t 在命令行中长度为8
+    const tab_len = 8;
+    //// key 与 value间隔/t
+    const space_len = 1
+    max = (Math.ceil(max / tab_len)) * tab_len + (tab_len * space_len)  ;
 
     for (let i in infos) {
         form_info(infos[i], max);
@@ -135,6 +144,12 @@ function form(title, ...infos) {
     form_frame();
 }
 
+function str_show_len(data) {
+    let reg = /[\u4e00-\u9fa5]/;
+    let len = 0;
+    Array.from(data).forEach(function(v){len += reg.test(v) ? 2 : 1});
+    return len;
+}
 function show_msg(msg, title = "", kwargs = {}) {
     type        = get_kwargs(kwargs, "type", "log");
     title_color = get_kwargs(kwargs, "title_color", "red");
@@ -200,4 +215,5 @@ module.exports = {
     clear,
     log,
     form,
+    str_show_len,
 }
