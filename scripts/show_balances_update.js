@@ -6,7 +6,7 @@ const logger    = require("./logger");
 const prj       = require("../prj.config.js");
 const gs_abi    = require("./datas/abis/GPUStore.json");
 const vnet_abi    = require("./datas/abis/IERC20Upgradeable.json");
-const sur       = require("./show_use_rights_base.js");
+const sur       = require("./use_rights_base.js");
 const { users, 
     users_cache_name }   = require("./datas/env.config.js");
 const users_cache_path   = path.join(__dirname ,  "/datas/" , users_cache_name);

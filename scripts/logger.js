@@ -111,12 +111,23 @@ function form_info(info, max) {
             tables += "\t";
         }
 
-        process.stdout.write(k);
-        process.stdout.write(tables);
-        process.stdout.write(info[k].toString());
-        process.stdout.write("\n");
+        print(k);
+        print(tables);
+        print(info[k].toString());
+        print("\n");
+        //process.stdout.write(k);
+        //process.stdout.write(tables);
+        //process.stdout.write(info[k].toString());
+        //process.stdout.write("\n");
     }
 }
+
+function print(...msgs) {
+    for(let i in msgs) {
+        process.stdout.write(msgs[i]);
+    }
+}
+
 function form(title, ...infos) {
     form_title(title);
 

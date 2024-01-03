@@ -4,86 +4,73 @@ const program   = require('commander');
 const utils     = require("./utils");
 const logger    = require("./logger");
 const prj       = require("../prj.config.js");
-const { users , use_right}       = require("./datas/env.config.js");
-const { contracts_load } = require("./contracts.js");
+const { 
+    users , 
+    use_right, 
+    use_types, 
+    vm }        = require("./datas/env.config.js");
+const { contracts_load }         = require("./contracts.js");
+const urb                        = require("./use_rights_base.js");
+const mb                         = require("./market_base.js");
 
-const bak_path  = prj.caches_contracts;
-const tokens  = require(prj.contract_conf);
-const {ethers, upgrades}    = require("hardhat");
-
-async function has_role(cobj, address, role) {
-    let brole = web3.eth.abi.encodeParameter("bytes32", web3.utils.soliditySha3(role));
-    let has = await cobj.hasRole(brole, address);
-
-    return has;
-}
-
-async function new_token_id(pre) {
-    var date = new Date();
-    return web3.utils.sha3(pre + date.getTime().toString());
-}
-
+/*
+ * 各组件关系图
+ *             
+ * 使用权通证---
+ *             |---算力资源---
+ *                           |---收益权通证
+ *                           |---算力单元---|
+ *                                          |---算力类型----|
+ *                                                          |---GPU
+ *                                                          |---内存
+ *
+ */
 async function run(types) {
-    logger.debug("start working...", "mint");
+    logger.debug(types);
 
-    let computility_vm = await utils.contract("SCPNSComputilityVM");
-    let use_right_c      = await utils.contract("SCPNSUseRightToken");
-    let typeUnit       = await utils.contract("SCPNSTypeUnit");
+    let user        = users.manager; 
+    let signer      = user.signer; 
+    let to          = await users.seller.signer.getAddress(); ; 
+    let deadline    = Math.floor(((new Date()).getTime())/1000) + use_right.deadline ;
+    let deadline_vm = Math.floor(((new Date()).getTime())/ 1000) + vm.deadline;
 
-    let role   = "MINTER_ROLE";
-    let signer = users.manager.signer; 
-    let minter = await signer.getAddress(); 
-    let seller = users.seller.signer; 
-    let to = await seller.getAddress();
+    let owners = [to, await users.beneficiary.signer.getAddress()];
+    logger.debug("owners:" + owners.toString());
+    for( let i in types) {
+        let type = types[i];
+        let cvmid = await urb.select_comp_vm_ids_of_owner(to, type);
+        logger.debug(cvmid);
+        //无可用算力资源，则先创建
+        if (cvmid == null) {
+            let cuid = await urb.select_comp_unit_ids_of_owner(to, type, 1);
+            //无可用算力单元，创建算力单元
+            if (cuid == null) {
+                //创建算力单元
+                cuid = await urb.new_token_id(type);
+                await urb.mint_comp_unit(user, to, cuid, 1, type);
+                await urb.wait_comp_unit_exists(cuid);
+            }
 
-    let has_miter = await has_role(use_right_c, minter, role);
-    if (has_miter != true) {
-        logger.error(minter + " no minter role." );
-        return;
-    } 
-
-    let deadline = Math.floor(((new Date()).getTime())/1000) + use_right.deadline ;
-    logger.warning(deadline);
-    let computility_vm_count = await computility_vm.totalSupply();
-
-    let rows = [];
-    for (var i = 0; i < computility_vm_count; i++) {
-        let computility_vm_id = utils.w3uint256_to_hex(await computility_vm.tokenByIndex(i));
-
-        let free = await computility_vm.isFree(computility_vm_id);
-        if (false == free) {
-            logger.debug(computility_vm_id + " is locked. next..");
-            continue;
+            //创建算力资源
+            cvmid = await urb.new_token_id(cuid);
+            await urb.mint_comp_vm(user, to, cvmid, cuid, 1, deadline_vm);
+            await urb.wait_comp_vm_exists(cvmid);
         }
 
-        let typeUnitId = await computility_vm.typeUnitIdOf(computility_vm_id);
-        let typeUnitName  = utils.w3bytes32_to_str(await typeUnit.nameOf(typeUnitId));
+        //创建使用权通证
+        let token_id = await urb.new_token_id(cvmid);
+
+        await urb.mint_use_right(signer, to, token_id, deadline, cvmid);
+        await urb.wait_use_right_exists(token_id);
+
+        let revenue_info = await mb.mint_revenue_or_load_revenue_by_use_right_id(signer, token_id, owners);
+        let use_right_info = await urb.datas_from_use_right_id(token_id);
+
+        logger.form("使用权通证及收益权通证信息", use_right_info.form, revenue_info.form);
         
-        if (types.includes(typeUnitName)) {
-            //使用权通证时间与算力资源寿命相同
-            //let deadline = await computility_vm.deadLine(computility_vm_id);
-            // 10分钟
-            let token_id = await new_token_id(computility_vm_id);
-            let datas = utils.json_to_w3str({data: "test"});
-            logger.debug("new token: " + token_id + " deadline: " + deadline);
-            logger.debug("vm id: " + computility_vm_id);
-
-            let tx = await use_right_c.connect(signer).mint(to, token_id,  deadline, 
-                computility_vm_id, datas);
-
-            logger.debug(tx);
-            rows.push({
-                to: to,
-                token_id: token_id,
-            })
-
-            break;
-        }
     }
-    logger.table(rows, "new tokens");
 }
-
-run(["CPU"])
+run(use_types)
   .then(() => process.exit(0))
   .catch(error => {
     console.error(error);

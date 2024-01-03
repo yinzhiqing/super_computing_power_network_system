@@ -22,7 +22,7 @@ config = {
         verify_task:  {
             filter_count: 10,
         },
-        use_types: ["CPU", "GTX_1050"],
+        use_types: ["CPU"],
         users_cache_name: "users.cache.json",
         users: {
             buyer: {

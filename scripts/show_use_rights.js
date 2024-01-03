@@ -1,6 +1,6 @@
 const utils     = require("./utils");
 const logger    = require("./logger");
-const sur       = require("./show_use_rights_base.js");
+const sur       = require("./use_rights_base.js");
 const {use_right}          = require("./datas/env.config.js");
 
 async function run() {

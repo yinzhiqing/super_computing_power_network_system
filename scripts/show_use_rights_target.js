@@ -7,7 +7,7 @@ const prj       = require("../prj.config.js");
 const bak_path  = prj.caches_contracts;
 const tokens  = require(prj.contract_conf);
 const {ethers, upgrades}    = require("hardhat");
-const sur       = require("./show_use_rights_base.js");
+const sur       = require("./use_rights_base.js");
 
 async function run() {
     logger.debug("start working...", "show_tokens");

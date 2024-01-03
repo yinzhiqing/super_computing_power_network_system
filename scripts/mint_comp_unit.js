@@ -6,11 +6,9 @@ const utils     = require("./utils");
 const logger    = require("./logger");
 const prj       = require("../prj.config.js");
 const { users, use_types }       = require("./datas/env.config.js");
-const { contracts_load } = require("./contracts.js");
+const { contracts_load }         = require("./contracts.js");
+const urb                        = require("./use_rights_base.js");
 
-const bak_path  = prj.caches_contracts;
-const tokens  = require(prj.contract_conf);
-const {ethers, upgrades}    = require("hardhat");
 
 async function has_role(cobj, address, role) {
     let brole = web3.eth.abi.encodeParameter("bytes32", web3.utils.soliditySha3(role));
@@ -25,46 +23,23 @@ async function new_token_id(pre) {
 }
 
 async function run(types) {
-    logger.debug("start working...", "mint");
-    let computility_unit = await utils.contract("SCPNSComputilityUnit");
-    let type_unit        = await utils.contract("SCPNSTypeUnit");
-
-    let role   = "MINTER_ROLE";
-    let signer = users.manager.signer; 
-    let minter = await signer.getAddress(); 
+    let user   = users.manager; 
+    let signer = user.signer; 
     let to     = await signer.getAddress();
+    logger.debug(types);
 
-    let has_miter = await has_role(computility_unit, to, role);
-    if (has_miter != true) {
-        logger.error(to + " no minter role." );
-        return;
-    } 
-
-    let type_unit_count = await type_unit.totalSupply();
-
-    let rows = [];
-    for (var i = 0; i < type_unit_count; i++) {
-        let type_unit_id = await type_unit.tokenByIndex(i);
-        let type_unit_name = utils.w3bytes32_to_str(await type_unit.nameOf(type_unit_id));
-        let token_id = await new_token_id(type_unit_name);
-        let count = 1;
-
-        if (types.includes(type_unit_name)) {
-            let datas = utils.json_to_w3str({data: type_unit_name});
-            logger.debug("new token: " + token_id);
-
-            let tx = await computility_unit.connect(signer).mint(to, token_id,  type_unit_id, count, datas);
-
-            rows.push({
-                to: to,
-                token_id: token_id,
-                type_name: type_unit_name,
-                type_unit_id: utils.w3uint256_to_hex(type_unit_id),
-                type_unit_count: utils.w3uint256_to_str(count),
-            })
-        }
+    let list = [];
+    for(let i in types) {
+        let token_id = await urb.new_token_id(types[i]);
+        await urb.mint_comp_unit(user, to, token_id, 1, types[i]);
+        list.push(token_id);
     }
-    logger.table(rows, "new tokens");
+
+    for(let i in list) {
+        let token_id = list[i];
+        await urb.wait_comp_unit_exists(token_id);
+        await urb.show_comp_units(token_id);
+    }
 }
 
 run(use_types)

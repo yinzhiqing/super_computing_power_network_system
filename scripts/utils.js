@@ -288,7 +288,14 @@ async function scheduleJob(times, func, parameter, clear, reset_buf) {
     while(1) {
         try {
             if (reset_buf != undefined && reset_buf > 0 && Date.now() - starttime > reset_buf * 1000) {
-                parameter = [];
+                if(Array.isArray(parameter)) {
+                    for(let i in parameter) {
+                        if(parameter[i].alias == undefined) {
+                            parameter[i] = {};
+                        }
+                    }
+                }
+
                 starttime = Date.now();
             }
             if (clear == true) {
@@ -297,11 +304,12 @@ async function scheduleJob(times, func, parameter, clear, reset_buf) {
             if (parameter == null) {
                 await func();
             } else {
-                await func(parameter)
+                //await func(parameter)
+                await func.apply(null, parameter);
             }
             
         } catch(error) {
-            console.log(error);
+            logger.warning(error);
         }
 
         await new Promise((resolve, reject) => {
@@ -310,6 +318,14 @@ async function scheduleJob(times, func, parameter, clear, reset_buf) {
             }, times * 1000);
         });
     }
+}
+
+async function sleep(times) {
+    await new Promise((resolve, reject) => {
+        setTimeout(() => {
+            resolve({ data: 'Hello, World!' });
+        }, times * 1000);
+    });
 }
 
 function min_from_right(value, count) {
@@ -353,4 +369,5 @@ module.exports = {
     scheduleJob,
     min_from_right,
     time_s_to_dhms,
+    sleep,
 }

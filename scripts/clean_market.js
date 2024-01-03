@@ -12,6 +12,7 @@ async function run() {
     for (let i in saleIds) {
         let use_right_id = utils.w3uint256_to_hex(saleIds[i]);
         await mb.buy_use(users.cleaner.signer, use_right_id);
+        await utils.sleep(4);
     }
 }
 

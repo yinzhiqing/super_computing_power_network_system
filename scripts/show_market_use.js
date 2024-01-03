@@ -5,7 +5,7 @@ const utils     = require("./utils");
 const logger    = require("./logger");
 const prj       = require("../prj.config.js");
 const gs_abi    = require("./datas/abis/GPUStore.json");
-const sur       = require("./show_use_rights_base.js");
+const sur       = require("./use_rights_base.js");
 const mb       = require("./market_base.js");
 
 const bak_path  = prj.caches_contracts;

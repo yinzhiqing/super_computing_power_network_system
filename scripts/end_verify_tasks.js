@@ -116,7 +116,7 @@ async function run() {
         
         break;
     }
-    logger.table(rows, "new tokens");
+    logger.table(rows, "挑战信息");
 }
 
 run()
