@@ -3,10 +3,10 @@ const path      = require("path");
 const program   = require('commander');
 const utils     = require("./utils");
 const logger    = require("./logger");
-const scr       = require("./show_comp_ranks_base.js");
+const crb       = require("./comp_ranks_base.js");
 
 async function run(times) {
-    await utils.scheduleJob(times, scr.works, null, true);
+    await utils.scheduleJob(times, crb.comp_ranks, null, true);
 }
 
 run(4)

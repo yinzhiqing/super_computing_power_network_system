@@ -284,16 +284,44 @@ async function schedule_job(time, func) {
  *
  */
 async function scheduleJob(times, func, parameter, clear, reset_buf) {
+    assert(typeof(func ) == "function", "scheduleJob: parameter(func) must be function");
+
     let starttime = Date.now();
+    
     while(1) {
         try {
             if (reset_buf != undefined && reset_buf > 0 && Date.now() - starttime > reset_buf * 1000) {
+                switch(typeof(parameter)) {
+                    case "number": {
+                        logger.debug("number");
+                        break;
+                    }
+                    case "string": {
+                        logger.debug("string");
+                        break;
+                    }
+                    case "boolean": {
+                        logger.debug("boolean");
+                        break;
+                    }
+                    case "object": {
+                        logger.debug("object");
+                        break;
+                    }
+                    case "other" : {
+                        logger.debug("other");
+                        break;
+                    }
+
+                }
                 if(Array.isArray(parameter)) {
                     for(let i in parameter) {
                         if(parameter[i].alias == undefined) {
                             parameter[i] = {};
                         }
                     }
+                } else {
+
                 }
 
                 starttime = Date.now();

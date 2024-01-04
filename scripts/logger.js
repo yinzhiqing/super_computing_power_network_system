@@ -16,7 +16,7 @@ function date_format(dash = "-", colon = ":", space = " ") {
 
 function create_split_symbol(weight = 80, symbol = "-", end_symbol = ":") {
     var line = "";
-    for(var i = 0; i < weight; i++) line += symbol;
+    line += symbol.repeat(weight);
     line += end_symbol;
     return line;
 }
@@ -89,12 +89,12 @@ function log(msg) {
     console.log(msg);
 }
 
-function form_frame() {
-    console.log("==========================================================================================================");
+function form_frame(count = 100) {
+    console.log("=".repeat(count));
 }
 
-function form_split() {
-    console.log("----------------------------------------------------------------------------------------------------------");
+function form_split(count = 100) {
+    console.log("-".repeat(count));
 }
 function form_title(title, kwargs = {}) {
     form_frame();

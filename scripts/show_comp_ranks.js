@@ -4,10 +4,10 @@ const path      = require("path");
 const program   = require('commander');
 const utils     = require("./utils");
 const logger    = require("./logger");
-const scr       = require("./show_comp_ranks_base.js");
+const crb       = require("./comp_ranks_base.js");
 
 async function run() {
-    await scr.works();
+    await crb.works();
 }
 run()
   .then(() => process.exit(0))
