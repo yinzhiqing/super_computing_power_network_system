@@ -67,7 +67,6 @@ async function run(types) {
         let use_right_info = await urb.datas_from_use_right_id(token_id);
 
         logger.form("使用权通证及收益权通证信息", use_right_info.form, revenue_info.form);
-        
     }
 }
 run(use_types)
