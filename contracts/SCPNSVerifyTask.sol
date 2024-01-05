@@ -339,6 +339,10 @@ contract SCPNSVerifyTask is
         return vp.state == VerifyState.End;
     }
 
+    function isVerifyEnd(uint256 tokenId) public view virtual override returns(bool) {
+        VerifyParameter storage vp  = _id2VerifyParameter[tokenId];
+        return vp.state == VerifyState.End || vp.state == VerifyState.Failed || vp.state == VerifyState.Error;
+    }
     //must be at end
     uint256[48] private __gap;
 }

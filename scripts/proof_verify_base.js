@@ -5,6 +5,7 @@ const utils     = require("./utils");
 const logger    = require("./logger");
 const prj       = require("../prj.config.js");
 const merkle    = require('./merkle');
+const crb       = require("./comp_ranks_base.js");
 const { contracts_load } = require("./contracts.js");
 
 async function get_leaf_index(leaf, dynamicData, leaf_count, leaf_deep) {
@@ -21,38 +22,58 @@ async function get_proof(leaf, dynamicData, leaf_count, leaf_deep) {
     logger.debug("proof: " + proof);
     return proof;
 }
+async function check_use_right_id_can_verify(use_right_id, signer_address, buf) {
+    assert(use_right_id != false, "use_right_id is invalid argument.");
 
-async function select_use_right_id_in_verify(signer_address, buf) {
     let use_right       = await utils.contract("SCPNSUseRightToken");
     let verify_task     = await utils.contract("SCPNSVerifyTask");
-    let proof_task     = await utils.contract("SCPNSProofTask");
+    let proof_task      = await utils.contract("SCPNSProofTask");
+
+    /*
+     * 1. 判断使用权通证对应的算力节点是否有挑战任务
+     */
+    let isInVerify   = await verify_task.isInVerifyOfUseRightId(use_right_id);
+    if (!isInVerify) {
+        logger.debug("useRight token(" + use_right_id +") is not in verify, next...");
+        return false;
+    }
+
+    /*
+     * 2. 获取算力使用权通证对应的算力证明参数（此处是确认proofId是否是当前最新的且完成的算力证明任务对应的数据）
+     */
+    let proof_parameters = await verify_task.proofParametersByUseRightId(use_right_id);
+    let proofId     = utils.w3uint256_to_hex(proof_parameters[2]); // 算力证明任务ID
+    // 只对自己证明的挑战感兴趣
+    let is_owner = await proof_task.isOwner(proofId, signer_address);
+    if (!is_owner) {
+        logger.debug("owner of proof task id(" + proofId +") is not signer, next...");
+        return false;
+    }
+
+    return true;
+}
+async function select_use_right_id_in_verify(signer_address, buf, fixed_use_right_id == null) {
+    let use_right       = await utils.contract("SCPNSUseRightToken");
+    let verify_task     = await utils.contract("SCPNSVerifyTask");
+    let proof_task      = await utils.contract("SCPNSProofTask");
 
     let use_right_count = await use_right.totalSupply();
 
+    //使用固定使用权通证
+    if(fixed_use_right_id != null) {
+        let valid = await check_use_right_id_can_verify(fixed_use_right_id, signer_address, buf);
+        if(valid == true) {
+            return fixed_use_right_id;
+        }
+    } else {
+    }
     //随机选择一个， 此处可指定固定使用权通证(use_right_id) 
     for (var i = 0; i < use_right_count; i++) {
         let use_right_id = utils.w3uint256_to_hex(await use_right.tokenByIndex(i));
-        /*
-         * 1. 判断使用权通证对应的算力节点是否有挑战任务
-         */
-        let isInVerify   = await verify_task.isInVerifyOfUseRightId(use_right_id);
-        if (!isInVerify) {
-            logger.debug("useRight token(" + use_right_id +") is not in verify, next...");
-            continue;
+        let valid = await check_use_right_id_can_verify(fixed_use_right_id, signer_address, buf);
+        if (valid == true)  {
+            return use_right_id;
         }
-
-        /*
-         * 2. 获取算力使用权通证对应的算力证明参数（此处是确认proofId是否是当前最新的且完成的算力证明任务对应的数据）
-         */
-        let proof_parameters = await verify_task.proofParametersByUseRightId(use_right_id);
-        let proofId     = utils.w3uint256_to_hex(proof_parameters[2]); // 算力证明任务ID
-        // 只对自己证明的挑战感兴趣
-        let is_owner = await proof_task.isOwner(proofId, signer_address);
-        if (!is_owner) {
-            logger.debug("owner of proof task id(" + proofId +") is not signer, next...");
-            continue;
-        }
-        return use_right_id;
     }
     return "";
 }
@@ -78,7 +99,7 @@ async function verify(user, buf) {
     let use_right_id = await select_use_right_id_in_verify(signer_address, buf);
     if (use_right_id == undefined || use_right_id == "") {
         logger.debug("没有需要验证的任务");
-        return;
+        return null;
     }
 
     logger.debug("want verify useRight token(" + use_right_id +")");
@@ -88,7 +109,7 @@ async function verify(user, buf) {
     let isInVerify  = await verify_task.isInVerifyOfUseRightId(use_right_id);
     if (!isInVerify) {
         //logger.debug("useRight token(" + use_right_id +") is not in verify, return");
-        return;
+        return null;
     }
 
     /*
@@ -114,7 +135,7 @@ async function verify(user, buf) {
 
     tokenId = utils.w3uint256_to_hex(tokenId);
     if(buf[tokenId + q] == true) {
-        return;
+        return tokenId;
     }
 
     logger.debug("tokenId: " + utils.w3uint256_to_hex(parameters[0])); // 挑战任务ID
@@ -148,6 +169,17 @@ async function verify(user, buf) {
 
     buf[tokenId + q] = true;
     logger.table(rows, "verify info");
+
+    //显示排行信息
+    if(residue_verify == 1) {
+        while(residue_verify == 1) {
+            residue_verify = Number(await verify_task.residueVerifyOf(parameters[0]));
+            await utils.sleep(2);
+        }
+        await crb.show_ranks_from_use_right_id(use_right_id);
+    }
+    
+    return tokenId;
 }
 
 async function create_merkle_datas(dynamicData, leaf_count, leaf_deep) {
@@ -157,43 +189,59 @@ async function create_merkle_datas(dynamicData, leaf_count, leaf_deep) {
     logger.info("merkle_root: " + merkle_root);
     return merkle_root;
 }
-async function select_use_right_id_in_proof(signer_address, buf) {
+
+async function check_use_right_id_can_proof(use_right_id, signer_address, buf) {
+    assert(use_right_id != false, "use_right_id is invalid argument.");
+
+    let use_right       = await utils.contract("SCPNSUseRightToken");
+    let proof_task      = await utils.contract("SCPNSProofTask");
+    let use_right_count = await use_right.totalSupply();
+
+    let isInProof = await proof_task.isInProofOfUseRightId(use_right_id);
+    if (!isInProof) {
+        //logger.debug("useRight token(" + use_right_id +") is not in proof, next...");
+        return false;
+    }
+    let parameters  = await proof_task.latestParametersByUseRightId(use_right_id); 
+    let taskId      = utils.w3uint256_to_hex(parameters[2]);
+
+    if(buf[taskId] == true) {
+        logger.debug("task id(" + taskId +") was proof, next...");
+        return false;
+    }
+
+    let is_owner = await proof_task.isOwner(taskId, signer_address);
+    if (!is_owner) {
+        return false;
+    }
+    return true;
+}
+
+async function select_use_right_id_in_proof(signer_address, buf, fixed_use_right_id = null) {
     //return use_right_id;
     let use_right       = await utils.contract("SCPNSUseRightToken");
     let proof_task      = await utils.contract("SCPNSProofTask");
     let use_right_count = await use_right.totalSupply();
-    let skeep = [''];
 
-    for (var i = 0; i < use_right_count; i++) {
-        let use_right_id = utils.w3uint256_to_hex(await use_right.tokenByIndex(i));
-        let isInProof = await proof_task.isInProofOfUseRightId(use_right_id);
-
-        if (skeep.includes(use_right_id)) {
-            continue;
+    //
+    if(fixed_use_right_id != null) {
+        let valid = await check_use_right_id_can_proof(fixed_use_right_id, signer_address, buf);
+        if(valid == true) {
+            return fixed_use_right_id;
         }
-
-        if (!isInProof) {
-            //logger.debug("useRight token(" + use_right_id +") is not in proof, next...");
-            continue;
+    } else {
+        for (var i = 0; i < use_right_count; i++) {
+            let use_right_id = utils.w3uint256_to_hex(await use_right.tokenByIndex(i));
+            let valid = awati check_use_right_id_can_proof(use_right_id, signer_address, buf);
+            if(valid == true) {
+                return use_right_id;
+            }
         }
-        let parameters  = await proof_task.latestParametersByUseRightId(use_right_id); 
-        let taskId      = utils.w3uint256_to_hex(parameters[2]);
-
-        let is_owner = await proof_task.isOwner(taskId, signer_address);
-        if (!is_owner) {
-            continue;
-        }
-        if(buf[taskId] == true) {
-            logger.debug("task id(" + taskId +") was proof, next...");
-            continue;
-        }
-
-        return use_right_id;
     }
     return "";
 }
 
-async function proof(user, buf) {
+async function proof(user, buf, fixed_use_right_id = null) {
 
     logger.warning("等待算力证明...");
 
@@ -207,7 +255,7 @@ async function proof(user, buf) {
 
     let rows = []
 
-    let use_right_id = await select_use_right_id_in_proof(signer_address, buf);
+    let use_right_id = await select_use_right_id_in_proof(signer_address, buf, fixed_use_right_id);
     if (use_right_id == undefined || use_right_id == "") {
         return;
     }

@@ -110,6 +110,14 @@ interface ISCPNSVerifyTask is
     function isVerified(uint256 tokenId) external view returns(bool);
     
     /**
+    * @notice 挑战任务是否正常结束(挑战成功)
+    * @dev 任务状态是End则任务任务结束, 即完成了所有挑战
+    * @param tokenId 任务ID
+    * @return 状态值 true:挑战正常结束 false: 未完成挑战
+    */
+    function isVerifyEnd(uint256 tokenId) external view returns(bool);
+    
+    /**
     * @notice 使用权通证是否可以发起挑战
     * @dev 使用通证是否可以发起挑战（证明中、挑战中、 没有执行过证明任务都不能发起挑战）
     * @param tokenId 使用权通证ID
