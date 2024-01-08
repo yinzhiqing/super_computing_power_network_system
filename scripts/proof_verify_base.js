@@ -23,7 +23,7 @@ async function get_proof(leaf, dynamicData, leaf_count, leaf_deep) {
     return proof;
 }
 async function check_use_right_id_can_verify(use_right_id, signer_address, buf) {
-    assert(use_right_id != false, "use_right_id is invalid argument.");
+    assert(use_right_id != false, "use_right_id(" + use_right_id + ") is invalid argument.");
 
     let use_right       = await utils.contract("SCPNSUseRightToken");
     let verify_task     = await utils.contract("SCPNSVerifyTask");
@@ -52,7 +52,7 @@ async function check_use_right_id_can_verify(use_right_id, signer_address, buf) 
 
     return true;
 }
-async function select_use_right_id_in_verify(signer_address, buf, fixed_use_right_id == null) {
+async function select_use_right_id_in_verify(signer_address, buf, fixed_use_right_id = null) {
     let use_right       = await utils.contract("SCPNSUseRightToken");
     let verify_task     = await utils.contract("SCPNSVerifyTask");
     let proof_task      = await utils.contract("SCPNSProofTask");
@@ -61,18 +61,20 @@ async function select_use_right_id_in_verify(signer_address, buf, fixed_use_righ
 
     //使用固定使用权通证
     if(fixed_use_right_id != null) {
+        logger.debug("use fixed use_right_id: " + use_right_id);
         let valid = await check_use_right_id_can_verify(fixed_use_right_id, signer_address, buf);
         if(valid == true) {
             return fixed_use_right_id;
         }
     } else {
-    }
-    //随机选择一个， 此处可指定固定使用权通证(use_right_id) 
-    for (var i = 0; i < use_right_count; i++) {
-        let use_right_id = utils.w3uint256_to_hex(await use_right.tokenByIndex(i));
-        let valid = await check_use_right_id_can_verify(fixed_use_right_id, signer_address, buf);
-        if (valid == true)  {
-            return use_right_id;
+        //随机选择一个， 此处可指定固定使用权通证(use_right_id) 
+        logger.debug("select use_right_id ");
+        for (var i = 0; i < use_right_count; i++) {
+            let use_right_id = utils.w3uint256_to_hex(await use_right.tokenByIndex(i));
+            let valid = await check_use_right_id_can_verify(use_right_id, signer_address, buf);
+            if (valid == true)  {
+                return use_right_id;
+            }
         }
     }
     return "";
@@ -84,7 +86,7 @@ async function select_use_right_id_in_verify(signer_address, buf, fixed_use_righ
  * 问题正确与否会在自动计算
  *
  */
-async function verify(user, buf) {
+async function verify(user, buf, fixed_use_right_id = null) {
     logger.warning("等待挑战");
 
     let use_right       = await utils.contract("SCPNSUseRightToken");
@@ -96,7 +98,7 @@ async function verify(user, buf) {
     let rows = [];
 
     //这里可以指定一个特定的感兴趣的use_right_id
-    let use_right_id = await select_use_right_id_in_verify(signer_address, buf);
+    let use_right_id = await select_use_right_id_in_verify(signer_address, buf, fixed_use_right_id);
     if (use_right_id == undefined || use_right_id == "") {
         logger.debug("没有需要验证的任务");
         return null;
@@ -163,12 +165,12 @@ async function verify(user, buf) {
     let index = await get_leaf_index(q, dynamicData, leaf_count, leaf_deep);
     logger.debug("q_index: " + index);
 
-    logger.info("verify task: " + tokenId);
+    logger.debug("verify task: " + tokenId);
     await verify_task.connect(signer).taskVerify(
         tokenId/* 任务ID*/, q /* 路径对应的问题 */, proof /*路径*/, [] /* 位置用openzepplin的树时候不用此值*/);
 
     buf[tokenId + q] = true;
-    logger.table(rows, "verify info");
+    logger.debug(rows, "verify info");
 
     //显示排行信息
     if(residue_verify == 1) {
@@ -232,7 +234,7 @@ async function select_use_right_id_in_proof(signer_address, buf, fixed_use_right
     } else {
         for (var i = 0; i < use_right_count; i++) {
             let use_right_id = utils.w3uint256_to_hex(await use_right.tokenByIndex(i));
-            let valid = awati check_use_right_id_can_proof(use_right_id, signer_address, buf);
+            let valid = await check_use_right_id_can_proof(use_right_id, signer_address, buf);
             if(valid == true) {
                 return use_right_id;
             }
@@ -245,7 +247,6 @@ async function proof(user, buf, fixed_use_right_id = null) {
 
     logger.warning("等待算力证明...");
 
-    logger.debug(buf);
     let use_right       = await utils.contract("SCPNSUseRightToken");
     let proof_task      = await utils.contract("SCPNSProofTask");
 
@@ -289,23 +290,96 @@ async function proof(user, buf, fixed_use_right_id = null) {
     logger.debug("taskId: " + taskId);
     logger.debug("has: " + parameters[3]);
 
+
+    let merkle_root = await create_merkle_datas(dynamicData, leaf_count, leaf_deep);
+    let tx = await proof_task.connect(signer).taskEnd(taskId, merkle_root, utils.str_to_w3bytes32(""), false);
+
+    buf[taskId] = true;
+
     let info = {
         use_right_id: use_right_id,
         taskId: taskId,
     }
-    rows.push(info)
 
-    let merkle_root = await create_merkle_datas(dynamicData, leaf_count, leaf_deep);
-    let tx = await proof_task.connect(signer).taskEnd(taskId, merkle_root, utils.str_to_w3bytes32(""), false);
-    logger.debug(tx);
-    buf[taskId] = true;
+    rows.push(info)
 
     if (rows.length > 0) {
         logger.table(rows, "new tokens");
     }
 }
 
+//显示指定数量的挑战任务及信息
+async function show_verify_tasks(latest_count) {
+    let cobj        = await utils.contract("SCPNSVerifyTask");
+    let name        = await cobj.name();
+    let amounts     = await cobj.totalSupply();
+
+    let list        = [];
+    let detail      = {};
+    let detail_of   = {};
+
+    logger.debug("挑战任务信息");
+    logger.debug("token address: " + cobj.address);
+    logger.debug("name: " + name);
+    logger.debug("totalSupply: " + amounts);
+
+    let start = utils.min_from_right(amounts, latest_count);
+    for (let i = start; i < amounts; i++) {
+        let row = new Map();
+        row["tokenId"] = utils.w3uint256_to_hex(await cobj.tokenByIndex(i));
+        row["owner"] = utils.w3uint256_to_hex(await cobj.ownerOf(row["tokenId"]));
+        logger.debug(">> tokenId; "     + row["tokenId"], "verify info");
+        row["use_right_id"] = utils.w3uint256_to_hex(await cobj.useRightIdOf(row["tokenId"]));
+        row["isInVerify"] = await cobj.isInVerifyOf(row["tokenId"]);
+        logger.debug(">> isInVerify; "     + row["isInVerify"]);
+
+        let parameters = await cobj.verifyParameterOf(row["tokenId"]);
+        logger.debug(">> useRightId: "  + utils.w3uint256_to_hex(parameters[0]));
+
+        logger.debug(">> q: "    + parameters[1]);
+        logger.debug(">> state :" + parameters[2].toString());
+
+        let residue_verify = Number(await cobj.residueVerifyOf(row["tokenId"]));
+        logger.debug(">> residue Verify: " + residue_verify);
+
+        let verify_stat = await cobj.verifyStatOfUseRightId(row["use_right_id"]);
+        logger.debug(">> verify stat: [t, s, f] " + verify_stat);
+
+        let verify_stat_of = await cobj.verifyStatOf(row["tokenId"]);
+        logger.debug(">> verify stat of: [t, s, f] " + verify_stat_of);
+
+        let use_right_id_sub = (row["use_right_id"].toString()).substr(0, 6);
+
+        detail[use_right_id_sub] = "verify [t, s, f]  " + verify_stat;
+        detail[use_right_id_sub] = {
+            total: Number(verify_stat[0].toString()),
+            succees: Number(verify_stat[1].toString()),
+            failed: Number(verify_stat[2].toString()),
+        };
+
+        detail_of[row["tokenId"]] = "verify [t, s, f]  " + verify_stat_of;
+        detail_of[row["tokenId"]] = {
+            use_right_id: use_right_id_sub,
+            total: Number(verify_stat_of[0].toString()),
+            succees: Number(verify_stat_of[1].toString()),
+            failed: Number(verify_stat_of[2].toString()),
+            residue_verify: residue_verify,
+            isVerified: await cobj.isVerified(row["tokenId"])
+        };
+
+        //reset key-value
+        row["use_right_id"] = use_right_id_sub;
+
+        list.push(row);
+
+    } 
+    logger.table(detail, "使用权通证证明统计");
+    logger.table(detail_of, "使用权通证挑战任务信息 "); 
+    logger.table(list, "使用权通证挑战状态信息");
+}
+
 module.exports = {
     verify,
     proof,
+    show_verify_tasks,
 }

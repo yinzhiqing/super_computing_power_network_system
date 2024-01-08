@@ -142,6 +142,9 @@ make_md:
 export_java:
 	@~/.web3j/web3j generate solidity -a $output_path/contracts/"$n"_output/$c.abi -b $output_path/contracts/"$c"_output/$c.bin -o $output_java_path -p $class_path 
 
+cli:
+	$(call run_script, "cli")
+
 init_dns:
 	$(call run_script, "init_dns")
 

@@ -6,15 +6,15 @@ const logger    = require("./logger");
 const prj       = require("../prj.config.js");
 const sur       = require("./use_rights_base.js");
 
-async function postion_of(parameterId, tokenId, scale) {
+async function postion_of(parameter_id, token_id, scale) {
     let cobj = await utils.contract("SCPNSComputilityRanking");
-    return Number(await cobj.postionOf(parameterId, tokenId, scale));
+    return Number(await cobj.postionOf(parameter_id, token_id, scale));
 }
 
-async function parameters_of(tokenId) {
+async function parameters_of(token_id) {
     let cobj = await utils.contract("SCPNSComputilityRanking");
 
-    let parameterIds = await cobj.parameterIdsOf(tokenId);
+    let parameterIds = await cobj.parameterIdsOf(token_id);
     return parameterIds;
 }
 // 不同类型算力资源排行数据
@@ -167,23 +167,44 @@ async function comp_ranks_history() {
     return list;
 }
 
+const verify_state_name = {
+    0: "没有挑战",
+    1: "开始挑战(完成证明，但挑战问题在生成中)",
+    2: "挑战中(正在完成挑战)",
+    3: "挑战成功(完成所有挑战)",
+    4: "挑战失败(挑战答案不能与问题匹配)",
+    5: "挑战出错(未在规定时间内完成挑战)",
+};
 //指定使用权通证的算力水平信息以表单的形式汇总
 async function datas_with_ranks_from_use_right_id(use_right_id) {
-    let type_unit_id = await sur.type_unit_id_of(use_right_id);
+    let type_unit_id    = await sur.type_unit_id_of(use_right_id);
     let proof_parameter = await utils.contract("SCPNSProofParameter");
-    let cobj = await utils.contract("SCPNSComputilityRanking");
-    let parameterIds = await parameters_of(use_right_id);
-    let rights = await sur.datas_from_use_right_id(use_right_id);
-    let use_right_info = rights.form;
-    let scale = 1;
-    let ranks_infos = [];
+    let cobj            = await utils.contract("SCPNSComputilityRanking");
+    let verify_task     = await utils.contract("SCPNSVerifyTask");
+
+    let parameterIds    = await parameters_of(use_right_id);
+    let rights          = await sur.datas_from_use_right_id(use_right_id);
+
+    let use_right_info  = rights.form;
+    let scale           = 1;
+    let ranks_infos     = [];
+
     if (parameterIds.length > 0) {
         for (var i in parameterIds) {
-            let para_id = parameterIds[i];
-            let range = await proof_parameter.computilityRangeOfTypeUnit(para_id, type_unit_id);
-            let verify_sample = Number(await proof_parameter.sampleOf(para_id));
-            let parameter = JSON.parse(utils.w3str_to_str(await proof_parameter.parameterOf(para_id)));
-            let postion   = await postion_of(para_id, use_right_id, scale);
+            let para_id         = parameterIds[i];
+            let range           = await proof_parameter.computilityRangeOfTypeUnit(para_id, type_unit_id);
+            let verify_sample   = Number(await proof_parameter.sampleOf(para_id));
+            let parameter       = JSON.parse(utils.w3str_to_str(await proof_parameter.parameterOf(para_id)));
+            let postion         = await postion_of(para_id, use_right_id, scale);
+
+            //获取当前挑战信息
+            let verify_stat     = await verify_task.verifyStatOfUseRightId(use_right_id);
+            let verify_parameter= await verify_task.verifyParameterOfUseRightId(use_right_id); 
+            let verify_id       = verify_parameter[0];
+            let verify_state    = await verify_task.verifyState(verify_id);
+
+            let verify_stat_of  = await verify_task.verifyStatOf(verify_id);
+            let residue_verify  = Number(await verify_task.residueVerifyOf(verify_id));
 
             let ranks_info = {
                 "算力有效范围(秒)": Number(range[0]) + " ~ " + Number(range[1]),
@@ -192,7 +213,17 @@ async function datas_with_ranks_from_use_right_id(use_right_id) {
                 "证明难度": "",
                 "   叶子数量(个)": parameter["leaf_count"],
                 "   叶子hash深度(次)": parameter["leaf_deep"],
-            }
+
+                //算力信息统计
+                "使用权通证挑战统计": "",
+                "    总挑战次数":       Number(verify_stat[0]),
+                "    成功次数":         Number(verify_stat[1]),
+                "证明任务挑战统计": "",
+                "    任务挑战次数":     Number(verify_stat_of[0]),
+                "    任务成功次数":     Number(verify_stat_of[1]),
+                "    剩余挑战次数":     residue_verify,
+                "    挑战状态":         verify_state_name[verify_state],
+            };
 
             //统计排行表
             //logger.log("排行表:");

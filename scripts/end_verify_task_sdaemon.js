@@ -12,7 +12,8 @@ const pvb           = require("./proof_verify_base.js");
 
 async function run(times) {
     let buf = {};
-    await utils.scheduleJob(times, pvb.verify, [users.prover, buf], false);
+    let use_right_id = null;
+    await utils.scheduleJob(times, pvb.verify, [users.prover, buf, use_right_id], false);
 }
 
 run(8)
