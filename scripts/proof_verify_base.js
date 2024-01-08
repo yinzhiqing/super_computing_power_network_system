@@ -10,7 +10,6 @@ const { contracts_load } = require("./contracts.js");
 
 async function get_leaf_index(leaf, dynamicData, leaf_count, leaf_deep) {
     let index = merkle.get_leaf_index_by_hash(leaf, dynamicData, leaf_count, leaf_deep);
-    logger.info("leaf index: " + index);
     return index;
 }
 
@@ -22,7 +21,7 @@ async function get_proof(leaf, dynamicData, leaf_count, leaf_deep) {
     logger.debug("proof: " + proof);
     return proof;
 }
-async function check_use_right_id_can_verify(use_right_id, signer_address, buf) {
+async function check_use_right_id_need_verify(use_right_id, signer_address, buf) {
     assert(use_right_id != false, "use_right_id(" + use_right_id + ") is invalid argument.");
 
     let use_right       = await utils.contract("SCPNSUseRightToken");
@@ -34,7 +33,7 @@ async function check_use_right_id_can_verify(use_right_id, signer_address, buf) 
      */
     let isInVerify   = await verify_task.isInVerifyOfUseRightId(use_right_id);
     if (!isInVerify) {
-        logger.debug("useRight token(" + use_right_id +") is not in verify, next...");
+        //logger.debug("useRight token(" + use_right_id +") is not in verify, next...");
         return false;
     }
 
@@ -62,7 +61,7 @@ async function select_use_right_id_in_verify(signer_address, buf, fixed_use_righ
     //使用固定使用权通证
     if(fixed_use_right_id != null) {
         logger.debug("use fixed use_right_id: " + use_right_id);
-        let valid = await check_use_right_id_can_verify(fixed_use_right_id, signer_address, buf);
+        let valid = await check_use_right_id_need_verify(fixed_use_right_id, signer_address, buf);
         if(valid == true) {
             return fixed_use_right_id;
         }
@@ -71,7 +70,7 @@ async function select_use_right_id_in_verify(signer_address, buf, fixed_use_righ
         logger.debug("select use_right_id ");
         for (var i = 0; i < use_right_count; i++) {
             let use_right_id = utils.w3uint256_to_hex(await use_right.tokenByIndex(i));
-            let valid = await check_use_right_id_can_verify(use_right_id, signer_address, buf);
+            let valid = await check_use_right_id_need_verify(use_right_id, signer_address, buf);
             if (valid == true)  {
                 return use_right_id;
             }
@@ -99,7 +98,7 @@ async function verify(user, buf, fixed_use_right_id = null) {
 
     //这里可以指定一个特定的感兴趣的use_right_id
     let use_right_id = await select_use_right_id_in_verify(signer_address, buf, fixed_use_right_id);
-    if (use_right_id == undefined || use_right_id == "") {
+    if (use_right_id == false || use_right_id == "") {
         logger.debug("没有需要验证的任务");
         return null;
     }
@@ -137,7 +136,7 @@ async function verify(user, buf, fixed_use_right_id = null) {
 
     tokenId = utils.w3uint256_to_hex(tokenId);
     if(buf[tokenId + q] == true) {
-        return tokenId;
+        return null;
     }
 
     logger.debug("tokenId: " + utils.w3uint256_to_hex(parameters[0])); // 挑战任务ID
@@ -158,7 +157,6 @@ async function verify(user, buf, fixed_use_right_id = null) {
         residue_verify: residue_verify
     })
 
-
     /* 5. 
      * 回答挑战问题, 将根据回答问题有效性进行对错次数统计
      */
@@ -171,17 +169,8 @@ async function verify(user, buf, fixed_use_right_id = null) {
 
     buf[tokenId + q] = true;
     logger.debug(rows, "verify info");
-
-    //显示排行信息
-    if(residue_verify == 1) {
-        while(residue_verify == 1) {
-            residue_verify = Number(await verify_task.residueVerifyOf(parameters[0]));
-            await utils.sleep(2);
-        }
-        await crb.show_ranks_from_use_right_id(use_right_id);
-    }
     
-    return tokenId;
+    return use_right_id;
 }
 
 async function create_merkle_datas(dynamicData, leaf_count, leaf_deep) {
@@ -191,8 +180,61 @@ async function create_merkle_datas(dynamicData, leaf_count, leaf_deep) {
     logger.info("merkle_root: " + merkle_root);
     return merkle_root;
 }
+async function check_use_right_id_can_proof(use_right_id) {
+    assert(use_right_id != false, "use_right_id(" + use_right_id + ") is invalid argument.");
 
-async function check_use_right_id_can_proof(use_right_id, signer_address, buf) {
+    let use_right       = await utils.contract("SCPNSUseRightToken");
+    let proof_task      = await utils.contract("SCPNSProofTask");
+    let verify_task     = await utils.contract("SCPNSVerifyTask");
+    let isInProof = await proof_task.isInProofOfUseRightId(use_right_id);
+
+    if (isInProof) {
+        logger.info("useRight token(" + use_right_id +") is in proof, next...");
+        return false;
+    }
+
+    let isInVerify = await verify_task.isInVerifyOfUseRightId(use_right_id);
+    if (isInVerify) {
+        logger.info("useRight token(" + use_right_id +") is in verify, next...");
+        return false;
+    }
+
+    let deadline = await use_right.deadLine(use_right_id);
+    let now_utc_time = Math.floor(((new Date()).getTime()));
+    logger.info(" check use_right_id(" + use_right_id + "deadline is " + deadline, "now time: " + now_utc_time);
+
+    if (deadline < now_utc_time) {
+        logger.debug("use_right_id: " + use_right_id + " is deadline");
+        return false;
+    }
+
+    return true;
+}
+async function select_use_right_id_can_proof(owner, fixed_use_right_id = null) {
+    let use_right       = await utils.contract("SCPNSUseRightToken");
+    let proof_task      = await utils.contract("SCPNSProofTask");
+    let use_right_count = await use_right.balanceOf(owner);
+
+    if(fixed_use_right_id != null) {
+        let valid = await check_use_right_id_can_proof(fixed_use_right_id);
+        if(valid == true) {
+            return fixed_use_right_id;
+        }
+    } else {
+        for (var i = 0; i < use_right_count; i++) {
+            let use_right_id = utils.w3uint256_to_hex(await use_right.tokenOfOwnerByIndex(owner, i));
+
+            if (await check_use_right_id_can_proof(use_right_id) == false) {
+                continue;
+            }
+            return use_right_id;
+        }
+    }
+
+    return null;
+}
+
+async function check_use_right_id_need_proof(use_right_id, signer_address, buf) {
     assert(use_right_id != false, "use_right_id is invalid argument.");
 
     let use_right       = await utils.contract("SCPNSUseRightToken");
@@ -227,14 +269,14 @@ async function select_use_right_id_in_proof(signer_address, buf, fixed_use_right
 
     //
     if(fixed_use_right_id != null) {
-        let valid = await check_use_right_id_can_proof(fixed_use_right_id, signer_address, buf);
+        let valid = await check_use_right_id_need_proof(fixed_use_right_id, signer_address, buf);
         if(valid == true) {
             return fixed_use_right_id;
         }
     } else {
         for (var i = 0; i < use_right_count; i++) {
             let use_right_id = utils.w3uint256_to_hex(await use_right.tokenByIndex(i));
-            let valid = await check_use_right_id_can_proof(use_right_id, signer_address, buf);
+            let valid = await check_use_right_id_need_proof(use_right_id, signer_address, buf);
             if(valid == true) {
                 return use_right_id;
             }
@@ -257,7 +299,8 @@ async function proof(user, buf, fixed_use_right_id = null) {
     let rows = []
 
     let use_right_id = await select_use_right_id_in_proof(signer_address, buf, fixed_use_right_id);
-    if (use_right_id == undefined || use_right_id == "") {
+    if (use_right_id == false || use_right_id == "") {
+        logger.debug("select use right id is \'" + use_right_id + "\'");
         return;
     }
     logger.debug("check use_right_id: " + use_right_id);
@@ -304,7 +347,7 @@ async function proof(user, buf, fixed_use_right_id = null) {
     rows.push(info)
 
     if (rows.length > 0) {
-        logger.table(rows, "new tokens");
+        logger.table(rows, "证明信息");
     }
 }
 
@@ -378,8 +421,52 @@ async function show_verify_tasks(latest_count) {
     logger.table(list, "使用权通证挑战状态信息");
 }
 
+async function mint_proof(owner, prover, fixed_use_right_id = null) {
+    logger.debug("start working...", "mint");
+
+    let contracts       = await contracts_load();
+    let use_right       = contracts.SCPNSUseRightToken;
+    let proof_task      = contracts.SCPNSProofTask;
+    let verify_task     = contracts.SCPNSVerifyTask;
+
+    let role     = "MINTER_ROLE";
+    let signer   = owner.signer; 
+    let receiver = (prover == undefined ? users.prover : prover).signer; 
+    let minter   = await signer.getAddress(); 
+
+    let has_miter = await utils.has_role(proof_task, minter, role);
+    if (has_miter != true) {
+        logger.error(personal + " no minter role." );
+        return;
+    } 
+
+    let from_address = await signer.getAddress();
+    let to = await receiver.getAddress();
+
+    let rows = [];
+
+    let use_right_id = await select_use_right_id_can_proof(from_address, fixed_use_right_id);
+    if (use_right_id == false || use_right_id == "") {
+        logger.debug("没有可以验证的通证");
+        return null;
+    }
+
+    let datas = utils.json_to_w3str({data: "test"});
+
+    let tx = await proof_task.connect(signer).mint(to, use_right_id, 
+        utils.str_to_w3bytes32(""), datas);
+
+    rows.push({
+        to: to.substr(0, 6),
+        use_right_id: use_right_id
+    })
+    logger.table(rows, "new mint proof task");
+    return use_right_id;
+}
+
 module.exports = {
-    verify,
+    mint_proof,
     proof,
+    verify,
     show_verify_tasks,
 }

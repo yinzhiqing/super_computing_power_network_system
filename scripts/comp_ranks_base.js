@@ -271,6 +271,7 @@ async function datas_with_ranks_from_use_right_id(use_right_id) {
 
 //以表单的形式显示指定使用权通证的算力水平
 async function show_ranks_from_use_right_id(use_right_id) {
+    logger.debug("show_ranks_from_use_right_id: " + use_right_id);
     let datas = await datas_with_ranks_from_use_right_id(use_right_id);
     
     let use_right_info  = datas.form.use_right_info;

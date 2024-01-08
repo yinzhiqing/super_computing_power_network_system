@@ -5,73 +5,15 @@ const utils     = require("./utils");
 const logger    = require("./logger");
 const prj       = require("../prj.config.js");
 const gs_abi    = require("./datas/abis/GPUStore.json");
-const vnet_abi    = require("./datas/abis/IERC20Upgradeable.json");
+const vnet_abi  = require("./datas/abis/IERC20Upgradeable.json");
 const sur       = require("./use_rights_base.js");
-const { users, 
-    users_cache_name }   = require("./datas/env.config.js");
-const users_cache_path   = path.join(__dirname ,  "/datas/" , users_cache_name);
-const users_cache        = require(users_cache_path);
+const { users } = require("./datas/env.config.js");
+const { uco }    = require("./cache_opts.js");
 const { contracts_load } = require("./contracts.js");
 
 const bak_path  = prj.caches_contracts;
 const tokens  = require(prj.contract_conf);
 const {ethers, upgrades}    = require("hardhat");
-
-function update_cache() {
-    utils.write_json(users_cache_path, users_cache);
-}
-
-function get_user(user) {
-    return new_user(user);
-}
-function new_user(user) {
-    if (users_cache[user] == undefined) {
-        users_cache[user] = {
-            init: false,
-            revenue:     0,
-            revenue_chg: 0,
-            revenue_chg_info: "",
-            revenue_block: 0,
-            vtoken:      0,
-            vtoken_chg:  0,
-            vtoken_chg_info:  "",
-            vtoken_block: 0,
-        }
-    }
-    return users_cache[user];
-}
-
-async function update_user(user, revenue, vtoken) {
-    let cache = get_user(user);
-    let block = await ethers.provider.getBlockNumber();
-    if (!cache.init) {
-        cache.revenue = revenue;
-        cache.vtoken  = vtoken.toString();
-        cache.init    = true;
-        cache.revenue_block = block;
-        cache.vtoken_block = block;
-        return cache;
-    }
-
-    if (cache.revenue != revenue) {
-        cache.revenue_chg = cache.revenue - revenue;
-        //'↓'
-        cache.revenue_chg_info = (cache.revenue_chg > 0 ? "↓ " : "↑ ") + Math.abs(cache.revenue_chg).toString();
-        cache.revenue = revenue;
-        cache.revenue_block = block;
-    }
-
-    if (cache.vtoken != vtoken) {
-        cache.vtoken_chg = web3.utils.toBN(cache.vtoken).sub(web3.utils.toBN(vtoken.toString()));
-        logger.debug("votken_chg: " + cache.vtoken_chg);
-        logger.debug("vtoken: " + vtoken);
-        logger.debug("cache vtoken: " + web3.utils.toBN(cache.vtoken));
-        cache.vtoken_chg_info = (cache.vtoken_chg > 0 ? "↓ " : "↑ " ) + Math.abs(cache.vtoken_chg).toString();
-        cache.vtoken = vtoken.toString();
-        cache.vtoken_block = block;
-    }
-    return cache;
-}
 
 async function works() {
     logger.info("账户金额");
@@ -128,7 +70,7 @@ async function works() {
         let revenue = merge_users[key].revenue;
         let vtoken  = (await vnet_token.balanceOf(key));
 
-        let user    = await update_user(key, revenue, vtoken);
+        let user    = await uco.update_user(key, revenue, vtoken);
         list.push({
             "账户地址": key,
             "账户类型": merge_users[key].alias,
@@ -142,7 +84,7 @@ async function works() {
     }
 
     logger.table(list);
-    update_cache();
+    uco.update_cache();
 }
 
 async function run(times) {

@@ -28,6 +28,11 @@ async function contract_ext(abi, address) {
     return await ethers.getContractAt(abi, address);
 }
 
+async function has_role(cobj, address, role) {
+    let brole = web3.eth.abi.encodeParameter("bytes32", web3.utils.soliditySha3(role));
+    return await cobj.hasRole(brole, address);
+}
+
 function get_files(pathname, ext) {
     let file_names = new Array();
     let files = fs.readdirSync(pathname)
@@ -360,6 +365,9 @@ function min_from_right(value, count) {
     return value > count ? value - count : 0;
 }
 
+function to_full_path(dirname, subdir, name) {
+   return path.join(dirname ,  subdir, name);
+}
 module.exports = {
     users,
     get_contract,
@@ -398,4 +406,6 @@ module.exports = {
     min_from_right,
     time_s_to_dhms,
     sleep,
+    to_full_path,
+    has_role,
 }

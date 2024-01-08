@@ -1,8 +1,5 @@
-const path = require("path");
-
-function get_signer(idx) {
-    return ethers.provider.getSigner(idx);
-}
+const path      = require("path");
+const utils     = require("../utils");
 
 config = {
     run: "dev",
@@ -24,6 +21,7 @@ config = {
         },
         use_types: ["CPU"],
         users_cache_name: "users.cache.json",
+        tokens_cache_name: "tokens.cache.json",
         users: {
             buyer: {
                 alias: "算力购买者",
@@ -69,13 +67,25 @@ config = {
     },
 };
 
+
+
+function get_signer(idx) {
+    return ethers.provider.getSigner(idx);
+}
+
+function to_full_path(dirname, subdir, name) {
+   return path.join(dirname ,  subdir, name);
+}
+
+const cur_config         = config[config.run];
 module.exports = {
-    users:              config[config.run].users,
-    store:              config[config.run].store,
-    use_types:          config[config.run].use_types,
-    users_cache_name:   config[config.run].users_cache_name,
-    vm:                 config[config.run].vm,
-    use_right:      config[config.run].use_right,
-    proof_task:         config[config.run].proof_task,
-    verify_task:         config[config.run].verify_task,
+    users:              cur_config.users,
+    store:              cur_config.store,
+    use_types:          cur_config.use_types,
+    users_cache_path:   to_full_path(__dirname, "./", cur_config.users_cache_name),
+    tokens_cache_path:  to_full_path(__dirname, "./", cur_config.tokens_cache_name),
+    vm:                 cur_config.vm,
+    use_right:          cur_config.use_right,
+    proof_task:         cur_config.proof_task,
+    verify_task:        cur_config.verify_task,
 };

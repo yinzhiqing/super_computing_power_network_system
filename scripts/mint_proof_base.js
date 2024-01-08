@@ -12,18 +12,6 @@ const tokens  = require(prj.contract_conf);
 const {ethers, upgrades}    = require("hardhat");
 
 
-async function has_role(cobj, address, role) {
-    let brole = web3.eth.abi.encodeParameter("bytes32", web3.utils.soliditySha3(role));
-    let has = await cobj.hasRole(brole, address);
-
-    return has;
-}
-
-async function new_token_id(pre) {
-    var date = new Date();
-    return web3.utils.sha3(pre + date.getTime().toString());
-}
-
 async function works(owner, prover) {
     logger.debug("start working...", "mint");
 

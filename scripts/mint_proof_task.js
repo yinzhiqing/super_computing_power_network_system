@@ -4,12 +4,13 @@ const program   = require('commander');
 const utils     = require("./utils");
 const logger    = require("./logger");
 const prj       = require("../prj.config.js");
+const { tco }   = require("./cache_opts.js");
 const {users}            = require("./datas/env.config.js");
 
-const mpb       = require("./mint_proof_base.js");
+const pvb       = require("./proof_verify_base");
 
 async function run() {
-    await mpb.works(users.buyer, users.prover);
+    await pvb.mint_proof(users.buyer, users.prover);
 }
 
 run()
