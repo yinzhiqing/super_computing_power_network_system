@@ -321,7 +321,7 @@ async function scheduleJob(times, func, parameter, clear, reset_buf) {
                 }
                 if(Array.isArray(parameter)) {
                     for(let i in parameter) {
-                        if(parameter[i].alias == undefined) {
+                        if(typeof(parameter[i]) == "object" && parameter[i].alias == undefined) {
                             parameter[i] = {};
                         }
                     }

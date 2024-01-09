@@ -1,18 +1,14 @@
-const fs        = require('fs');
-const path      = require("path");
-const program   = require('commander');
 const utils     = require("./utils");
 const logger    = require("./logger");
-const prj       = require("../prj.config.js");
-const merkle    = require('./merkle');
 const {users}   = require("./datas/env.config.js");
-const { contracts_load } = require("./contracts.js");
 const pvb       = require("./proof_verify_base.js");
+const { tco }   = require("./cache_opts.js");
 
 async function run(times) {
-    let buf = {};
-    let user = users.prover;
-    await utils.scheduleJob(times, pvb.proof, [user, buf], false, 30);
+    let buf          = {};
+    let user         = users.prover;
+    let use_right_id = tco.fixed_use_right_id;
+    await utils.scheduleJob(times, pvb.proof, [user, buf, use_right_id], false, 30);
 }
 
 run(5)

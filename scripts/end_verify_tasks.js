@@ -7,6 +7,7 @@ const logger    = require("./logger");
 const prj       = require("../prj.config.js");
 const {users}   = require("./datas/env.config.js");
 const pvb       = require("./proof_verify_base.js");
+const {tco}     = require("./cache_opts.js");
 
 /*
  * 此函数完成挑战
@@ -20,7 +21,8 @@ async function run() {
 
     let buf = {};
     let user = users.prover;
-    await pvb.verify(user, buf)
+    let use_right_id = tco.fixed_use_right_id;
+    await pvb.verify(user, buf, use_right_id);
 }
 
 run()

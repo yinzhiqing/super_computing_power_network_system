@@ -271,6 +271,19 @@ async function show_comp_vm(ids) {
         logger.form("算力资源基本信息", rights["infos"]);
     }
 }
+
+async function select_use_right_id(owner) {
+    let contracts        = await contracts_load();
+    let use_right        = contracts.SCPNSUseRightToken;
+    let use_right_count = await use_right.balanceOf(owner);
+
+    for (var i = 0; i < use_right_count; i++) {
+        let use_right_id = utils.w3uint256_to_hex(await use_right.tokenOfOwnerByIndex(owner, i));
+        return use_right_id;
+    }
+    return null;
+}
+
 async function select_comp_vm_ids_of_owner(owner, type) {
     logger.debug("select_comp_vm_ids_of_owner(" + owner + "," + type + ")")
     let computility_vm = await utils.contract("SCPNSComputilityVM");
@@ -441,6 +454,7 @@ module.exports = {
     wait_comp_unit_exists,
     wait_comp_vm_exists,
     wait_use_right_exists,
+    select_use_right_id,
     select_comp_vm_ids_of_owner,
     select_comp_unit_ids_of_owner,
     select_type_unit_id_of,

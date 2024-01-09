@@ -143,22 +143,16 @@ async function load_revenue_info_by_slot(slot /*cvmId*/) {
         values: values
     };
 }
-async function select_use_right_id(signer_address) {
+
+async function select_use_right_id_from_market() {
     let contracts        = await contracts_load();
-    let use_right        = contracts.SCPNSUseRightToken;
-    let use_right_count = await use_right.balanceOf(signer_address);
-    let skeep = [''];
-
-    for (var i = 0; i < use_right_count; i++) {
-        let use_right_id = utils.w3uint256_to_hex(await use_right.tokenOfOwnerByIndex(signer_address, i));
-
-        if (skeep.includes(use_right_id)) {
-            continue;
-        }
-
+    let gpu_store        = contracts.GPUStore;
+    let saleIds          = await gpu_store.getGPUTokenForSaleIds();
+    for (let i in saleIds) {
+        let use_right_id = utils.w3uint256_to_hex(saleIds[i]);
         return use_right_id;
     }
-    throw("没有 use_right_id");
+    return null;
 }
 
 async function select_revenue_id(signer_address) {
@@ -687,7 +681,7 @@ module.exports = {
     put_use,
     buy_revenue,
     put_revenue,
-    select_use_right_id,
+    select_use_right_id_from_market,
     select_revenue_id,
     use_right_ids_of,
     mint_revenue_or_load_revenue_by_use_right_id

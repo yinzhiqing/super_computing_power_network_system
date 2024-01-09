@@ -214,10 +214,12 @@ async function datas_with_ranks_from_use_right_id(use_right_id) {
                 "   叶子数量(个)": parameter["leaf_count"],
                 "   叶子hash深度(次)": parameter["leaf_deep"],
 
+                //使用权通证证明统计
+                "使用通证证明统计：": "",
+                "    证明次数":         Number(verify_stat[0]),
+                "    证明成功次数":     Number(verify_stat[1]),
+                "    证明失败次数":     Number(verify_stat[2]),
                 //算力信息统计
-                "使用权通证挑战统计": "",
-                "    总挑战次数":       Number(verify_stat[0]),
-                "    成功次数":         Number(verify_stat[1]),
                 "证明任务挑战统计": "",
                 "    任务挑战次数":     Number(verify_stat_of[0]),
                 "    任务成功次数":     Number(verify_stat_of[1]),
@@ -241,13 +243,14 @@ async function datas_with_ranks_from_use_right_id(use_right_id) {
             xs = xs.sort(function (a, b) { return a - b;});
             xs.forEach(e => {ys.push(xyt[e]); });
             let state = "异常";
-            if (postion <= range[1]) {
+            if (postion <= range[1] && verify_state == 3) {
                 state = "正常";
             }
 
             if (postion <= range[0]) {
                 state += "(小于规定值范围)"
             }
+
             ranks_info["* 算力状态"] = state;
 
             ranks_infos.push(ranks_info);
