@@ -68,7 +68,7 @@ contract SCPNSUseRightToken is
 
         require(_baseIf(ContractProject.DNS_NAME_COMPUTILITYVM).isOwner(computilityVMs, _msgSender()) 
             || hasRole(MANAGER_ROLE, _msgSender()),
-            "SCPNSComputilityVM: must have role of manager or owner of token");
+            "SCPNSUseRightToken: must have role of manager or owner of token");
 
         _computilityVMIf().lockResources(computilityVMs,  deadline);
         _tokenComputilityVMs[tokenId].set(computilityVMs, uint256(1));
@@ -76,10 +76,34 @@ contract SCPNSUseRightToken is
         _deadlines[tokenId] = deadline;
     }
 
+    function resetLifeTime(uint256 tokenId, uint256 lifetime) public virtual override whenNotPaused {
+        require(hasRole(CONTROLLER_ROLE, _msgSender()), 
+                "SCPNSUseRightToken: only controller of token can reset deadline");
+        require(_exists(tokenId), 
+                "SCPNSUseRightToken: token is nonexistent.");
+
+        uint256 cvmId = SCPNSUseRightToken.computilityVMIdOf(tokenId);
+
+        _deadlines[tokenId] = block.timestamp / _pricision() + lifetime;
+        _computilityVMIf().resetLockLine(cvmId, _deadlines[tokenId]);
+    }
+
+    function renewal(uint256 tokenId, uint256 times) public virtual override whenNotPaused {
+        require(hasRole(CONTROLLER_ROLE, _msgSender()), 
+                "SCPNSUseRightToken: only controller of token can reset deadline");
+        require(_exists(tokenId), 
+                "SCPNSUseRightToken: token is nonexistent.");
+
+        uint256 cvmId = SCPNSUseRightToken.computilityVMIdOf(tokenId);
+
+        _deadlines[tokenId] += times;
+        _computilityVMIf().resetLockLine(cvmId, _deadlines[tokenId]);
+    }
+
     function computilityVMIdOf(uint256 tokenId) public view virtual override returns(uint256) {
         uint256 len = _tokenComputilityVMs[tokenId].length();
         require(len > 0, 
-                "SCPNSComputilityVM: no computility vm ");
+                "SCPNSUseRightToken: no computility vm ");
 
         return _tokenComputilityVMs[tokenId].keyOfByIndex(len - 1);
     }
@@ -87,7 +111,7 @@ contract SCPNSUseRightToken is
     function typeUnitIdOf(uint256 tokenId) public view virtual override returns(uint256) {
         uint256 len = _tokenComputilityVMs[tokenId].length();
         require(len > 0, 
-                "SCPNSComputilityVM: no computility vm ");
+                "SCPNSUseRightToken: no computility vm ");
 
         uint256 computilityVMId = _tokenComputilityVMs[tokenId].keyOfByIndex(len - 1);
 
@@ -128,7 +152,7 @@ contract SCPNSUseRightToken is
     function revenueValueOf(uint256 tokenId) public view virtual override returns(uint256) {
         uint256 len = _tokenComputilityVMs[tokenId].length();
         require(len > 0, 
-                "SCPNSComputilityVM: no computility vm");
+                "SCPNSUseRightToken: no computility vm");
 
         uint256 computilityVMId = _tokenComputilityVMs[tokenId].keyOfByIndex(len - 1);
 

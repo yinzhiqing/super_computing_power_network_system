@@ -46,12 +46,12 @@ async function set(client, signer, name, address){
 async function run() {
     logger.debug("start working...", "notes");
 
-    let computility_unit = await contract("SCPNSComputilityUnit");
-    let computility_vm   = await contract("SCPNSComputilityVM");
-    let computility_rank = await contract("SCPNSComputilityRanking");
-    let use_right        = await contract("SCPNSUseRightToken");
-    let proof_task       = await contract("SCPNSProofTask");
-    let verify_task      = await contract("SCPNSVerifyTask");
+    let computility_unit = await utils.contract("SCPNSComputilityUnit");
+    let computility_vm   = await utils.contract("SCPNSComputilityVM");
+    let computility_rank = await utils.contract("SCPNSComputilityRanking");
+    let use_right        = await utils.contract("SCPNSUseRightToken");
+    let proof_task       = await utils.contract("SCPNSProofTask");
+    let verify_task      = await utils.contract("SCPNSVerifyTask");
 
     const accounts = await web3.eth.getAccounts();
     let signer = users.manager.signer; 
@@ -63,7 +63,8 @@ async function run() {
     await grant_role(computility_rank,  proof_task.address,     "CONTROLLER_ROLE");
     await grant_role(verify_task,       proof_task.address,     "CONTROLLER_ROLE");
     //￼0x7B5dE13ff540C685eBA05b34A5283fAF02A1Bb88
-    await grant_role(use_right,  '0x7B5dE13ff540C685eBA05b34A5283fAF02A1Bb88',     "MINTER_ROLE");
+    await grant_role(use_right,        '0x7B5dE13ff540C685eBA05b34A5283fAF02A1Bb88',     "MINTER_ROLE");
+    await grant_role(use_right,        '0xf97436Df382526343239910938FA47C53A26948d',     "CONTROLLER_ROLE");
 
     //
 

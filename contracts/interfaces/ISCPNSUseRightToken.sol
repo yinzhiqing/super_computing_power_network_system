@@ -67,6 +67,22 @@ interface ISCPNSUseRightToken is
     function deadLine(uint256 tokenId) external view returns(uint256);
 
     /**
+    * @notice 重新设置使用权通证的有效终止时间点(生命时间)
+    * @dev 重新设置使用权通证的有效终止时间
+    * @param tokenId 使用权通证ID
+    * @param lifeTime 生命时间(秒)
+    */
+    function resetLifeTime(uint256 tokenId, uint256 lifeTime) external;
+
+    /**
+    * @notice 延长终止时间点, 在现有时间基础上增加指定的时间(times)
+    * @dev 延长使用权通证的有效终止时间
+    * @param tokenId 使用权通证ID
+    * @param times 续约时间(秒)
+    */
+    function renewal(uint256 tokenId, uint256 times) external;
+
+    /**
     * @notice  确认使用权通证是否有效
     * @dev 使用权通证有效性根据deadline 与 块时间戳比较判定
     * @param tokenId 使用权通证ID

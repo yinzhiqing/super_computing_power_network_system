@@ -61,6 +61,13 @@ interface ISCPNSComputilityVM is
     function lockResources(uint256 tokenId, uint256 lockLine) external;
 
     /**
+    * @notice 重新设定锁定算力到指定的时间
+    * @dev 重新设定锁定时间使指定的算力在指定时间点之前不能被重新使用
+    * @param tokenId 算力ID
+    * @param lockLine 锁定终止时戳（精度与链精度一致）
+    */
+    function resetLockLine(uint256 tokenId, uint256 lockLine) external;
+    /**
     * @notice 获取算力可使用终止时间（时戳，精度与链精度一致）
     * @dev 使用终止日，即以时戳形式表示的终止时间点
     * @param tokenId 算力ID

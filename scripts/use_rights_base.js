@@ -372,6 +372,57 @@ async function mint_use_right(signer, to, use_right_id, deadline, computility_vm
     return rows;
 }
 
+async function renewal_use_right(signer, use_right_id, times) {
+    logger.debug("renewal_use_right:" + use_right_id);
+    let use_right      = await utils.contract("SCPNSUseRightToken");
+
+    let role   = "CONTROLLER_ROLE";
+    let signer_address = await signer.getAddress(); 
+
+    let has = await has_role(use_right, signer_address, role);
+    if (has != true) {
+        throw(signer_address + " no controller role." );
+    } 
+
+    let rows = [];
+    //使用权通证时间与算力资源寿命相同
+
+    let tx = await use_right.connect(signer).renewal(use_right_id, times);
+
+    logger.debug(tx);
+    rows.push({
+        token_id: use_right_id,
+        times: times
+    });
+
+    return rows;
+}
+
+async function reset_lifetime_use_right(signer, use_right_id, life_time) {
+    logger.debug("renewal_use_right:" + use_right_id);
+    let use_right      = await utils.contract("SCPNSUseRightToken");
+
+    let role   = "CONTROLLER_ROLE";
+    let signer_address = await signer.getAddress(); 
+
+    let has = await has_role(use_right, signer_address, role);
+    if (has != true) {
+        throw(signer_address + " no controller role." );
+    } 
+
+    let rows = [];
+    //使用权通证时间与算力资源寿命相同
+
+    let tx = await use_right.connect(signer).resetLifeTime(use_right_id, life_time);
+
+    logger.debug(tx);
+    rows.push({
+        token_id: use_right_id,
+        life_time:life_time, 
+    });
+
+    return rows;
+}
 async function mint_comp_vm(wallet_user, to, token_id, computility_unit_id, count, deadline) {
     logger.debug("mint computility vm");
     let computility_vm   = await utils.contract("SCPNSComputilityVM");
@@ -449,6 +500,8 @@ module.exports = {
     type_unit_id_of, 
     new_token_id,
     mint_use_right,
+    renewal_use_right,
+    reset_lifetime_use_right,
     mint_comp_vm,
     mint_comp_unit,
     use_right_exists,

@@ -90,6 +90,16 @@ contract SCPNSComputilityVM is
         _lockLines[tokenId] = lockline;
     }
 
+    function resetLockLine(uint256 tokenId, uint256 lockline) public virtual override whenNotPaused {
+        require(_msgSender() == super.ownerOf(tokenId) || hasRole(CONTROLLER_ROLE , _msgSender()), 
+                "SCPNSComputilityVM: only owner of token or have controller role can lock resources");
+        require(_exists(tokenId), 
+                "SCPNSComputilityVM: token is nonexists.");
+        require(lockline <= _deadlines[tokenId], 
+                "SCPNSComputilityVM: locked time > deadline");
+
+        _lockLines[tokenId] = lockline;
+    }
     function typeUnitIdOf(uint256 tokenId) public view virtual override returns(uint256) {
         uint256 len = _tokenComputilityUnits[tokenId].length();
         require(len > 0, 
