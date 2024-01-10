@@ -100,7 +100,7 @@ contract SCPNSVerifyTask is
         vp.q                = _create_q(useRightId, proofId);
 
         VerifyStat      storage vs  = _useRightId2VerifyStat[useRightId];
-        vs.total            += sample;
+        vs.total            += 1;
     
         emit TaskData(_eventIndex.current(), useRightId, _preBlockNumber, _msgSender(), vp, datas);
 
@@ -120,9 +120,7 @@ contract SCPNSVerifyTask is
         require(_msgSender() == super.ownerOf(tokenId), 
                 "SCPNSVerifyTask: must be owner of token");
 
-        VerifyStat      storage vs = _useRightId2VerifyStat[_id2UseRightId[tokenId]];
         VerifyParameter storage vp = _id2VerifyParameter[tokenId];
-
         require(vp.q == a, 
                 "SCPNSVerifyTask: the answer does not match  question question");
 
@@ -131,10 +129,8 @@ contract SCPNSVerifyTask is
 
         bool __valid = _is_valid_proof(tokenId, proof, pos);
         if (!__valid) {
-            vs.failed  += 1;
             vp.stat.failed += 1;
         } else {
-            vs.success += 1;
             vp.stat.success += 1;
         }
 
@@ -260,12 +256,9 @@ contract SCPNSVerifyTask is
     
         VerifyParameter storage vp = _id2VerifyParameter[tokenId];
         VerifyStat storage vs = _useRightId2VerifyStat[useRightId];
-        if (vp.state == VerifyState.Start && block.number > vp.startBlockNumber + _waitBlockNumber) {
+        if ((vp.state == VerifyState.Start || vp.state == VerifyState.Verify) && block.number > vp.startBlockNumber + _waitBlockNumber) {
             vp.state = VerifyState.Error;
             vs.failed += 1;
-        }
-        if (vp.state == VerifyState.Verify && block.number > vp.startBlockNumber + _waitBlockNumber) {
-            vp.state = VerifyState.Error;
         }
     }
 
@@ -294,10 +287,14 @@ contract SCPNSVerifyTask is
 
     function _next_verify(uint256 tokenId, uint256 useRightId) internal {
         VerifyParameter storage vp  = _id2VerifyParameter[tokenId];
+        VerifyStat storage vs       = _useRightId2VerifyStat[useRightId];
+
         if (vp.stat.total == vp.stat.success) {
-            vp.state = VerifyState.End;
+            vp.state   = VerifyState.End;
+            vs.success += 1;
         }  else if (vp.stat.total <= (vp.stat.failed + vp.stat.success)) {
             vp.state = VerifyState.Error;
+            vs.failed  += 1;
         } else if(vp.stat.total > (vp.stat.failed + vp.stat.success)) {
             vp.state            = VerifyState.Verify;
             vp.q                = _create_q(useRightId, vp.proofId);

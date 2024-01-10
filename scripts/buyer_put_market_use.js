@@ -8,11 +8,11 @@ const urb       = require("./use_rights_base.js");
 
 async function run() {
     logger.debug("start working...", "put mark");
-    let signer = users.buyer.signer;
-    let owner = await signer.getAddress();
+    let user  = users.buyer;
+    let owner = await user.signer.getAddress();
     // 从配置文件中读取使用权通证(一个算力节点对应一个使用权通证)
     let use_right_id = await urb.select_use_right_id(owner);
-    await mb.put_use(signer, use_right_id);
+    await mb.put_use(user, use_right_id);
 }
 
 run()

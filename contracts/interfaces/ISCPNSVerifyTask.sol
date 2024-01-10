@@ -14,8 +14,8 @@ interface ISCPNSVerifyTask is
     ISCPNSBase
 {
     /**
-    * @notice 挑战统计
-    * @dev 统计某种类型算力挑战信息
+    * @notice 证明次数统计
+    * @dev 统计某种类型算力证明信息
     */
     struct VerifyStat {
         uint256 total;

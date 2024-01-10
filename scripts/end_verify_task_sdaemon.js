@@ -10,6 +10,7 @@ const {tco}     = require("./cache_opts.js");
 async function works(user, buf, use_right_id = null) {
     let token_id = await pvb.verify(user, buf, use_right_id);
     logger.debug("verify return token(" + token_id +")");
+    token_id = token_id == null ? use_right_id : token_id;
     if (token_id != null) {
         //显示排行信息
         await crb.show_ranks_from_use_right_id(token_id);

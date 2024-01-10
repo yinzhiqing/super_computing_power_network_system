@@ -1,5 +1,7 @@
-const readline = require('readline');
-const {exec, spawn}   = require('child_process');
+const readline          = require('readline');
+const logger            = require("./logger");
+const {exec, spawn}     = require('child_process');
+const {uco, tco}        = require('./cache_opts.js');
  
 // 创建接口对象
 const rl = readline.createInterface({
@@ -15,40 +17,90 @@ rl.question("请输入您的名字：", (name) => {
 });
 */
 
-rl.setPrompt('输入命令: ');
 
-/*
-rl.on('line', (input) => {
-    exec(`${input}`, {shell:process.platform === "linux"}, (error, stdout, stdin) => {
-        if(error) {
-            console.error(`error: ${error}`);
-        }
-        console.log(`stdout: ${stdout}`);
-    });
-    rl.prompt();
-});
-*/
-
-
-async function run(name) {
-    console.log(name);
-    const python    = spawn('make', [name]);
-    python.stdout.on('data', (data) => {
-        console.log(`stdout: ${data}`);
-    });
-
-    python.stderr.on('data', (data) => {
-        console.error(`stderr: ${data}`);
-    });
-
-    python.on('close', (code) => {
-        console.log(`child process exited with code ${code}`);
-    });
+const commands = {
+    exit : {
+        name: "exit",
+        args: "",
+        desc: "退出"
+    },
+    upuid: {
+        name: "upuid",
+        args: "<use_right_id> [usage = true]",
+        desc: "更新目标使用权通证",
+    },
+    accounts: {
+        name: "accounts",
+        args: "",
+        desc: "钱包账户"
+    },
+    make: {
+        name: "make",
+        args: "[name]",
+        desc: "执行脚本"
+    },
 
 }
 
+let prompts = "usage: cmd [arg1] [arg2] ... [argn]\n";
 
+for(let i in commands) {
+    prompts += `\t${commands[i].name}\t\t\t\t--${commands[i].desc}\n`;
+    prompts += `\t\tex. ${commands[i].name} ${commands[i].args}\n`;
+}
+prompts += "输入命令：";
+
+rl.setPrompt(prompts);
+
+
+async function call(args) {
+    let argv = args.split(" ");
+    let argn = argv.length;
+    if (argn == 0) {
+        return;
+    }
+    let cmd = argv[0];
+    argv.shift();
+    switch(cmd) {
+        case "exit":
+            process.exit();
+            break;
+        case "upuid":
+            tco.update_fixed_use_right_id.apply(null, argv);
+            break;
+        case "accounts":
+            make(cmd);
+        case "make":
+            make.apply(null, argv);
+        default:
+            break;
+    }
+}
+
+async function make(name) {
+    const python    = spawn('make', [name]);
+    python.stdout.on('data', (data) => {
+        console.log(`${data}`);
+    });
+
+
+    /*
+    python.stderr.on('data', (data) => {
+        console.error(`stderr: ${data}`);
+    });
+     */
+    python.on('close', (code) => {
+    });
+}
+async function run(input) {
+    call(input);
+}
+
+
+rl.prompt();
 rl.on('line', (input) => {
     run(input);
-
+    rl.prompt();
 });
+
+

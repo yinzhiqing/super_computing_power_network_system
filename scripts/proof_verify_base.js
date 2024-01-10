@@ -202,9 +202,10 @@ async function check_use_right_id_can_proof(use_right_id) {
         return false;
     }
 
-    let deadline = await use_right.deadLine(use_right_id);
+    let pricision_chain = await use_right.pricision();
+    let deadline = (await use_right.deadLine(use_right_id)) * pricision_chain;
     let now_utc_time = Math.floor(((new Date()).getTime()));
-    logger.debug(" check use_right_id(" + use_right_id + " deadline is " + deadline, " now time: " + now_utc_time);
+    logger.debug(" check use_right_id(" + use_right_id + " deadline is " + deadline + ", now time: " + now_utc_time);
 
     if (deadline < now_utc_time) {
         logger.debug("use_right_id: " + use_right_id + " is deadline");

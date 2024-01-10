@@ -234,7 +234,7 @@ async function store_use(title = "使用权通证市场") {
             "使用权通证ID": use_right_id,
             "价格": price,
         })
-        logger.form("使用权通证市场信息表", use_right_info, use_form);
+        //logger.form("使用权通证市场信息表", use_right_info, use_form);
 
     }
     logger.table(list, title);
@@ -456,7 +456,7 @@ async function revenue_distribute_revenue(title = "结算记录") {
     //msgs.forEach(function(item) {logger.table(item)});
 }
 
-async function buy_use(signer, use_right_id, title = "购买通证") {
+async function buy_use(user, use_right_id, title = "购买通证") {
     logger.debug(title);
 
     //获取合约SCPNSProofTask对象
@@ -469,6 +469,7 @@ async function buy_use(signer, use_right_id, title = "购买通证") {
     logger.debug("store address: " + gpu_store.address);
     logger.debug("vnet token address: " + vnet_token.address);
 
+    let signer= user.signer;
     let buyer = await signer.getAddress();
     logger.debug("buyer: " + buyer);
 
@@ -505,7 +506,7 @@ async function buy_use(signer, use_right_id, title = "购买通证") {
     logger.form("购买使用权通证信息", use_right_info, sale_info);
 }
 
-async function put_use(signer, use_right_id, title = "添加使用权通证到市场") {
+async function put_use(user, use_right_id, title = "添加使用权通证到市场") {
     logger.info(title);
 
     //获取合约SCPNSProofTask对象
@@ -518,7 +519,7 @@ async function put_use(signer, use_right_id, title = "添加使用权通证到�
     let revenue_token    = contracts.RevenueToken;
 
     //1.
-    // 获取钱包中account, 此account是使用权通证(use_right_id)的拥有者
+    let signer = user.signer;
     let owner = await signer.getAddress();
 
     logger.debug("owner: " + owner);

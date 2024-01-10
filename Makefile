@@ -178,6 +178,9 @@ show_comp_vms:
 show_use_rights:
 	$(call run_script, "show_use_rights")
 
+show_use_rights_target:
+	$(call run_script, "show_use_rights_target")
+
 show_proof_tasks:
 	$(call run_script, "show_proof_tasks")
 

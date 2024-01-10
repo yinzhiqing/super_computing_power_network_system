@@ -243,12 +243,16 @@ async function datas_with_ranks_from_use_right_id(use_right_id) {
             xs = xs.sort(function (a, b) { return a - b;});
             xs.forEach(e => {ys.push(xyt[e]); });
             let state = "异常";
-            if (postion <= range[1] && verify_state == 3) {
+            if(verify_state == 2) {
+                state = "证明中";
+            } else if (postion <= range[1] && verify_state == 3) {
                 state = "正常";
             }
 
             if (postion <= range[0]) {
-                state += "(小于规定值范围)"
+                state += "(小于规定值范围最小值)"
+            } else {
+                state += "(大于规定值范围最大值)"
             }
 
             ranks_info["* 算力状态"] = state;

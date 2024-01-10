@@ -221,6 +221,7 @@ async function tokensByTokenId(tokenId) {
     return list;
 }
 
+//获取所有使用权通证
 async function works(latest_count) {
     let cobj     = await utils.contract("SCPNSUseRightToken");
     let typeUnit = await utils.contract("SCPNSTypeUnit");

@@ -9,13 +9,14 @@ const {tco}     = require("./cache_opts.js");
 
 async function run() {
     logger.debug("start working...", "put mark");
-    let signer = users.seller.signer;
-    let owner  = await signer.getAddress();
+    let user = users.seller;
+    let owner  = await user.signer.getAddress();
+
     // 从配置文件中读取使用权通证(一个算力节点对应一个使用权通证)
     let use_right_id = tco.fixed_use_right_id;
-
     use_right_id = use_right_id == null ? await urb.select_use_right_id(owner) : use_right_id;
-    await mb.put_use(signer, use_right_id);
+
+    await mb.put_use(user, use_right_id);
 }
 
 run()

@@ -2,6 +2,7 @@ const utils     = require("./utils");
 const logger    = require("./logger");
 const {users}   = require("./datas/env.config.js");
 const pvb       = require("./proof_verify_base.js");
+const {tco}     = require("./cache_opts.js");
 
 async function run() {
     let user         = users.prover;
