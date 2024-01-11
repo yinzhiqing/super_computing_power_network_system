@@ -46,12 +46,14 @@ async function set(client, signer, name, address){
 async function run() {
     logger.debug("start working...", "notes");
 
-    let computility_unit = await utils.contract("SCPNSComputilityUnit");
-    let computility_vm   = await utils.contract("SCPNSComputilityVM");
-    let computility_rank = await utils.contract("SCPNSComputilityRanking");
-    let use_right        = await utils.contract("SCPNSUseRightToken");
-    let proof_task       = await utils.contract("SCPNSProofTask");
-    let verify_task      = await utils.contract("SCPNSVerifyTask");
+    let contracts        = await contracts_load();
+    let computility_unit = contracts.SCPNSComputilityUnit;
+    let computility_vm   = contracts.SCPNSComputilityVM;
+    let computility_rank = contracts.SCPNSComputilityRanking;
+    let use_right        = contracts.SCPNSUseRightToken;
+    let proof_task       = contracts.SCPNSProofTask;
+    let verify_task      = contracts.SCPNSVerifyTask;
+    let gpu_store        = contracts.GPUStore;
 
     const accounts = await web3.eth.getAccounts();
     let signer = users.manager.signer; 
@@ -65,6 +67,7 @@ async function run() {
     //￼0x7B5dE13ff540C685eBA05b34A5283fAF02A1Bb88
     await grant_role(use_right,        '0x7B5dE13ff540C685eBA05b34A5283fAF02A1Bb88',     "MINTER_ROLE");
     await grant_role(use_right,        '0xf97436Df382526343239910938FA47C53A26948d',     "CONTROLLER_ROLE");
+    await grant_role(use_right,        gpu_store.address,     "CONTROLLER_ROLE");
 
     //
 
