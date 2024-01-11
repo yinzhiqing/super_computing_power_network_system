@@ -436,6 +436,7 @@ async function mint_proof(owner, prover, fixed_use_right_id = null) {
     let signer   = owner.signer; 
     let receiver = (prover == undefined ? users.prover : prover).signer; 
     let minter   = await signer.getAddress(); 
+    logger.debug("minter: " + minter);
 
     let has_miter = await utils.has_role(proof_task, minter, role);
     if (has_miter != true) {

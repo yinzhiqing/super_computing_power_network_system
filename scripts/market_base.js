@@ -352,6 +352,7 @@ async function use_orders(latest_count = 2, title = "使用权通证交易记录
             trade_time:     (new Date(Number(order[4]))).toLocaleString(),
             charging_time:  (new Date(Number(order[5]))).toLocaleString()
         }
+        logger.debug("trade_name: " +  order[4].toString());
 
         let rights = await sur.datas_from_use_right_id(order[0]);
         let use_right_info = rights.form;
@@ -506,6 +507,100 @@ async function buy_use(user, use_right_id, title = "购买通证") {
     logger.form("购买使用权通证信息", use_right_info, sale_info);
 }
 
+async function renewal_use_right(user, use_right_id, title = "续约") {
+    logger.debug(title);
+
+    //获取合约SCPNSProofTask对象
+    let contracts        = await contracts_load();
+    let use_right        = contracts.SCPNSUseRightToken;
+    let dns              = contracts.SCPNSDns;
+    let gpu_store        = contracts.GPUStore;
+    let vnet_token       = contracts.VNetToken;
+    logger.debug("store address: " + gpu_store.address);
+    logger.debug("vnet token address: " + vnet_token.address);
+
+    let signer= user.signer;
+    let buyer = await signer.getAddress();
+    logger.debug("buyer: " + buyer);
+
+    let list = [];
+    let order_id = await gpu_store._gpuTokenIdToOrderId(use_right_id);
+    logger.debug("order_id: " + utils.w3uint256_to_hex(order_id));
+    let order_info = await gpu_store._orders(order_id);
+    let price         = order_info[1].toString();
+
+    logger.debug(order_info);
+    list.push({
+        use_right_id: use_right_id,
+        price: price,
+        buyer: buyer
+    });
+
+    await vnet_token.connect(signer).approve(gpu_store.address, price);
+
+    let amount = 0;
+    while(amount < price) {
+        amount = await vnet_token.connect(signer).allowance(buyer, gpu_store.address);
+    }
+    await gpu_store.connect(signer).renewOrder(use_right_id);
+
+    utils.sleep(4);
+
+    let use_right_info = await _use_right_info_load(use_right_id);
+    logger.debug(use_right_info);
+
+    sale_info = {
+       "价格(VNet)":  price,
+       "拥有者": buyer
+    };
+    logger.form("使用权通证续约", use_right_info, sale_info);
+    return list;
+}
+
+async function approve_use(user, use_right_id, times, title = "授权自动扣费") {
+    logger.debug(title);
+
+    //获取合约SCPNSProofTask对象
+    let contracts        = await contracts_load();
+    let use_right        = contracts.SCPNSUseRightToken;
+    let dns              = contracts.SCPNSDns;
+    let gpu_store        = contracts.GPUStore;
+    let vnet_token       = contracts.VNetToken;
+    let to               = gpu_store.address;
+    logger.debug("store address: " + gpu_store.address);
+    logger.debug("vnet token address: " + vnet_token.address);
+
+    let signer= user.signer;
+    let buyer = await signer.getAddress();
+    logger.debug("buyer: " + buyer);
+
+    let list = [];
+    let order_id = await gpu_store._gpuTokenIdToOrderId(use_right_id);
+    logger.debug("order_id: " + utils.w3uint256_to_hex(order_id));
+    let order_info = await gpu_store._orders(order_id);
+    let price         = order_info[1].toString();
+
+    list.push({
+        use_right_id: use_right_id,
+        price: price,
+        approve: buyer, 
+        to: to
+    });
+
+    let approve = price * times;
+    await vnet_token.connect(signer).approve(gpu_store.address, price);
+    let use_right_info = await _use_right_info_load(use_right_id);
+
+    sale_info = {
+       "授权者": buyer,
+       "被授权者": to,
+       "价格(VNet)":  price,
+       "授权金额(VNet)":  approve,
+       "可扣费次数": Math.floor(approve / price),
+    };
+    logger.form("购买使用权通证信息", use_right_info, sale_info);
+
+}
 async function put_use(user, use_right_id, title = "添加使用权通证到市场") {
     logger.info(title);
 
@@ -676,10 +771,12 @@ module.exports = {
     store_use,
     revenues,
     use_orders,
+    renewal_use_right,
     revenue_orders,
     revenue_distribute_revenue,
     buy_use,
     put_use,
+    approve_use,
     buy_revenue,
     put_revenue,
     select_use_right_id_from_market,

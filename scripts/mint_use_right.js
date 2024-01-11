@@ -60,7 +60,7 @@ async function run(types) {
         //创建使用权通证
         let token_id = await urb.new_token_id(cvmid);
 
-        await urb.mint_use_right(signer, to, token_id, deadline, cvmid);
+        await urb.mint_use_right(user, to, token_id, deadline, cvmid);
         await urb.wait_use_right_exists(token_id);
 
         let revenue_info = await mb.mint_revenue_or_load_revenue_by_use_right_id(signer, token_id, owners);

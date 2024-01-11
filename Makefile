@@ -244,6 +244,9 @@ cancel_proof_tasks:
 put_market_use:
 	$(call run_script, "put_market_use")
 
+approve_market_use:
+	$(call run_script, "approve_market_use")
+
 buyer_put_market_use:
 	$(call run_script, "buyer_put_market_use")
 
@@ -264,6 +267,9 @@ buy_market_revenue:
 
 revoke_market_revenue:
 	$(call run_script, "revoke_market_revenue")
+
+renewal_market_use:
+	$(call run_script, "renewal_market_use")
 
 show_market_use:
 	$(call run_script, "show_market_use")

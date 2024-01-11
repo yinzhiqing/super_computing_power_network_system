@@ -1,4 +1,3 @@
-const fs        = require('fs');
 const path      = require("path");
 const program   = require('commander');
 const utils     = require("./utils");
@@ -7,6 +6,7 @@ const prj       = require("../prj.config.js");
 const bak_path  = prj.caches_contracts;
 const tokens  = require(prj.contract_conf);
 const {ethers, upgrades}    = require("hardhat");
+const { contracts_load }    = require("./contracts.js");
 
 async function has_role(cobj, address, role) {
     let brole = web3.eth.abi.encodeParameter("bytes32", web3.utils.soliditySha3(role));
@@ -154,7 +154,11 @@ async function datas_from_use_right_id(tokenId) {
     row["revenueValue"] = Number(await cobj.revenueValueOf(row["tokenId"]));
     //logger.log(row["revenueValue"]);
     row["deadline"] = await cobj.deadLine(row["tokenId"]);
+    row["isValid"] = await cobj.isValid(row["tokenId"]);
     let pricision_chain = await cobj.pricision();
+    logger.debug("pricision: " +  Number(pricision_chain));
+    logger.debug("deadline:" + row["deadline"]);
+    logger.debug("deadline:" + (Number(row["deadline"]) * pricision_chain));
     row["deadline"] = (new Date(Number(row["deadline"]) * pricision_chain)).toLocaleString();
 
     let datas = utils.w3str_to_str(await cobj.datasOf(row["tokenId"]));
@@ -181,7 +185,8 @@ async function datas_from_use_right_id(tokenId) {
         "类型":  await typeUnit.unitTypeOf(typeUnitId),
         "型号": typeUnitName,
         "数量": typeUnitCount.toString(),
-        "使用截止日期": row["deadline"]
+        "使用截止日期": row["deadline"],
+        "是否有效": row["isValid"]
     }
 
     let unit = await typeUnit.unitIdOf(typeUnitId);
@@ -237,7 +242,8 @@ async function works(latest_count) {
     for (let i = start; i < amounts; i++) {
         let tokenId = utils.w3uint256_to_hex(await cobj.tokenByIndex(i));
         let rights = await datas_from_use_right_id(tokenId);
-        logger.form("使用权通证基本信息", rights.form);
+        let cvm    = await datas_from_comp_vm_id(rights.row.cvmId);
+        logger.form("使用权通证信息", rights.form, cvm.form);
         list.push(rights["row"]);
         //let gpuDatas = utils.w3str_to_str(await gpu.datasOf(typeId);
     } 
@@ -342,10 +348,11 @@ async function select_type_unit_id_of(name) {
     return existed == true ? token_id : null;
 }
 
-async function mint_use_right(signer, to, use_right_id, deadline, computility_vm_id) {
+async function mint_use_right(user, to, use_right_id, deadline, computility_vm_id) {
     let use_right      = await utils.contract("SCPNSUseRightToken");
 
     let role   = "MINTER_ROLE";
+    let signer = user.signer;
     let signer_address = await signer.getAddress(); 
 
     let has_miter = await has_role(use_right, signer_address, role);
@@ -372,11 +379,12 @@ async function mint_use_right(signer, to, use_right_id, deadline, computility_vm
     return rows;
 }
 
-async function renewal_use_right(signer, use_right_id, times) {
+async function renewal_use_right(user, use_right_id, times) {
     logger.debug("renewal_use_right:" + use_right_id);
     let use_right      = await utils.contract("SCPNSUseRightToken");
 
     let role   = "CONTROLLER_ROLE";
+    let signer = user.signer;
     let signer_address = await signer.getAddress(); 
 
     let has = await has_role(use_right, signer_address, role);
@@ -398,11 +406,12 @@ async function renewal_use_right(signer, use_right_id, times) {
     return rows;
 }
 
-async function reset_lifetime_use_right(signer, use_right_id, life_time) {
+async function reset_lifetime_use_right(user, use_right_id, life_time) {
     logger.debug("renewal_use_right:" + use_right_id);
     let use_right      = await utils.contract("SCPNSUseRightToken");
 
     let role   = "CONTROLLER_ROLE";
+    let signer = user.signer;
     let signer_address = await signer.getAddress(); 
 
     let has = await has_role(use_right, signer_address, role);
@@ -423,14 +432,14 @@ async function reset_lifetime_use_right(signer, use_right_id, life_time) {
 
     return rows;
 }
-async function mint_comp_vm(wallet_user, to, token_id, computility_unit_id, count, deadline) {
+async function mint_comp_vm(user, to, token_id, computility_unit_id, count, deadline) {
     logger.debug("mint computility vm");
     let computility_vm   = await utils.contract("SCPNSComputilityVM");
 
     let rows = [];
 
     let role   = "MINTER_ROLE";
-    let signer = wallet_user.signer; 
+    let signer = user.signer; 
 
     let has_miter = await has_role(computility_vm, to, role);
     if (has_miter != true) {
@@ -452,13 +461,13 @@ async function mint_comp_vm(wallet_user, to, token_id, computility_unit_id, coun
     return rows;
 }
 
-async function mint_comp_unit(wallet_user, to, token_id, count, type) {
+async function mint_comp_unit(user, to, token_id, count, type) {
     logger.debug("mint computility unit");
     let computility_unit = await utils.contract("SCPNSComputilityUnit");
     let type_unit        = await utils.contract("SCPNSTypeUnit");
 
     let role   = "MINTER_ROLE";
-    let signer = wallet_user.signer; 
+    let signer = user.signer; 
 
     let has_miter = await has_role(computility_unit, to, role);
     if (has_miter != true) {
