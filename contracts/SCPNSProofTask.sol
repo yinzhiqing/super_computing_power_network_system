@@ -4,6 +4,7 @@
 pragma solidity ^0.8.2;
 
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol";
 import "./SCPNSBase.sol";
 import "./interfaces/ISCPNSProofTask.sol";
 import "./interfaces/ISCPNSUseRightToken.sol";
@@ -79,6 +80,7 @@ ISCPNSProofTask
                 "SCPNSProofTask: useRight token is in Verify");
 
         require(_useRightTokenIf().isValid(useRightId), 
+                //StringsUpgradeable.toString(block.timestamp));
                 "SCPNSProofTask: useRight token is invalid(deadline < block.timestamp)");
 
         uint256 tokenId = _idGenerator.current();

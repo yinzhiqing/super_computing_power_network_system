@@ -158,7 +158,6 @@ async function datas_from_use_right_id(tokenId) {
     let pricision_chain = await cobj.pricision();
     logger.debug("pricision: " +  Number(pricision_chain));
     logger.debug("deadline:" + row["deadline"]);
-    logger.debug("deadline:" + (Number(row["deadline"]) * pricision_chain));
     row["deadline"] = (new Date(Number(row["deadline"]) * pricision_chain)).toLocaleString();
 
     let datas = utils.w3str_to_str(await cobj.datasOf(row["tokenId"]));

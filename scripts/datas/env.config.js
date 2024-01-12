@@ -25,7 +25,7 @@ config = {
         tokens_cache_name: "tokens.cache.json",
         users: {
             buyer: {
-                alias: "算力购买者",
+                alias: "购买者",
                 signer: get_signer(19),
             },
             seller : {

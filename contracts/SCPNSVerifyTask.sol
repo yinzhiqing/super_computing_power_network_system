@@ -69,7 +69,7 @@ contract SCPNSVerifyTask is
     internal initializer 
     {
         _unitType("verifytask");
-        _waitBlockNumber = 300; //10 minute
+        _waitBlockNumber = 600; //10 minute
     }
 
     function mint(uint256 useRightId, uint256 proofId, string memory datas) public virtual override {

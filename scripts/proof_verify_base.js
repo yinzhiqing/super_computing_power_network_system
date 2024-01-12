@@ -78,7 +78,7 @@ async function select_use_right_id_in_verify(owner, buf, use_right_id = null) {
             }
         }
     }
-    return "";
+    return null;
 }
 /*
  * 此函数完成挑战
@@ -101,7 +101,7 @@ async function verify(user, buf, fixed_use_right_id = null) {
 
     //这里可以指定一个特定的感兴趣的use_right_id
     let use_right_id = await select_use_right_id_in_verify(owner, buf, fixed_use_right_id);
-    if (use_right_id == false || use_right_id == "") {
+    if (use_right_id == null || use_right_id == "") {
         logger.debug("没有需要验证的任务");
         return null;
     }
@@ -189,8 +189,8 @@ async function check_use_right_id_can_proof(use_right_id) {
     let use_right       = await utils.contract("SCPNSUseRightToken");
     let proof_task      = await utils.contract("SCPNSProofTask");
     let verify_task     = await utils.contract("SCPNSVerifyTask");
-    let isInProof = await proof_task.isInProofOfUseRightId(use_right_id);
 
+    let isInProof = await proof_task.isInProofOfUseRightId(use_right_id);
     if (isInProof) {
         logger.info("useRight token(" + use_right_id +") is in proof, next...");
         return false;
@@ -286,7 +286,7 @@ async function select_use_right_id_in_proof(owner, buf, fixed_use_right_id = nul
             }
         }
     }
-    return "";
+    return null;
 }
 
 async function proof(user, buf, fixed_use_right_id = null) {
@@ -303,7 +303,7 @@ async function proof(user, buf, fixed_use_right_id = null) {
     let rows = []
 
     let use_right_id = await select_use_right_id_in_proof(owner, buf, fixed_use_right_id);
-    if (use_right_id == false || use_right_id == "") {
+    if (use_right_id == null || use_right_id == "") {
         logger.debug("not found token in proof");
         return;
     }
@@ -448,8 +448,8 @@ async function mint_proof(owner, prover, fixed_use_right_id = null) {
     let to = await receiver.getAddress();
 
     let use_right_id = await select_use_right_id_can_proof(from_address, fixed_use_right_id);
-    if (use_right_id == false || use_right_id == "") {
-        logger.debug("没有可以验证的通证");
+    if (use_right_id == null || use_right_id == "") {
+        logger.debug("不可进行算力证明");
         return null;
     }
 

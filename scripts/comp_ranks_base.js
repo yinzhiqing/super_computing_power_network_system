@@ -255,7 +255,7 @@ async function datas_with_ranks_from_use_right_id(use_right_id) {
                 state += "(大于规定值范围最大值)"
             }
 
-            ranks_info["* 算力状态"] = state;
+            ranks_info["*算力状态"] = state;
 
             ranks_infos.push(ranks_info);
             //logger.form("使用权通证算力信息表", use_right_info, ranks_info, ranks_state);

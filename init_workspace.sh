@@ -12,3 +12,10 @@ else
    echo "{}" > "$FILE"
 fi
 
+FILE=./scripts/datas/tokens.cache.json
+if test -f "$FILE"; then
+    echo "tokens.cache.json is exists"
+else
+   echo "{}" > "$FILE"
+fi
+

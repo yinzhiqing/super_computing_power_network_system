@@ -58,6 +58,9 @@ async function run() {
     const accounts = await web3.eth.getAccounts();
     let signer = users.manager.signer; 
 
+    //20 min
+    await verify_task.updateWaitBlockNumber(600);
+
     // grant manager role to SCPNSComputilityVM
     //               contract           roler                   role
     await grant_role(computility_unit,  computility_vm.address, "MANAGER_ROLE");

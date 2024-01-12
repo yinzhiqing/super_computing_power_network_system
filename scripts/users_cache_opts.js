@@ -37,7 +37,9 @@ async function update_user(user, revenue, vtoken) {
         cache.vtoken  = vtoken.toString();
         cache.init    = true;
         cache.revenue_block = block;
+        cache.revenue_date = (new Date()).toLocaleString();
         cache.vtoken_block = block;
+        cache.vtoken_date = (new Date()).toLocaleString();
         return cache;
     }
 
@@ -47,6 +49,7 @@ async function update_user(user, revenue, vtoken) {
         cache.revenue_chg_info = (cache.revenue_chg > 0 ? "↓ " : "↑ ") + Math.abs(cache.revenue_chg).toString();
         cache.revenue = revenue;
         cache.revenue_block = block;
+        cache.revenue_date = (new Date()).toLocaleString();
     }
 
     if (cache.vtoken != vtoken) {
@@ -57,6 +60,7 @@ async function update_user(user, revenue, vtoken) {
         cache.vtoken_chg_info = (cache.vtoken_chg > 0 ? "↓ " : "↑ " ) + Math.abs(cache.vtoken_chg).toString();
         cache.vtoken = vtoken.toString();
         cache.vtoken_block = block;
+        cache.vtoken_date = (new Date()).toLocaleString();
     }
     return cache;
 }

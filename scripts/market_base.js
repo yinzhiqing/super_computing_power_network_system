@@ -9,8 +9,6 @@ const sur       = require("./use_rights_base.js");
 const { users, store }       = require("./datas/env.config.js");
 const { contracts_load }     = require("./contracts.js");
 
-const bak_path  = prj.caches_contracts;
-const tokens  = require(prj.contract_conf);
 const {ethers, upgrades}    = require("hardhat");
 
 function filter(seller, token) {
@@ -155,21 +153,16 @@ async function select_use_right_id_from_market() {
     return null;
 }
 
-async function select_revenue_id(signer_address) {
+async function select_revenue_id(signer_address, slot) {
     let contracts        = await contracts_load();
     let use_right        = contracts.SCPNSUseRightToken;
     let revenue_token    = contracts.RevenueToken;
-    let skeep = [''];
     let total = await revenue_token.totalSupply();
     logger.debug("revenue count: " + Number(total));
     let list = [];
     for (let i = 0; i < total; i++) {
         let token_id    = await revenue_token.tokenByIndex(i);
         let owner       = await revenue_token.ownerOf(token_id);
-
-        if (skeep.includes(token_id)) {
-            continue;
-        }
 
         if (owner != signer_address) {
             continue;
@@ -278,8 +271,7 @@ async function store_revenue(title = "收益权通证市场") {
             "挂单者" : sale_info[3],
             "价格" : sale_info[2].toString(),
         })
-        logger.form("收益权通证市场信息表", show_sale_info);
-        logger.log("\t");
+        //logger.form("收益权通证市场信息表", show_sale_info);
     }
     logger.table(list, title);
     return list;
@@ -507,7 +499,7 @@ async function buy_use(user, use_right_id, title = "购买通证") {
     logger.form("购买使用权通证信息", use_right_info, sale_info);
 }
 
-async function renewal_use_right(user, use_right_id, title = "续约") {
+async function renewal_use_right(user, use_right_id, title = "续费") {
     logger.debug(title);
 
     //获取合约SCPNSProofTask对象
@@ -550,8 +542,9 @@ async function renewal_use_right(user, use_right_id, title = "续约") {
     logger.debug(use_right_info);
 
     sale_info = {
-       "价格(VNet)":  price,
-       "拥有者": buyer
+       "费用(VNet)":  price,
+       "拥有者": buyer,
+       "续约时间": "30天"
     };
     logger.form("使用权通证续约", use_right_info, sale_info);
     return list;
@@ -681,10 +674,12 @@ async function put_revenue(signer, revenue_id) {
     }
 
     let value   = await revenue_token.balanceOf(revenue_id);
+    let slot    = await revenue_token.slotOf(revenue_id);
     let revenue_info = {
-        "算力资源ID" : utils.w3uint256_to_hex(revenue_id),
-        "收益权获得者": "[" + owner.toString() + "]",
-        "收益权益值": "[" + value.toString() + "]",    
+        "收益权ID" :    utils.w3uint256_to_hex(revenue_id),
+        "算力资源ID" :  utils.w3uint256_to_hex(slot),
+        "收益权拥有者": "[" + owner.toString() + "]",
+        "收益权益值":   "[" + value.toString() + "]",    
     };
 
     let price = 22000;
@@ -708,6 +703,7 @@ async function buy_revenue(signer, revenue_id, title = "购买通证") {
     let dns              = contracts.SCPNSDns;
     let gpu_store        = contracts.GPUStore;
     let vnet_token       = contracts.VNetToken;
+    let revenue_token    = contracts.RevenueToken;
     let to               = gpu_store.address;
     logger.debug("store address: " + gpu_store.address);
     logger.debug("vnet token address: " + vnet_token.address);
@@ -718,16 +714,18 @@ async function buy_revenue(signer, revenue_id, title = "购买通证") {
     let list = [];
     let sale_info = await gpu_store._revenueTokenStore(revenue_id);
     let price         = sale_info[2].toString();
+    let slot      = await revenue_token.slotOf(revenue_id);
 
     logger.debug(sale_info);
-    list.push({
+    let buy_info = {
         "收益权ID": revenue_id,
+        "算力资源ID" :  utils.w3uint256_to_hex(slot),
         "价格(VNet)": price,
         "挂单者": sale_info[3],
         "购买者": buyer
-    });
+    };
+    list.push(buy_info);
 
-    logger.debug(list);
     await vnet_token.connect(signer).approve(gpu_store.address, price);
 
     let amount = await vnet_token.connect(signer).allowance(buyer, gpu_store.address);
@@ -737,7 +735,11 @@ async function buy_revenue(signer, revenue_id, title = "购买通证") {
     }
     await gpu_store.connect(signer).tradeRevenueToken(revenue_id);
 
-    logger.table(list);
+    logger.form("购买收益权账单", buy_info);
+
+    return list;
+
+
 }
 
 async function use_right_ids_of(user) {

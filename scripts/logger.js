@@ -102,7 +102,7 @@ function form_title(title, kwargs = {}) {
     show_msg("\t\t\t\t\t--" + title + "--", "", kwargs);
     form_frame();
 }
-function form_info(info, max) {
+function form_info(info, max, color_value = "red") {
     for(let k in info){
         //计算需要补充的'\t'个数
         let tcount = Math.ceil((max - str_show_len(k)) / 8);
@@ -113,12 +113,14 @@ function form_info(info, max) {
 
         print(k);
         print(tables);
-        print(info[k].toString());
+        let color = k.startsWith("*");
+        let value = info[k].toString();
+        if(color)  {
+            print(add_color(value, color_value));
+        } else {
+            print(value);
+        }
         print("\n");
-        //process.stdout.write(k);
-        //process.stdout.write(tables);
-        //process.stdout.write(info[k].toString());
-        //process.stdout.write("\n");
     }
 }
 
@@ -166,6 +168,7 @@ function show_msg(msg, title = "", kwargs = {}) {
     title_color = get_kwargs(kwargs, "title_color", "red");
     color       = get_kwargs(kwargs, "color", "");
     format      = get_kwargs(kwargs, "format", true);
+    date        = get_kwargs(kwargs, "date", true);
 
     if (title.length > 0) {
         console.log(create_split_symbol() + add_color(title, title_color));
@@ -179,7 +182,13 @@ function show_msg(msg, title = "", kwargs = {}) {
     } else {
         if (format) {
             msg = JSON.stringify(msg);
-            if (msg.length > 0) msg = date_format() + ": " + add_color(msg, color);
+            if (msg.length > 0) {
+                if (date == true) {
+                    msg = date_format() + ": " + add_color(msg, color);
+                } else {
+                    msg = add_color(msg, color);
+                }
+            } 
         } else {
             msg = add_color(msg, color);
         }

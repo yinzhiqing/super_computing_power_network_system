@@ -1,19 +1,9 @@
-const fs        = require('fs');
-const path      = require("path");
-const program   = require('commander');
 const utils     = require("./utils");
 const logger    = require("./logger");
-const prj       = require("../prj.config.js");
-const gs_abi    = require("./datas/abis/GPUStore.json");
-const vnet_abi  = require("./datas/abis/IERC20Upgradeable.json");
-const sur       = require("./use_rights_base.js");
 const { users } = require("./datas/env.config.js");
-const { uco }    = require("./cache_opts.js");
+const { uco }   = require("./cache_opts.js");
+const {ethers}  = require("hardhat");
 const { contracts_load } = require("./contracts.js");
-
-const bak_path  = prj.caches_contracts;
-const tokens  = require(prj.contract_conf);
-const {ethers, upgrades}    = require("hardhat");
 
 async function works() {
     logger.info("账户金额");
@@ -76,10 +66,12 @@ async function works() {
             "账户类型": merge_users[key].alias,
             "收益权值": revenue + "/" + total_value,
             "收益权值变动": user.revenue_chg_info,
-            "收益权值保持时间(秒)": utils.time_s_to_dhms((block - user.revenue_block) * 2),
+            //"收益权值保持时间": utils.time_s_to_dhms((block - user.revenue_block) * 2),
+            "收益权值变更时间": user.revenue_date,
             "账户资金": vtoken.toString(),
             "账户资金变动": user.vtoken_chg_info,
-            "账户资金保持时间(秒)": utils.time_s_to_dhms((block - user.vtoken_block) * 2),
+            //"账户资金保持时间": utils.time_s_to_dhms((block - user.vtoken_block) * 2),
+            "账户资金变更时间": user.vtoken_date,
         })
     }
 
