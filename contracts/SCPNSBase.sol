@@ -232,6 +232,10 @@ contract SCPNSBase is Initializable, ContextUpgradeable, AccessControlEnumerable
         return __pricision;
     }
 
+    function _ensure_millisecond(uint256 value) internal pure returns(uint256) {
+        return value > 1000000000000 ? value : value * 1000;
+    }
+
     function _pricision() internal view returns(uint256) {
         if (__pricision > 0) {
             return __pricision;

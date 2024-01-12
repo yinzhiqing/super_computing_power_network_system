@@ -139,7 +139,7 @@ contract SCPNSUseRightToken is
     }
 
     function isValid(uint256 tokenId) public view virtual override returns(bool) {
-        return _deadlines[tokenId] * SCPNSBase.pricision() > block.timestamp;
+        return _ensure_millisecond(_deadlines[tokenId] * _pricision()) > _ensure_millisecond(block.timestamp);
     }
 
     function parameterIdOf(uint256 tokenId) public view virtual override returns(uint256) {
