@@ -181,6 +181,7 @@ async function datas_with_ranks_from_use_right_id(use_right_id) {
     let proof_parameter = await utils.contract("SCPNSProofParameter");
     let cobj            = await utils.contract("SCPNSComputilityRanking");
     let verify_task     = await utils.contract("SCPNSVerifyTask");
+    let proof_task      = await utils.contract("SCPNSProofTask");
 
     let parameterIds    = await parameters_of(use_right_id);
     let rights          = await sur.datas_from_use_right_id(use_right_id);
@@ -197,9 +198,12 @@ async function datas_with_ranks_from_use_right_id(use_right_id) {
             let parameter       = JSON.parse(utils.w3str_to_str(await proof_parameter.parameterOf(para_id)));
             let postion         = await postion_of(para_id, use_right_id, scale);
 
+            let isInProof       = await proof_task.isInProofOfUseRightId(use_right_id);
+
             //获取当前挑战信息
             let verify_stat     = await verify_task.verifyStatOfUseRightId(use_right_id);
             let verify_parameter= await verify_task.verifyParameterOfUseRightId(use_right_id); 
+            let isInVerify      = await verify_task.isInVerifyOfUseRightId(use_right_id);
             let verify_id       = verify_parameter[0];
             let verify_state    = await verify_task.verifyState(verify_id);
 
@@ -223,7 +227,7 @@ async function datas_with_ranks_from_use_right_id(use_right_id) {
                 "证明任务挑战统计": "",
                 "    任务挑战次数":     Number(verify_stat_of[0]),
                 "    任务成功次数":     Number(verify_stat_of[1]),
-                "    剩余挑战次数":     residue_verify,
+                "#   剩余挑战次数":     residue_verify,
                 "*   挑战状态":         verify_state_name[verify_state],
             };
 
@@ -243,10 +247,15 @@ async function datas_with_ranks_from_use_right_id(use_right_id) {
             xs = xs.sort(function (a, b) { return a - b;});
             xs.forEach(e => {ys.push(xyt[e]); });
             let state = "";
-            if(verify_state == 2) {
+            if(isInProof) {
                 state = "证明中";
-            } else if (postion <= range[1] && verify_state == 3) {
+            } else if (isInVerify) {
+                state = "挑战中";
+            } else {
                 state = "正常";
+            }
+
+            if (postion <= range[1] && verify_state == 3) {
                 if (postion < range[0]) {
                     state += "(小于规定值范围最小值)"
                 } else if (postion > range[1]) {
@@ -255,7 +264,6 @@ async function datas_with_ranks_from_use_right_id(use_right_id) {
             } else if (verify_state > 3) {
                 state = "异常";
             }
-
 
             ranks_info["*算力状态"] = state;
 

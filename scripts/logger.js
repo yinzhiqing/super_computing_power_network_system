@@ -90,6 +90,7 @@ function log(msg) {
 }
 
 //************************Form output***********************************
+const COLOR_FLAGS_REPLACE = [" ", "-"];
 const COLOR_FLAGS = [["*", "red"], ["#", "blue"]];
 const COLOR_FORM  = new Map(COLOR_FLAGS);
 function has_color_flag(data) {
@@ -104,7 +105,12 @@ function transfer_color(data) {
     let color = color_value(data);
     let new_data = data;
     if(color) {
-        new_data = data.substr(1);
+        let next_chart = data.substr(1, 1);
+        if(COLOR_FLAGS_REPLACE.includes(next_chart)) {
+            new_data = next_chart + data.substr(1);
+        } else {
+            new_data = data.substr(1);
+        }
     }
     return {color, new_data};
 }
@@ -115,7 +121,13 @@ function str_show_len(data) {
     if (data) {
         Array.from(data).forEach(function(v){len += reg.test(v) ? 2 : 1});
 
-        return has_color_flag(data) ? len - 1: len;
+        if(has_color_flag(data)) {
+            let next_chart = data.substr(1, 1);
+            if(!COLOR_FLAGS_REPLACE.includes(next_chart)) {
+                len = len -1;
+            }
+        }
+        return len;
     }
     return 0;
 }
