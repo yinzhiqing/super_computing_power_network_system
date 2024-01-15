@@ -185,7 +185,7 @@ async function datas_from_use_right_id(tokenId) {
         "型号": typeUnitName,
         "数量": typeUnitCount.toString(),
         "使用截止日期": row["deadline"],
-        "是否有效": row["isValid"]
+        "*是否有效": (row["isValid"] ? "有效" : "无效"),
     }
 
     let unit = await typeUnit.unitIdOf(typeUnitId);

@@ -89,6 +89,36 @@ function log(msg) {
     console.log(msg);
 }
 
+//************************Form output***********************************
+const COLOR_FLAGS = [["*", "red"], ["#", "blue"]];
+const COLOR_FORM  = new Map(COLOR_FLAGS);
+function has_color_flag(data) {
+    return COLOR_FORM.has(data.substr(0, 1));
+}
+
+function color_value(data) {
+    return COLOR_FORM.get(data.substr(0, 1));
+}
+
+function transfer_color(data) {
+    let color = color_value(data);
+    let new_data = data;
+    if(color) {
+        new_data = data.substr(1);
+    }
+    return {color, new_data};
+}
+
+function str_show_len(data) {
+    let reg = /[\u4e00-\u9fa5]/;
+    let len = 0;
+    if (data) {
+        Array.from(data).forEach(function(v){len += reg.test(v) ? 2 : 1});
+
+        return has_color_flag(data) ? len - 1: len;
+    }
+    return 0;
+}
 function form_frame(count = 100) {
     console.log("=".repeat(count));
 }
@@ -102,7 +132,7 @@ function form_title(title, kwargs = {}) {
     show_msg("\t\t\t\t\t--" + title + "--", "", kwargs);
     form_frame();
 }
-function form_info(info, max, color_value = "red") {
+function form_info(info, max) {
     for(let k in info){
         //计算需要补充的'\t'个数
         let tcount = Math.ceil((max - str_show_len(k)) / 8);
@@ -111,12 +141,13 @@ function form_info(info, max, color_value = "red") {
             tables += "\t";
         }
 
-        print(k);
-        print(tables);
-        let color = k.startsWith("*");
+        let {color, new_data} = transfer_color(k);
         let value = info[k].toString();
+
+        print(new_data);
+        print(tables);
         if(color)  {
-            print(add_color(value, color_value));
+            print(add_color(value, color));
         } else {
             print(value);
         }
@@ -157,12 +188,6 @@ function form(title, ...infos) {
     form_frame();
 }
 
-function str_show_len(data) {
-    let reg = /[\u4e00-\u9fa5]/;
-    let len = 0;
-    Array.from(data).forEach(function(v){len += reg.test(v) ? 2 : 1});
-    return len;
-}
 function show_msg(msg, title = "", kwargs = {}) {
     type        = get_kwargs(kwargs, "type", "log");
     title_color = get_kwargs(kwargs, "title_color", "red");

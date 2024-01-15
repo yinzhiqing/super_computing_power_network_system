@@ -224,7 +224,7 @@ async function datas_with_ranks_from_use_right_id(use_right_id) {
                 "    任务挑战次数":     Number(verify_stat_of[0]),
                 "    任务成功次数":     Number(verify_stat_of[1]),
                 "    剩余挑战次数":     residue_verify,
-                "    挑战状态":         verify_state_name[verify_state],
+                "*   挑战状态":         verify_state_name[verify_state],
             };
 
             //统计排行表
@@ -242,18 +242,20 @@ async function datas_with_ranks_from_use_right_id(use_right_id) {
             }
             xs = xs.sort(function (a, b) { return a - b;});
             xs.forEach(e => {ys.push(xyt[e]); });
-            let state = "异常";
+            let state = "";
             if(verify_state == 2) {
                 state = "证明中";
             } else if (postion <= range[1] && verify_state == 3) {
                 state = "正常";
+                if (postion < range[0]) {
+                    state += "(小于规定值范围最小值)"
+                } else if (postion > range[1]) {
+                    state += "(大于规定值范围最大值)"
+                }
+            } else if (verify_state > 3) {
+                state = "异常";
             }
 
-            if (postion <= range[0]) {
-                state += "(小于规定值范围最小值)"
-            } else {
-                state += "(大于规定值范围最大值)"
-            }
 
             ranks_info["*算力状态"] = state;
 
