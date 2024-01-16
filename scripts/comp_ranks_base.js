@@ -249,20 +249,22 @@ async function datas_with_ranks_from_use_right_id(use_right_id) {
             let state = "";
             if(isInProof) {
                 state = "证明中";
-            } else if (isInVerify) {
-                state = "挑战中";
-            } else {
-                state = "正常";
-            }
+                delete ranks_info["证明任务挑战统计"];
+                delete ranks_info["    任务挑战次数"];
+                delete ranks_info["    任务成功次数"];
+                delete ranks_info["#   剩余挑战次数"];
+                delete ranks_info["*   挑战状态"];
 
-            if (postion <= range[1] && verify_state == 3) {
+            } else if (isInVerify || verify_state < 3) {
+                state = "挑战中";
+            } else if (verify_state == 3) {
                 if (postion < range[0]) {
-                    state += "(小于规定值范围最小值)"
+                    state = "正常(小于规定值范围最小值)"
                 } else if (postion > range[1]) {
-                    state += "(大于规定值范围最大值)"
+                    state += "异常(证明时间超时)"
                 }
             } else if (verify_state > 3) {
-                state = "异常";
+                state = "异常(挑战失败)";
             }
 
             ranks_info["*算力状态"] = state;

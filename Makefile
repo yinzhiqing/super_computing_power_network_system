@@ -277,6 +277,9 @@ reset_lifetime_use_right:
 renewal_market_use:
 	$(call run_script, "renewal_market_use")
 
+clean_market:
+	$(call run_script, "clean_market")
+
 show_market_use:
 	$(call run_script, "show_market_use")
 

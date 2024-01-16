@@ -528,7 +528,10 @@ async function renewal_use_right(user, use_right_id, title = "续费") {
         buyer: buyer
     });
 
-    await vnet_token.connect(signer).approve(gpu_store.address, price);
+    let is_valid = await use_right.isValid(use_right_id);
+    assert(is_valid, "token id(" + use_right_id + ") is invalid.");
+
+    await vnet_token.connect(signer).approve(gpu_store.address, Number(price));
 
     let amount = 0;
     while(amount < price) {
@@ -807,7 +810,7 @@ async function use_right_ids_of(user) {
         });
 
     }
-    logger.table(list, alias + " 拥有的使用权通证")
+    logger.table(list, alias + `(${address})拥有的使用权通证`)
 
     return list;
 

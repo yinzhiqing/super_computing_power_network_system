@@ -5,10 +5,11 @@ const pvb       = require("./proof_verify_base.js");
 const {tco}     = require("./cache_opts.js");
 
 async function run() {
+    let buf = {};
     let user         = users.prover;
     let use_right_id = tco.fixed_use_right_id;
 
-    pvb.proof(user, buf, use_right_id);
+    await pvb.proof(user, buf, use_right_id);
 }
 
 run()

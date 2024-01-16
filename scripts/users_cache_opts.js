@@ -28,6 +28,10 @@ function new_user(user) {
     }
     return users_cache[user];
 }
+async function is_changed(user, revenue, vtoken) {
+    let cache = get_user(user);
+    return !cache.init || (cache.revenue != revenue) || (cache.vtoken != vtoken);
+}
 
 async function update_user(user, revenue, vtoken) {
     let cache = get_user(user);
@@ -71,4 +75,5 @@ module.exports = {
     new_user,
     update_user,
     users_cache,
+    is_changed,
 }
