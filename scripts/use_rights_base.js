@@ -290,6 +290,14 @@ async function select_use_right_id(owner) {
     return null;
 }
 
+async function get_comp_vm_id_by_use_right_id(use_right_id) {
+    assert(use_right_id, "use_right_id is " + use_right_id);
+    let contracts        = await contracts_load();
+    let use_right        = contracts.SCPNSUseRightToken;
+    let comp_vm_id       = await use_right.computilityVMIdOf(use_right_id);
+    return comp_vm_id;
+}
+
 async function select_comp_vm_ids_of_owner(owner, type) {
     logger.debug("select_comp_vm_ids_of_owner(" + owner + "," + type + ")")
     let computility_vm = await utils.contract("SCPNSComputilityVM");
@@ -528,4 +536,5 @@ module.exports = {
     show_use_rights_of,
     show_comp_units,
     show_comp_vm,
+    get_comp_vm_id_by_use_right_id,
 }

@@ -5,7 +5,7 @@ const utils     = require("./utils");
 const logger    = require("./logger");
 const prj       = require("../prj.config.js");
 const gs_abi    = require("./datas/abis/GPUStore.json");
-const sur       = require("./use_rights_base.js");
+const urb       = require("./use_rights_base.js");
 const { users, store }       = require("./datas/env.config.js");
 const { contracts_load }     = require("./contracts.js");
 
@@ -153,18 +153,28 @@ async function select_use_right_id_from_market() {
     return null;
 }
 
-async function select_revenue_id(signer_address, slot) {
+async function select_revenue_id(signer_address, use_right_id = null) {
     let contracts        = await contracts_load();
     let use_right        = contracts.SCPNSUseRightToken;
     let revenue_token    = contracts.RevenueToken;
     let total = await revenue_token.totalSupply();
     logger.debug("revenue count: " + Number(total));
     let list = [];
+
+    let fixed_slot = null;
+    if (use_right_id)  {
+        vmid = await urb.get_comp_vm_id_by_use_right_id(use_right_id);
+    }
     for (let i = 0; i < total; i++) {
         let token_id    = await revenue_token.tokenByIndex(i);
         let owner       = await revenue_token.ownerOf(token_id);
+        let slot        = await revenue_token.slotOf(token_id);
 
         if (owner != signer_address) {
+            continue;
+        }
+
+        if (fixed_slot != null && utils.w3uint256_to_hex(slot) != utils.w3uint256_to_hex(fixed_slot)) {
             continue;
         }
 
@@ -174,8 +184,8 @@ async function select_revenue_id(signer_address, slot) {
 }
 
 async function _use_right_info_load(use_right_id) {
-    let type_unit_id = await sur.type_unit_id_of(use_right_id);
-    let rights       = await sur.datas_from_use_right_id(use_right_id);
+    let type_unit_id = await urb.type_unit_id_of(use_right_id);
+    let rights       = await urb.datas_from_use_right_id(use_right_id);
 
     return  rights.form;
 }
@@ -300,7 +310,7 @@ async function revenues(title = "收益权通证列表") {
         logger.debug("value: " + value);
         let balance = await vnet_token.balanceOf(owner);
 
-        let vms = await sur.datas_from_comp_vm_id(slot);
+        let vms = await urb.datas_from_comp_vm_id(slot);
         let vms_info = vms["infos"];
         let revenue_info = {
             "收益权通证ID": utils.w3uint256_to_hex(token_id.toString()),
@@ -346,7 +356,7 @@ async function use_orders(latest_count = 2, title = "使用权通证交易记录
         }
         logger.debug("trade_name: " +  order[4].toString());
 
-        let rights = await sur.datas_from_use_right_id(order[0]);
+        let rights = await urb.datas_from_use_right_id(order[0]);
         let use_right_info = rights.form;
         let use_form = {
             "挂单者":  row.provider,
@@ -396,7 +406,7 @@ async function revenue_orders(latest_count, title = "收益权通证交易记录
 
         let token_id = utils.w3uint256_to_shex(log["topics"][1]);
         let slot     = await revenue_token.slotOf(token_id);
-        let vms      = await sur.datas_from_comp_vm_id(slot);
+        let vms      = await urb.datas_from_comp_vm_id(slot);
         let vms_info = vms["infos"];
         let event_data = { 
             //blockNumber: log["blockNumber"],
@@ -833,5 +843,6 @@ module.exports = {
     select_use_right_id_from_market,
     select_revenue_id,
     use_right_ids_of,
-    mint_revenue_or_load_revenue_by_use_right_id
+    mint_revenue_or_load_revenue_by_use_right_id,
+    load_revenue_info_by_slot,
 }
