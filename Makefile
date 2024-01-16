@@ -247,6 +247,9 @@ put_market_use:
 approve_market_use:
 	$(call run_script, "approve_market_use")
 
+reject_market_use:
+	$(call run_script, "reject_market_use")
+
 buyer_put_market_use:
 	$(call run_script, "buyer_put_market_use")
 
@@ -267,6 +270,9 @@ buy_market_revenue:
 
 revoke_market_revenue:
 	$(call run_script, "revoke_market_revenue")
+
+reset_lifetime_use_right:
+	$(call run_script, "reset_lifetime_use_right")
 
 renewal_market_use:
 	$(call run_script, "renewal_market_use")

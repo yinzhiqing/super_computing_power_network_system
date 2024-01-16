@@ -192,7 +192,7 @@ async function _use_right_info_print(use_right_id) {
 }
 
 async function store_use(title = "使用权通证市场") {
-    logger.info(title);
+    logger.debug(title);
 
     let contracts        = await contracts_load();
     let use_right        = contracts.SCPNSUseRightToken;
@@ -235,7 +235,7 @@ async function store_use(title = "使用权通证市场") {
 }
 
 async function store_revenue(title = "收益权通证市场") {
-    logger.info(title);
+    logger.debug(title);
 
     let contracts        = await contracts_load();
     let use_right        = contracts.SCPNSUseRightToken;
@@ -278,7 +278,7 @@ async function store_revenue(title = "收益权通证市场") {
 }
 
 async function revenues(title = "收益权通证列表") {
-    logger.info(title);
+    logger.debug(title);
     let contracts        = await contracts_load();
     let dns              = contracts.SCPNSDns;
     let revenue_token    = contracts.RevenueToken;
@@ -318,7 +318,7 @@ async function revenues(title = "收益权通证列表") {
 }
 
 async function use_orders(latest_count = 2, title = "使用权通证交易记录") {
-    logger.info(title);
+    logger.debug(title);
     let contracts        = await contracts_load();
     let revenue_token    = contracts.RevenueToken;
     let dns              = contracts.SCPNSDns;
@@ -374,7 +374,7 @@ async function use_orders(latest_count = 2, title = "使用权通证交易记录
 }
 
 async function revenue_orders(latest_count, title = "收益权通证交易记录") {
-    logger.info(title);
+    logger.debug(title);
     let contracts        = await contracts_load();
     let gpu_store        = contracts.GPUStore;
     let revenue_token    = contracts.RevenueToken;
@@ -414,7 +414,7 @@ async function revenue_orders(latest_count, title = "收益权通证交易记录
     logger.table(msgs, title + " (最大显示数量: " + latest_count + ")");
 }
 async function revenue_distribute_revenue(title = "结算记录") {
-    logger.info(title);
+    logger.debug(title);
     let contracts        = await contracts_load();
     let gpu_store        = contracts.GPUStore;
     let use_right        = contracts.SCPNSUseRightToken;
@@ -544,7 +544,7 @@ async function renewal_use_right(user, use_right_id, title = "续费") {
     sale_info = {
        "费用(VNet)":  price,
        "拥有者": buyer,
-       "续约时间": "30天"
+       "*续约时间": "30天"
     };
     logger.form("使用权通证续约", use_right_info, sale_info);
     return list;
@@ -585,17 +585,63 @@ async function approve_use(user, use_right_id, times, title = "授权自动扣�
     let use_right_info = await _use_right_info_load(use_right_id);
 
     sale_info = {
-       "授权者": buyer,
-       "被授权者": to,
-       "价格(VNet)":  price,
-       "授权金额(VNet)":  approve,
-       "可扣费次数": Math.floor(approve / price),
+        "使用权通证ID": use_right_id,
+        "授权者":       buyer,
+        "被授权者":     to,
+        "价格(VNet)":   price,
+        "*授权金额(VNet)":  approve,
+        "*可扣费次数":  Math.floor(approve / price),
+    };
+    logger.form("购买使用权通证信息", use_right_info, sale_info);
+
+}
+
+async function reject_use(user, use_right_id, title = "取消自动扣费") {
+    logger.debug(title);
+
+    //获取合约SCPNSProofTask对象
+    let contracts        = await contracts_load();
+    let use_right        = contracts.SCPNSUseRightToken;
+    let dns              = contracts.SCPNSDns;
+    let gpu_store        = contracts.GPUStore;
+    let vnet_token       = contracts.VNetToken;
+    let to               = gpu_store.address;
+    logger.debug("store address: " + gpu_store.address);
+    logger.debug("vnet token address: " + vnet_token.address);
+
+    let signer= user.signer;
+    let buyer = await signer.getAddress();
+    logger.debug("buyer: " + buyer);
+
+    let list = [];
+    let order_id = await gpu_store._gpuTokenIdToOrderId(use_right_id);
+    logger.debug("order_id: " + utils.w3uint256_to_hex(order_id));
+    let order_info = await gpu_store._orders(order_id);
+    let price         = order_info[1].toString();
+
+    list.push({
+        use_right_id: use_right_id,
+        price: price,
+        reject: buyer, 
+        to: to
+    });
+
+    await vnet_token.connect(signer).approve(gpu_store.address, 0);
+    let use_right_info = await _use_right_info_load(use_right_id);
+
+    sale_info = {
+        "使用权通证ID": use_right_id,
+        "授权者":       buyer,
+        "被授权者":     to,
+        "价格(VNet)":   price,
+        "*授权金额(VNet)":  0,
+        "*可扣费次数":  0,
     };
     logger.form("购买使用权通证信息", use_right_info, sale_info);
 
 }
 async function put_use(user, use_right_id, title = "添加使用权通证到市场") {
-    logger.info(title);
+    logger.debug(title);
 
     //获取合约SCPNSProofTask对象
     let contracts        = await contracts_load();
@@ -644,7 +690,7 @@ async function put_use(user, use_right_id, title = "添加使用权通证到市�
 }
 
 async function put_revenue(signer, revenue_id) {
-    logger.info("添加收益权通证到市场");
+    logger.debug("添加收益权通证到市场");
 
     //获取合约SCPNSProofTask对象
     let contracts        = await contracts_load();

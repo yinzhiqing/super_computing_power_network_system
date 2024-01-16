@@ -88,7 +88,7 @@ async function select_use_right_id_in_verify(owner, buf, use_right_id = null) {
  *
  */
 async function verify(user, buf, fixed_use_right_id = null) {
-    logger.warning("等待挑战");
+    logger.debug("等待挑战");
     logger.debug("fixed user_right_id: " + fixed_use_right_id);
 
     let use_right       = await utils.contract("SCPNSUseRightToken");
@@ -290,7 +290,7 @@ async function select_use_right_id_in_proof(owner, buf, fixed_use_right_id = nul
 }
 
 async function proof(user, buf, fixed_use_right_id = null) {
-    logger.warning("等待算力证明...");
+    logger.debug("等待算力证明...");
     logger.debug("fixed user_right_id: " + fixed_use_right_id);
 
     let use_right       = await utils.contract("SCPNSUseRightToken");
@@ -321,6 +321,7 @@ async function proof(user, buf, fixed_use_right_id = null) {
     let parameter   = JSON.parse(utils.w3str_to_str(parameters[1]));
     let leaf_count  = parameter["leaf_count"];
     let leaf_deep   = parameter["leaf_deep"];
+    let sample      = parameter["sample"];
     let taskId      = utils.w3uint256_to_hex(parameters[2]);
 
     let is_owner = await proof_task.isOwner(taskId, owner);
@@ -347,9 +348,19 @@ async function proof(user, buf, fixed_use_right_id = null) {
         taskId: taskId,
     });
 
-
     if (rows.length > 0) {
-        logger.table(rows, "证明信息");
+        let proof_form = {
+            "使用权通证ID": use_right_id,
+            "*证明任务ID":  taskId,
+            "*Merkle树根":  merkle_root,
+            "证明难度:":    "",
+            "   随机参数":  dynamicData,
+            "   叶子数":    leaf_count,
+            "   叶子深度":  leaf_deep,
+            "   采样数":    sample
+        }
+        logger.form("算力证明信息", proof_form);
+        //logger.table(rows, "证明信息");
     }
 }
 
@@ -462,7 +473,14 @@ async function mint_proof(owner, prover, fixed_use_right_id = null) {
         to: to.substr(0, 6),
         use_right_id: use_right_id
     })
-    logger.table(rows, "new mint proof task");
+
+    let task_form = {
+        "算力使用权通证ID":         use_right_id,
+        "任务发起者(通证拥有者)":   minter,
+        "任务执行者":               to,
+    }
+    logger.form("算力证明任务", task_form);
+    //logger.table(rows, "new mint proof task");
     return use_right_id;
 }
 

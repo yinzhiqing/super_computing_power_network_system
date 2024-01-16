@@ -429,6 +429,11 @@ async function reset_lifetime_use_right(user, use_right_id, life_time) {
         life_time:life_time, 
     });
 
+    let lifetime_form = {
+        "使用权通证ID":  use_right_id,
+        "*生命周期":      utils.time_s_to_dhms(life_time),
+    }
+    logger.form("重新设置使用权生命时间", lifetime_form);
     return rows;
 }
 async function mint_comp_vm(user, to, token_id, computility_unit_id, count, deadline) {

@@ -10,8 +10,9 @@ config = {
         },
         use_right: {
             //使用权通证使用期限10分钟
-            deadline:  30 * 24 * 60 * 60,
+            deadline:  30 * 60 * 60,
             renewal_times:  30 * 24 * 60 * 60,
+            resetlife_times:  6 * 60,
             filter_count: 10,
         },
         proof_task:  {

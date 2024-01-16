@@ -22,7 +22,7 @@ async function run(times) {
     await utils.scheduleJob(times, works, [users.prover, buf, use_right_id], false);
 }
 
-run(8)
+run(5)
   .then(() => process.exit(0))
   .catch(error => {
     console.error(error);

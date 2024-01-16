@@ -8,7 +8,7 @@ async function run(times) {
     let buf          = {};
     let user         = users.prover;
     let use_right_id = tco.fixed_use_right_id;
-    await utils.scheduleJob(times, pvb.proof, [user, buf, use_right_id], false, 30);
+    await utils.scheduleJob(times, pvb.proof, [user, buf, use_right_id], false, 120);
 }
 
 run(5)
