@@ -46,6 +46,7 @@ async function mint_revenue_or_load_revenue_by_use_right_id(signer, use_right_id
     } else {
         //查询收益权及对应的账户和所有值
         revenue_info = await load_revenue_info_by_slot(cvmId);
+        logger.info("使用已有的收益权通证");
     }
 
     return revenue_info;

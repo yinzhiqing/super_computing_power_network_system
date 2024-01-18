@@ -14,6 +14,7 @@ config = {
             renewal_times:  30 * 24 * 60 * 60,
             resetlife_times:  6 * 60,
             filter_count: 10,
+            new_cvmid: true,
         },
         proof_task:  {
             filter_count: 10,

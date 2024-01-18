@@ -367,7 +367,6 @@ async function mint_use_right(user, to, use_right_id, deadline, computility_vm_i
         throw(signer_address + " no minter role." );
     } 
 
-    logger.warning(deadline);
     let rows = [];
     //使用权通证时间与算力资源寿命相同
     let datas = utils.json_to_w3str({data: "test"});

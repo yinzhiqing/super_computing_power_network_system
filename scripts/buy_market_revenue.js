@@ -20,7 +20,7 @@ async function run() {
             logger.debug("result saleId: " + sale_info[0]);
             continue;
         }
-        await mb.buy_revenue(users.buyer.signer, token_id);
+        await mb.buy_revenue(users.manager.signer, token_id);
         return;
     }
     throw("未发现出售收益权");

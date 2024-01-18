@@ -14,7 +14,7 @@ async function run() {
 
     // 从配置文件中读取使用权通证(一个算力节点对应一个使用权通证)
     let use_right_id = tco.fixed_use_right_id;
-    let times = 6;
+    let times = 11;
     use_right_id = use_right_id == null ? await urb.select_use_right_id(owner) : use_right_id;
 
     await mb.approve_use(user, use_right_id, times);

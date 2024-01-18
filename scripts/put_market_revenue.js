@@ -10,7 +10,7 @@ const { contracts_load } = require("./contracts.js");
 
 async function run() {
     logger.debug("start working...", "put mark");
-    let signer = users.manager.signer;
+    let signer = users.buyer.signer;
     let owner = await signer.getAddress();
     let use_right_id = tco.fixed_use_right_id;
     let token_id = utils.w3uint256_to_hex(await mb.select_revenue_id(owner, use_right_id));

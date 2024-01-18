@@ -115,13 +115,14 @@ function transfer_color(data) {
     return {color, new_data};
 }
 
-function str_show_len(data) {
+function str_show_len(data, flag = true) {
     let reg = /[\u4e00-\u9fa5]/;
     let len = 0;
+    data = data.toString();
     if (data) {
-        Array.from(data).forEach(function(v){len += reg.test(v) ? 2 : 1});
+        Array.from(data.toString()).forEach(function(v){len += reg.test(v) ? 2 : 1});
 
-        if(has_color_flag(data)) {
+        if(flag && has_color_flag(data)) {
             let next_chart = data.substr(1, 1);
             if(!COLOR_FLAGS_REPLACE.includes(next_chart)) {
                 len = len -1;
@@ -131,20 +132,21 @@ function str_show_len(data) {
     }
     return 0;
 }
-function form_frame(count = 100) {
+function form_frame(count = 30) {
     console.log("=".repeat(count));
 }
 
-function form_split(count = 100) {
+function form_split(count = 30) {
     console.log("-".repeat(count));
 }
-function form_title(title, kwargs = {}) {
-    form_frame();
+
+function form_title(title, kwargs = {}, count = 30) {
+    form_frame(count);
     kwargs = __merge_kwargs(kwargs, {"format":false, "type":"log", "color" : "yellow"});
     show_msg("\t\t\t\t\t--" + title + "--", "", kwargs);
-    form_frame();
+    form_frame(count);
 }
-function form_info(info, max) {
+function form_info(info, max, max_all = 30) {
     for(let k in info){
         //计算需要补充的'\t'个数
         let tcount = Math.ceil((max - str_show_len(k)) / 8);
@@ -174,17 +176,23 @@ function print(...msgs) {
 }
 
 function form(title, ...infos) {
-    form_title(title);
 
-    let max = 0;
+    let max     = 0;
+    let max_all = 0;
     //获取shell显示时字节最大长度: 中文有特殊字符 /[\u4e00-\u9fa5]/ 不应算在显示内容中
     for (let j in infos) {
         let info = infos[j];
         for(let k in info){
+            //计算属性最大宽度
             let length = str_show_len(k);
             max = max < length ? length : max;
+
+            //计算值最大宽度
+            length = str_show_len(info[k], false);
+            max_all = max_all < length ? length : max_all;
         }
     }
+    //计算最大宽度
 
     //将字符串换算成\t后长度（值最左边位置）
     //// \t 在命令行中长度为8
@@ -192,12 +200,15 @@ function form(title, ...infos) {
     //// key 与 value间隔/t
     const space_len = 1
     max = (Math.ceil(max / tab_len)) * tab_len + (tab_len * space_len)  ;
+    max_all = (Math.ceil(max_all / tab_len)) * tab_len + (tab_len * space_len)  ;
+    max_all = max + max_all - tab_len;
 
+    form_title(title, {}, max_all);
     for (let i in infos) {
-        form_info(infos[i], max);
-        i < infos.length - 1 ?  form_split() : "" ;
+        form_info(infos[i], max, max_all);
+        i < infos.length - 1 ?  form_split(max_all) : "" ;
     }
-    form_frame();
+    form_frame(max_all);
 }
 
 function show_msg(msg, title = "", kwargs = {}) {
