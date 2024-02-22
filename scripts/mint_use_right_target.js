@@ -21,6 +21,10 @@ async function new_token_id(pre) {
     return web3.utils.sha3(pre + date.getTime().toString());
 }
 
+/*
+ * 根据现有的算力资源创建指定类型的使用权通证。
+ * 算力资源需要提前创建好
+ */
 async function run() {
     logger.debug("start working...", "mint");
 

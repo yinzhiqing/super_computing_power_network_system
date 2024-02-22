@@ -25,6 +25,13 @@ const mb                         = require("./market_base.js");
  *                                                          |---内存
  *
  */
+
+/*
+ * 创建使用权通证。
+ * 使用权通证对应的算力资源获取方式，两种：
+ * 1. 总是创建新的算力资源（配置文件中设置）
+ * 2. 优先使用已经存在的算力资源（未使用 或  使用权通证已经过期的）
+ */
 async function run(types) {
     logger.debug(types);
 
@@ -36,14 +43,16 @@ async function run(types) {
 
     let owners = [to, await users.beneficiary.signer.getAddress()];
     logger.debug("owners:" + owners.toString());
+    //不同类型使用权通证（对应算力单元类型）
     for( let i in types) {
         let type = types[i];
         let cvmid = null ;
+        //确定算力资源获取方式：总是创建、优先使用可用
         if(use_right.new_cvmid != true) {
             cvmid = await urb.select_comp_vm_ids_of_owner(to, type);
         }
         logger.debug(cvmid);
-        //无可用算力资源，则先创建
+        //无可用算力资源，则创建
         if (cvmid == null) {
             let cuid = await urb.select_comp_unit_ids_of_owner(to, type, 1);
             //无可用算力单元，创建算力单元
@@ -70,6 +79,7 @@ async function run(types) {
         await urb.mint_use_right(user, to, token_id, deadline, cvmid);
         await urb.wait_use_right_exists(token_id);
 
+        //创建或获取使用权通证对应的收益权通证（收益权通证只能创建一次）
         let revenue_info = await mb.mint_revenue_or_load_revenue_by_use_right_id(signer, token_id, owners);
         let use_right_info = await urb.datas_from_use_right_id(token_id);
 
