@@ -13,7 +13,7 @@ async function run() {
     let signer      = user.signer; 
     let use_right_id = tco.fixed_use_right_id;
 
-    let infos       = await urb.renewal_use_right(signer, use_right_id, use_right.renewal_times);
+    let infos       = await urb.renewal_use_right(user, use_right_id, use_right.renewal_times);
     logger.table(infos);
 }
 
